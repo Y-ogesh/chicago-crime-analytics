@@ -70,6 +70,10 @@ Create version-controlled PostgreSQL DDL and load workflows for raw staging and 
 - Unique record identifiers, parsing behavior, rejected rows, and load duration are validated and reported.
 - No analytical conclusion is claimed from load validation alone.
 
+### Completion record (2026-09-25)
+
+Milestone 2 is complete. PostgreSQL 14.20 was configured with a local `chicago_crime` database and three version-controlled tables: text-preserving staging, typed `raw_chicago_crimes`, and load audit. The loader verified the raw SHA-256 and header, loaded 761,563 staging rows, cast all rows transactionally, and reconciled every source field to its typed representation. Expected, staging, imported, and distinct-ID counts all equaled 761,563; date bounds and yearly counts matched the acquisition manifest. The final measured schema/load/validation workflow completed in 12.384 seconds. Repeated successful rebuilds produced identical table totals, proving idempotent table contents. Two implementation discrepancies—source-null location fields and coordinate display-scale normalization—were investigated; both failed attempts rolled back with zero partial rows before the schema and validation rules were corrected. No cleaning, analytical transformation, or finding was produced. Full commands, types, checks, and evidence are recorded in [database setup](database_setup.md).
+
 ## Milestone 3 — Data quality, cleaning, and analytical layer
 
 ### Scope

@@ -4,17 +4,17 @@
 
 This dictionary documents the official City of Chicago [Crimes - 2001 to Present](https://data.cityofchicago.org/Public-Safety/Crimes-2001-to-Present/ijzp-q8t2/data) dataset (`ijzp-q8t2`) as verified on September 25, 2026. The acquired raw extract covers incident timestamps from January 1, 2023 through December 31, 2025 and contains 761,563 rows.
 
-The official metadata contained 31 columns: 22 core published fields returned by the explicit CSV export and nine portal-computed geographic fields. The acquisition script preserved the 22 exported source values without cleaning or type conversion. Proposed PostgreSQL types remain plans for Milestone 2 and have not been implemented.
+The official metadata contained 31 columns: 22 core published fields returned by the explicit CSV export and nine portal-computed geographic fields. The acquisition script preserved the 22 exported fields. Milestone 2 loaded all 761,563 records into a text staging table and the typed PostgreSQL table `raw_chicago_crimes` without filtering or analytical cleaning.
 
-Empty-field counts below are observations from the raw CSV, not cleaned-null counts. Domain, format, and validity checks beyond acquisition integrity remain reserved for later milestones.
+Empty-field counts below are observations from the raw CSV. PostgreSQL CSV parsing represents unavailable unquoted fields as SQL `NULL`; present text is retained unchanged in staging. Domain and geographic validity checks remain reserved for later milestones.
 
 ## Exported source fields
 
-| Source column | API field | Socrata type | Proposed PostgreSQL type | Empty fields | Interpretation / later validation |
+| Source column | API field | Socrata type | `raw_chicago_crimes` type | Empty fields | Interpretation / later validation |
 |---|---|---|---|---:|---|
 | ID | `id` | `number` | `bigint` | 0 | Source record identifier; 761,563 values were unique in this extract. |
 | Case Number | `case_number` | `text` | `text` | 0 | Chicago Police Department Records Division number; source metadata describes it as incident-unique, but later checks must not substitute it for `id`. |
-| Date | `date` | `calendar_date` | `timestamp` | 0 | Reported occurrence timestamp, sometimes estimated; timezone semantics remain to be documented. |
+| Date | `date` | `calendar_date` | `timestamp(3) without time zone` | 0 | Reported occurrence timestamp, sometimes estimated; the source provides no timezone offset. |
 | Block | `block` | `text` | `text` | 0 | Privacy-protected block-level location, not an exact address. |
 | IUCR | `iucr` | `text` | `text` | 0 | Illinois Uniform Crime Reporting code; preserve leading zeros. |
 | Primary Type | `primary_type` | `text` | `text` | 0 | Primary classification associated with the IUCR code; classifications may be revised. |
@@ -27,13 +27,23 @@ Empty-field counts below are observations from the raw CSV, not cleaned-null cou
 | Ward | `ward` | `number` | `smallint` | 4 | City Council ward; validate integer domain and historical comparability before analysis. |
 | Community Area | `community_area` | `text` | `smallint` | 35 | Chicago community-area identifier; the analytical valid range is 1–77 after later parsing and validation. |
 | FBI Code | `fbi_code` | `text` | `text` | 0 | FBI crime classification code; preserve as a code. |
-| X Coordinate | `x_coordinate` | `number` | `numeric` | 6,697 | Projected coordinate; coordinate reference system and range require verification. |
-| Y Coordinate | `y_coordinate` | `number` | `numeric` | 6,697 | Projected coordinate; coordinate reference system and range require verification. |
+| X Coordinate | `x_coordinate` | `number` | `integer` | 6,697 | Projected coordinate; coordinate reference system and range require verification. |
+| Y Coordinate | `y_coordinate` | `number` | `integer` | 6,697 | Projected coordinate; coordinate reference system and range require verification. |
 | Year | `year` | `number` | `smallint` | 0 | Source-provided year; later reconcile with parsed `date`. |
-| Updated On | `updated_on` | `calendar_date` | `timestamp` | 0 | Source record update timestamp; timezone semantics remain to be documented. |
-| Latitude | `latitude` | `number` | `double precision` | 6,697 | Approximate latitude; coordinate mapping requires both latitude and longitude. |
-| Longitude | `longitude` | `number` | `double precision` | 6,697 | Approximate longitude; coordinate mapping requires both latitude and longitude. |
-| Location | `location` | `location` | staged as `text`; typed representation TBD | 6,697 | Combined portal location value; the raw CSV can contain embedded line breaks and remains unmodified. |
+| Updated On | `updated_on` | `calendar_date` | `timestamp(3) without time zone` | 0 | Source record update timestamp; the source provides no timezone offset. |
+| Latitude | `latitude` | `number` | `numeric(12,9)` | 6,697 | Approximate latitude; exact numeric value is retained while display scale can gain trailing zeros. |
+| Longitude | `longitude` | `number` | `numeric(12,9)` | 6,697 | Approximate longitude; exact numeric value is retained while display scale can gain trailing zeros. |
+| Location | `location` | `location` | `text` | 6,697 | Combined portal location text; present values preserve embedded line breaks. |
+
+## PostgreSQL raw layer
+
+Three tables implement the raw import:
+
+- `raw_chicago_crimes_staging` stores the 22 parsed source fields as text plus a generated `source_row_number`. It preserves source strings before type conversion; PostgreSQL CSV `NULL` semantics represent unavailable unquoted fields.
+- `raw_chicago_crimes` stores the same 22 fields with the types documented above and enforces source `id` as the primary key. Every staging row must cast and reconcile before the transaction commits.
+- `raw_chicago_crimes_load_audit` records the source filename, SHA-256, expected/staging/imported/distinct-ID counts, date bounds, yearly counts, and load timestamp for every successful rebuild.
+
+Text identifiers such as `iucr`, `beat`, and `district` remain text so leading zeros are preserved. `case_number` is not constrained as unique because the acquired file contains repeated case-number values. Source values such as `ward = 0` and `community_area = 0` remain unchanged; later milestones must classify validity without rewriting the raw layer.
 
 ## Portal-computed geographic metadata fields
 
@@ -66,13 +76,20 @@ Presence is not the same as geographic validity. Range, parse, cross-field consi
 
 No derived fields were created during acquisition. Later milestones may add calendar parts, complete-period flags, coordinate-availability flags, and data-quality status fields only after documenting their formulas and lineage. Source columns will not be silently overwritten.
 
+## Database-load validation completed
+
+- Every source timestamp and boolean value cast successfully.
+- All integer and decimal source values cast successfully.
+- Expected, staging, imported, and distinct source-ID counts each equal 761,563.
+- Full-row reconciliation found no value mismatches after comparing coordinates by exact numeric equivalence.
+- Typed-table date boundaries, yearly totals, and missing-value counts match the acquisition evidence.
+
 ## Data-quality checks reserved for later milestones
 
-- Typed timestamp parsing and source-year reconciliation
-- Boolean type enforcement
+- Source-year versus parsed-date-year reconciliation
 - Valid community-area, ward, district, and beat domains
 - Coordinate numeric parsing, range, reference system, and cross-field consistency
 - Category whitespace, spelling variants, and classification changes
 - Record-version and update-timestamp implications for refreshes
 
-See [dataset acquisition](dataset_acquisition.md) for source queries, extraction evidence, file checksum, and acquisition limitations.
+See [dataset acquisition](dataset_acquisition.md) for source queries and extraction evidence, and [database setup](database_setup.md) for the executed PostgreSQL workflow.

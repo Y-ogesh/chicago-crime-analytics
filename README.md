@@ -52,7 +52,7 @@ Python QA and EDA                         Tableau extracts/dashboard
               documented findings and metrics
 ```
 
-The repository foundation and raw-data acquisition layer are complete. Database loading, transformation, analysis, visualization, and Tableau work remain planned.
+The repository foundation, raw-data acquisition, and PostgreSQL raw-import layers are complete. Cleaning, analytical transformations, analysis, visualization, and Tableau work remain planned.
 
 ## Repository structure
 
@@ -79,9 +79,9 @@ Empty working directories are retained with `.gitkeep` placeholders. Raw and gen
 
 | Milestone | Scope | Status |
 |---|---|---|
-| 0 | Repository foundation and analytical definitions | Complete (2026-09-25) |
-| 1 | Source acquisition and raw-data integrity | Complete (2026-09-25) |
-| 2 | PostgreSQL schema and reproducible load | Planned |
+| 0 | Repository foundation and analytical definitions | Complete |
+| 1 | Source acquisition and raw-data integrity | Complete |
+| 2 | PostgreSQL schema and reproducible load | Complete |
 | 3 | Data quality, cleaning, and analytical layer | Planned |
 | 4 | SQL analysis and verified year-over-year metrics | Planned |
 | 5 | Python exploratory analysis and static visuals | Planned |
@@ -89,7 +89,7 @@ Empty working directories are retained with `.gitkeep` placeholders. Raw and gen
 | 7 | Findings and resource-planning recommendations | Planned |
 | 8 | Final QA, portfolio packaging, and resume metrics | Planned |
 
-Detailed gates and acceptance criteria are in the [project plan](docs/project_plan.md). The executed extraction and validation evidence are in [dataset acquisition](docs/dataset_acquisition.md). Metric formulas and comparison rules are in [metric definitions](docs/metric_definitions.md), and source fields are described in the [data dictionary](docs/data_dictionary.md).
+Detailed gates and acceptance criteria are in the [project plan](docs/project_plan.md). The executed extraction evidence is in [dataset acquisition](docs/dataset_acquisition.md), and the PostgreSQL workflow and import validation are in [database setup](docs/database_setup.md). Metric formulas and comparison rules are in [metric definitions](docs/metric_definitions.md), and source fields are described in the [data dictionary](docs/data_dictionary.md).
 
 ## Reproducibility overview
 
@@ -103,6 +103,14 @@ python3 scripts/download_crimes.py
 
 The script applies the documented date filter, downloads 50,000-row pages using source-ID keyset pagination, orders records by `id ASC`, retries transient API failures, refuses to overwrite existing raw artifacts, and validates source counts before and after download. It writes an immutable Git-ignored CSV and JSON evidence manifest under `data/raw/`. See [dataset acquisition](docs/dataset_acquisition.md) for exact commands, filters, outputs, and limitations. The full dependency set has not yet been tested in a clean virtual environment.
 
+After creating a PostgreSQL database and configuring connection variables, the raw import is reproducible with:
+
+```bash
+python3 scripts/load_raw_postgres.py
+```
+
+The loader verifies the raw-file checksum and header, preserves parsed source fields in a text staging table, transactionally rebuilds the typed `raw_chicago_crimes` table, reconciles every row and field, and records a load audit. It rolls back the entire rebuild on any count, ID, cast, or reconciliation error. See [database setup](docs/database_setup.md) for database creation, schema, commands, and executed validation evidence.
+
 ## Current status
 
-Milestone 1 was completed on September 25, 2026. The official 2023–2025 extract contains 761,563 rows and 761,563 unique source IDs. Its pre-download source count, downloaded count, and post-download source count matched. The 219,747,521-byte raw CSV is stored locally under `data/raw/`, excluded from Git, and identified by SHA-256 `8b74425af7936af7b88226664b1b1cafe6c8805fe95ff1ca6ac4d75d364c4757`. No database import, cleaning, crime-pattern analysis, Tableau workbook, findings, or recommendations have been produced.
+Milestone 2 was completed on September 25, 2026. PostgreSQL 14.20 contains 761,563 staging rows and 761,563 typed rows in `raw_chicago_crimes`, with 761,563 distinct source IDs. Counts, date bounds, yearly totals, important-column completeness, representative records, and all-field staging-to-typed reconciliation passed. A repeated rebuild produced the same table state, demonstrating idempotent loading. No cleaning, analytical transformation, crime-pattern analysis, Tableau workbook, findings, or recommendations have been produced.
