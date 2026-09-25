@@ -6,33 +6,33 @@ This dictionary documents the official City of Chicago [Crimes - 2001 to Present
 
 The official metadata contained 31 columns: 22 core published fields returned by the explicit CSV export and nine portal-computed geographic fields. The acquisition script preserved the 22 exported fields. Milestone 2 loaded all 761,563 records into a text staging table and the typed PostgreSQL table `raw_chicago_crimes` without filtering or analytical cleaning.
 
-Empty-field counts below are observations from the raw CSV. PostgreSQL CSV parsing represents unavailable unquoted fields as SQL `NULL`; present text is retained unchanged in staging. Domain and geographic validity checks remain reserved for later milestones.
+Empty-field counts below are observations from the raw CSV. PostgreSQL CSV parsing represents unavailable unquoted fields as SQL `NULL`; present text is retained unchanged in staging. Milestone 3 assessed domain, formatting, completeness, and geographic plausibility without modifying the raw layer.
 
 ## Exported source fields
 
 | Source column | API field | Socrata type | `raw_chicago_crimes` type | Empty fields | Interpretation / later validation |
 |---|---|---|---|---:|---|
 | ID | `id` | `number` | `bigint` | 0 | Source record identifier; 761,563 values were unique in this extract. |
-| Case Number | `case_number` | `text` | `text` | 0 | Chicago Police Department Records Division number; source metadata describes it as incident-unique, but later checks must not substitute it for `id`. |
+| Case Number | `case_number` | `text` | `text` | 0 | Chicago Police Department Records Division number. Sixty-four values repeat across 138 rows, so it must not substitute for source `id` or drive automatic deduplication. |
 | Date | `date` | `calendar_date` | `timestamp(3) without time zone` | 0 | Reported occurrence timestamp, sometimes estimated; the source provides no timezone offset. |
 | Block | `block` | `text` | `text` | 0 | Privacy-protected block-level location, not an exact address. |
 | IUCR | `iucr` | `text` | `text` | 0 | Illinois Uniform Crime Reporting code; preserve leading zeros. |
 | Primary Type | `primary_type` | `text` | `text` | 0 | Primary classification associated with the IUCR code; classifications may be revised. |
 | Description | `description` | `text` | `text` | 0 | Secondary IUCR description. |
-| Location Description | `location_description` | `text` | `text` | 3,947 | Categorical incident-location description; profile variants without modifying raw values. |
+| Location Description | `location_description` | `text` | `text` | 3,947 | Categorical incident-location description; 142 non-null values were observed, with no tested case/outer-whitespace cardinality difference. |
 | Arrest | `arrest` | `checkbox` | `boolean` | 0 | Indicates whether an arrest was made; not a clearance, prosecution, or conviction field. |
 | Domestic | `domestic` | `checkbox` | `boolean` | 0 | Domestic-related indicator as defined by the source. |
 | Beat | `beat` | `text` | `text` | 0 | Police beat identifier; preserve as a code. |
-| District | `district` | `text` | `text` | 0 | Police district identifier; preserve as a code. |
-| Ward | `ward` | `number` | `smallint` | 4 | City Council ward; validate integer domain and historical comparability before analysis. |
-| Community Area | `community_area` | `text` | `smallint` | 35 | Chicago community-area identifier; the analytical valid range is 1–77 after later parsing and validation. |
+| District | `district` | `text` | `text` | 0 | Police district identifier. One row uses non-padded `16`; 1,020 use `061`, absent from the current official district reference. Preserve raw codes. |
+| Ward | `ward` | `number` | `smallint` | 4 | City Council ward. Values 1–50 are valid for numbered-ward analysis; 1,032 additional rows contain `0` and require an unknown/unassigned classification. |
+| Community Area | `community_area` | `text` | `smallint` | 35 | Chicago community-area identifier. Values 1–77 are eligible for named-area analysis; 1,032 additional rows contain `0` and are out of range. |
 | FBI Code | `fbi_code` | `text` | `text` | 0 | FBI crime classification code; preserve as a code. |
-| X Coordinate | `x_coordinate` | `number` | `integer` | 6,697 | Projected coordinate; coordinate reference system and range require verification. |
-| Y Coordinate | `y_coordinate` | `number` | `integer` | 6,697 | Projected coordinate; coordinate reference system and range require verification. |
-| Year | `year` | `number` | `smallint` | 0 | Source-provided year; later reconcile with parsed `date`. |
+| X Coordinate | `x_coordinate` | `number` | `integer` | 6,697 | Projected coordinate. Missingness exactly matches latitude, longitude, and location; no partial pair was observed. |
+| Y Coordinate | `y_coordinate` | `number` | `integer` | 6,697 | Projected coordinate. Missingness exactly matches latitude, longitude, and location; no partial pair was observed. |
+| Year | `year` | `number` | `smallint` | 0 | Source-provided year; all 761,563 values matched the year extracted from `date`. |
 | Updated On | `updated_on` | `calendar_date` | `timestamp(3) without time zone` | 0 | Source record update timestamp; the source provides no timezone offset. |
-| Latitude | `latitude` | `number` | `numeric(12,9)` | 6,697 | Approximate latitude; exact numeric value is retained while display scale can gain trailing zeros. |
-| Longitude | `longitude` | `number` | `numeric(12,9)` | 6,697 | Approximate longitude; exact numeric value is retained while display scale can gain trailing zeros. |
+| Latitude | `latitude` | `number` | `numeric(12,9)` | 6,697 | Approximate latitude; present values passed global and City map-envelope screens. Missing rows remain usable outside point mapping. |
+| Longitude | `longitude` | `number` | `numeric(12,9)` | 6,697 | Approximate longitude; present values passed global and City map-envelope screens. Missing rows remain usable outside point mapping. |
 | Location | `location` | `location` | `text` | 6,697 | Combined portal location text; present values preserve embedded line breaks. |
 
 ## PostgreSQL raw layer
@@ -70,11 +70,11 @@ These nine fields were present in official dataset metadata but marked with `:@c
 - Non-empty source `community_area`: 761,528 records
 - Empty source `community_area`: 35 records
 
-Presence is not the same as geographic validity. Range, parse, cross-field consistency, and boundary checks have not been performed. Records without coordinates remain available for applicable non-coordinate analyses.
+Milestone 3 confirmed no partial coordinate pairs, no latitude/longitude versus projected-coordinate presence mismatches, no globally invalid or zero coordinate pairs, and no points outside the tested City map envelope. The envelope is a rectangular plausibility screen, not a point-in-polygon or positional-accuracy test. Records without coordinates remain available for applicable non-coordinate analyses.
 
 ## Planned derived fields
 
-No derived fields were created during acquisition. Later milestones may add calendar parts, complete-period flags, coordinate-availability flags, and data-quality status fields only after documenting their formulas and lineage. Source columns will not be silently overwritten.
+No derived fields have been created. A future authorized cleaning milestone may add calendar parts, complete-period flags, coordinate-availability flags, normalized join keys, and data-quality status fields only after documenting their formulas and lineage. Source columns will not be silently overwritten.
 
 ## Database-load validation completed
 
@@ -84,12 +84,15 @@ No derived fields were created during acquisition. Later milestones may add cale
 - Full-row reconciliation found no value mismatches after comparing coordinates by exact numeric equivalence.
 - Typed-table date boundaries, yearly totals, and missing-value counts match the acquisition evidence.
 
-## Data-quality checks reserved for later milestones
+## Data-quality assessment completed
 
-- Source-year versus parsed-date-year reconciliation
-- Valid community-area, ward, district, and beat domains
-- Coordinate numeric parsing, range, reference system, and cross-field consistency
-- Category whitespace, spelling variants, and classification changes
-- Record-version and update-timestamp implications for refreshes
+- All 761,563 source IDs are unique. Repeated case numbers affect 138 rows (0.0181%) and are not treated as duplicate source records.
+- No incident-date nulls, nonstandard source-date strings, update-date nulls, or date/year mismatches were found.
+- No missing primary types, tested outer-whitespace variants, or conflicting IUCR-to-primary-type mappings were found.
+- Location description is missing on 3,947 rows (0.5183%).
+- Community area is null on 35 rows and `0` on 1,032 rows; ward is null on four rows and `0` on 1,032 rows.
+- Coordinates and location are jointly missing on 6,697 rows (0.8794%). Present coordinate pairs passed the implemented plausibility screens.
+- Arrest and domestic fields are complete booleans. Their observed distributions are validation evidence, not clearance or conviction measures.
+- Raw category cardinality is 31 primary types, 337 descriptions, 142 non-null location descriptions, 359 IUCR codes, and 26 FBI codes.
 
-See [dataset acquisition](dataset_acquisition.md) for source queries and extraction evidence, and [database setup](database_setup.md) for the executed PostgreSQL workflow.
+See [dataset acquisition](dataset_acquisition.md) for source queries and extraction evidence, [database setup](database_setup.md) for the executed PostgreSQL workflow, and [data quality assessment](data_quality_report.md) for counts, percentages, proposed treatments, validation queries, and limitations.

@@ -42,7 +42,7 @@ Official City source
 data/raw (immutable, local, Git-ignored)
         |
         v
-PostgreSQL staging -> validation/cleaning -> analytical tables/views
+PostgreSQL staging -> data-quality assessment -> planned cleaned/analytical layer
         |                                      |
         v                                      v
 Python QA and EDA                         Tableau extracts/dashboard
@@ -52,7 +52,7 @@ Python QA and EDA                         Tableau extracts/dashboard
               documented findings and metrics
 ```
 
-The repository foundation, raw-data acquisition, and PostgreSQL raw-import layers are complete. Cleaning, analytical transformations, analysis, visualization, and Tableau work remain planned.
+The repository foundation, raw-data acquisition, PostgreSQL raw import, and read-only data-quality assessment are complete. Cleaning, analytical transformations, analysis, visualization, and Tableau work remain planned.
 
 ## Repository structure
 
@@ -82,14 +82,14 @@ Empty working directories are retained with `.gitkeep` placeholders. Raw and gen
 | 0 | Repository foundation and analytical definitions | Complete |
 | 1 | Source acquisition and raw-data integrity | Complete |
 | 2 | PostgreSQL schema and reproducible load | Complete |
-| 3 | Data quality, cleaning, and analytical layer | Planned |
+| 3 | Read-only data-quality assessment and proposed treatments | Complete |
 | 4 | SQL analysis and verified year-over-year metrics | Planned |
 | 5 | Python exploratory analysis and static visuals | Planned |
 | 6 | Four-page interactive Tableau dashboard | Planned |
 | 7 | Findings and resource-planning recommendations | Planned |
 | 8 | Final QA, portfolio packaging, and resume metrics | Planned |
 
-Detailed gates and acceptance criteria are in the [project plan](docs/project_plan.md). The executed extraction evidence is in [dataset acquisition](docs/dataset_acquisition.md), and the PostgreSQL workflow and import validation are in [database setup](docs/database_setup.md). Metric formulas and comparison rules are in [metric definitions](docs/metric_definitions.md), and source fields are described in the [data dictionary](docs/data_dictionary.md).
+Detailed gates and acceptance criteria are in the [project plan](docs/project_plan.md). The executed extraction evidence is in [dataset acquisition](docs/dataset_acquisition.md), the PostgreSQL workflow and import validation are in [database setup](docs/database_setup.md), and observed quality issues and proposed treatments are in the [data-quality report](docs/data_quality_report.md). Metric formulas and comparison rules are in [metric definitions](docs/metric_definitions.md), and source fields are described in the [data dictionary](docs/data_dictionary.md).
 
 ## Reproducibility overview
 
@@ -111,6 +111,15 @@ python3 scripts/load_raw_postgres.py
 
 The loader verifies the raw-file checksum and header, preserves parsed source fields in a text staging table, transactionally rebuilds the typed `raw_chicago_crimes` table, reconciles every row and field, and records a load audit. It rolls back the entire rebuild on any count, ID, cast, or reconciliation error. See [database setup](docs/database_setup.md) for database creation, schema, commands, and executed validation evidence.
 
+The raw table can be profiled without modifying it by running:
+
+```bash
+psql -d chicago_crime -X -v ON_ERROR_STOP=1 -P pager=off \
+  -f sql/02_data_quality.sql
+```
+
+The script runs inside a read-only transaction and reports duplicate identifiers, case-number repetition, date consistency, categorical quality, administrative-geography domains, coordinate coverage and plausibility, boolean distributions, field completeness, yearly coverage, and category cardinality. No proposed cleaning rule has been applied.
+
 ## Current status
 
-Milestone 2 was completed on September 25, 2026. PostgreSQL 14.20 contains 761,563 staging rows and 761,563 typed rows in `raw_chicago_crimes`, with 761,563 distinct source IDs. Counts, date bounds, yearly totals, important-column completeness, representative records, and all-field staging-to-typed reconciliation passed. A repeated rebuild produced the same table state, demonstrating idempotent loading. No cleaning, analytical transformation, crime-pattern analysis, Tableau workbook, findings, or recommendations have been produced.
+Milestone 3 was completed on September 25, 2026 as a read-only data-quality assessment. The 761,563-row raw table contains no duplicate source IDs, missing incident dates, date/year mismatches, missing primary crime types, or null arrest/domestic indicators. Identified issues include 138 rows sharing 64 case numbers, 6,697 rows without coordinates (0.8794%), 3,947 without location descriptions (0.5183%), missing or out-of-range community-area and ward values, one non-padded district code, and 1,020 records with district `061`, which is absent from the current official district reference. All records remain unchanged and retained; field-specific treatments are proposed in the data-quality report. No cleaning, analytical transformation, year-over-year analysis, Tableau workbook, findings, or recommendations have been produced.

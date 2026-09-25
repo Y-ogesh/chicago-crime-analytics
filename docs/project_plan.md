@@ -74,20 +74,25 @@ Create version-controlled PostgreSQL DDL and load workflows for raw staging and 
 
 Milestone 2 is complete. PostgreSQL 14.20 was configured with a local `chicago_crime` database and three version-controlled tables: text-preserving staging, typed `raw_chicago_crimes`, and load audit. The loader verified the raw SHA-256 and header, loaded 761,563 staging rows, cast all rows transactionally, and reconciled every source field to its typed representation. Expected, staging, imported, and distinct-ID counts all equaled 761,563; date bounds and yearly counts matched the acquisition manifest. The final measured schema/load/validation workflow completed in 12.384 seconds. Repeated successful rebuilds produced identical table totals, proving idempotent table contents. Two implementation discrepancies—source-null location fields and coordinate display-scale normalization—were investigated; both failed attempts rolled back with zero partial rows before the schema and validation rules were corrected. No cleaning, analytical transformation, or finding was produced. Full commands, types, checks, and evidence are recorded in [database setup](database_setup.md).
 
-## Milestone 3 — Data quality, cleaning, and analytical layer
+## Milestone 3 — Data quality assessment
 
 ### Scope
 
-Implement documented quality rules and reusable analytical tables or views while preserving source values and lineage.
+Profile the imported raw table without modifying it, quantify material data-quality issues, and document proposed treatments for a future cleaned layer.
 
 ### Acceptance criteria
 
-- Cleaning rules for identifiers, timestamps, categorical values, booleans, community areas, and coordinates are explicit and tested.
-- Source columns remain available or traceable; transformations never silently overwrite raw values.
-- Missing coordinates are flagged separately from records retained for non-map analysis.
-- Valid community areas are separated from missing or invalid values using the documented eligibility rule.
-- Complete-year and partial-period flags are reproducibly derived using a recorded data cutoff.
-- SQL and Python quality checks reconcile record counts and key distributions.
+- A reusable SQL suite profiles identifiers, case numbers, dates, categories, location descriptions, administrative geography, coordinates, arrest/domestic indicators, nulls, yearly totals, and category cardinality.
+- Every material issue includes an affected-row count, percentage, analytical impact, proposed treatment, retention decision, and validation query.
+- Repeated case numbers are assessed separately from duplicate source IDs and are not automatically treated as duplicate incidents.
+- Missing coordinates are separated from incidents retained for non-map analysis; coordinate coverage is quantified.
+- Valid community areas are separated from missing or out-of-range values using the documented 1–77 eligibility rule.
+- Every quality query executes successfully inside a read-only transaction, and source values remain unchanged.
+- README, project plan, data dictionary, and quality report agree on the executed results and explicitly identify cleaning as future work.
+
+### Completion record (2026-09-25)
+
+Milestone 3 is complete as a read-only assessment. All queries in `sql/02_data_quality.sql` executed successfully against 761,563 raw records inside a PostgreSQL read-only transaction. Source IDs were unique; source/typed dates, year consistency, primary crime type, tested categorical whitespace, and arrest/domestic completeness had no observed defects. The assessment found 64 repeated case-number values affecting 138 rows, including 17 repeated substantive homicide fingerprints affecting 34 source-ID-distinct rows; no automatic deduplication is proposed. It also quantified 6,697 records without coordinate pairs (0.8794%), 3,947 without location descriptions (0.5183%), 35 missing and 1,032 out-of-range community areas, four missing and 1,032 out-of-range wards, one non-padded district code, and 1,020 records using district `061`, which is absent from the current official district reference. All records were retained and the raw layer was not modified. Proposed treatments and limitations are recorded in [data quality assessment](data_quality_report.md); no cleaning or analytical layer was implemented.
 
 ## Milestone 4 — SQL analysis and verified year-over-year metrics
 
