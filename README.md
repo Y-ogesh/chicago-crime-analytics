@@ -1,6 +1,6 @@
 # Chicago Crime Analytics
 
-An end-to-end data analytics and business intelligence portfolio project built from official City of Chicago reported-crime data. The project will use reproducible PostgreSQL, SQL, and Python workflows to examine temporal, geographic, seasonal, crime-category, domestic-incident, and arrest patterns across at least 500,000 records. A four-page Tableau dashboard and evidence-backed resource-planning recommendations are planned deliverables; they have not yet been built.
+An end-to-end data analytics and business intelligence portfolio project built from official City of Chicago reported-crime data. The project uses reproducible acquisition workflows and will use PostgreSQL, SQL, and Python to examine temporal, geographic, seasonal, crime-category, domestic-incident, and arrest patterns. The acquired source extract contains 761,563 records across the three complete calendar years 2023–2025. A four-page Tableau dashboard and evidence-backed resource-planning recommendations are planned deliverables; they have not yet been built.
 
 ## Project objective
 
@@ -8,7 +8,7 @@ The objective is to produce an auditable analysis of reported crime patterns in 
 
 ## Official dataset source
 
-The planned primary source is the City of Chicago Data Portal's [Crimes - 2001 to Present](https://data.cityofchicago.org/Public-Safety/Crimes-2001-to-Present/ijzp-q8t2/data) dataset (dataset identifier `ijzp-q8t2`), provided by the Chicago Police Department. The portal describes rows as reported crimes, except that murder records represent victims, and notes that recent records and classifications can change. No data has been downloaded for this project yet.
+The primary source is the City of Chicago Data Portal's [Crimes - 2001 to Present](https://data.cityofchicago.org/Public-Safety/Crimes-2001-to-Present/ijzp-q8t2/data) dataset (dataset identifier `ijzp-q8t2`), provided by the Chicago Police Department. The portal describes rows as reported crimes, except that murder records represent victims, and notes that records and classifications can change. On September 25, 2026, the project acquired source records with incident timestamps from January 1, 2023 through December 31, 2025. Partial-year 2026 records were excluded.
 
 The eventual analysis must acknowledge that reported-crime data does not measure all crime, locations are approximate, coordinate and community-area fields may be missing, and administrative practices or later record updates may affect comparisons. Findings will describe associations and observed patterns, not causation.
 
@@ -52,7 +52,7 @@ Python QA and EDA                         Tableau extracts/dashboard
               documented findings and metrics
 ```
 
-The architecture is planned beyond the repository-foundation layer. Only the folder structure and foundational documentation exist at Milestone 0.
+The repository foundation and raw-data acquisition layer are complete. Database loading, transformation, analysis, visualization, and Tableau work remain planned.
 
 ## Repository structure
 
@@ -80,7 +80,7 @@ Empty working directories are retained with `.gitkeep` placeholders. Raw and gen
 | Milestone | Scope | Status |
 |---|---|---|
 | 0 | Repository foundation and analytical definitions | Complete (2026-09-25) |
-| 1 | Source acquisition and raw-data integrity | Planned |
+| 1 | Source acquisition and raw-data integrity | Complete (2026-09-25) |
 | 2 | PostgreSQL schema and reproducible load | Planned |
 | 3 | Data quality, cleaning, and analytical layer | Planned |
 | 4 | SQL analysis and verified year-over-year metrics | Planned |
@@ -89,14 +89,20 @@ Empty working directories are retained with `.gitkeep` placeholders. Raw and gen
 | 7 | Findings and resource-planning recommendations | Planned |
 | 8 | Final QA, portfolio packaging, and resume metrics | Planned |
 
-Detailed gates and acceptance criteria are in the [project plan](docs/project_plan.md). Metric formulas and comparison rules are in [metric definitions](docs/metric_definitions.md), and source fields are described in the initial [data dictionary](docs/data_dictionary.md).
+Detailed gates and acceptance criteria are in the [project plan](docs/project_plan.md). The executed extraction and validation evidence are in [dataset acquisition](docs/dataset_acquisition.md). Metric formulas and comparison rules are in [metric definitions](docs/metric_definitions.md), and source fields are described in the [data dictionary](docs/data_dictionary.md).
 
 ## Reproducibility overview
 
-The planned workflow will use environment variables copied from `.env.example`, scripts and version-controlled SQL instead of manual transformations, immutable raw inputs, documented extraction metadata, and validation checks at each milestone. Paths in project code and documentation will be repository-relative. Credentials, raw CSV files, database dumps, Tableau extracts, and other large generated exports are excluded from Git.
+The workflow uses environment variables copied from `.env.example`, scripts and version-controlled SQL instead of manual transformations, immutable raw inputs, documented extraction metadata, and validation checks at each milestone. Paths in project code and documentation are repository-relative. Credentials, raw CSV files, database dumps, Tableau extracts, and other large generated exports are excluded from Git.
 
-Dependency declarations are provided in `requirements.txt`; installation and runtime compatibility have not yet been validated. Exact setup, acquisition, database, and execution commands will be added only when their corresponding milestones are implemented and tested.
+The acquisition is reproducible from a clean checkout after installing `requirements.txt`:
+
+```bash
+python3 scripts/download_crimes.py
+```
+
+The script applies the documented date filter, downloads 50,000-row pages using source-ID keyset pagination, orders records by `id ASC`, retries transient API failures, refuses to overwrite existing raw artifacts, and validates source counts before and after download. It writes an immutable Git-ignored CSV and JSON evidence manifest under `data/raw/`. See [dataset acquisition](docs/dataset_acquisition.md) for exact commands, filters, outputs, and limitations. The full dependency set has not yet been tested in a clean virtual environment.
 
 ## Current status
 
-Milestone 0 was completed on September 25, 2026. The required repository scaffold, documentation links, and representative ignore rules were validated successfully. No crime data has been acquired or analyzed, no PostgreSQL objects have been created, and no Tableau workbook or analytical findings have been produced. Dependency installation and runtime compatibility remain unvalidated and belong to later authorized work.
+Milestone 1 was completed on September 25, 2026. The official 2023–2025 extract contains 761,563 rows and 761,563 unique source IDs. Its pre-download source count, downloaded count, and post-download source count matched. The 219,747,521-byte raw CSV is stored locally under `data/raw/`, excluded from Git, and identified by SHA-256 `8b74425af7936af7b88226664b1b1cafe6c8805fe95ff1ca6ac4d75d364c4757`. No database import, cleaning, crime-pattern analysis, Tableau workbook, findings, or recommendations have been produced.

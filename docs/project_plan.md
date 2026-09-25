@@ -51,6 +51,10 @@ Implement a reproducible, parameterized extraction from the official City of Chi
 - Duplicate identifiers, nulls, date range, and basic domain values are profiled with saved, reproducible evidence.
 - Partial and complete calendar-year availability is documented without presenting analytical findings.
 
+### Completion record (2026-09-25)
+
+Milestone 1 is complete. The reproducible downloader selected the three adjacent complete calendar years 2023–2025 and used the half-open source filter `date >= '2023-01-01T00:00:00.000' AND date < '2026-01-01T00:00:00.000'`. It downloaded 761,563 untransformed source rows in 16 keyset-paginated API requests ordered by `id ASC`. The pre-download source count, downloaded count, post-download source count, and unique source-ID count all equaled 761,563; no duplicate IDs were found. The raw CSV is 219,747,521 bytes with SHA-256 `8b74425af7936af7b88226664b1b1cafe6c8805fe95ff1ca6ac4d75d364c4757` and remains excluded from Git. Source schema, empty-field counts, extraction timestamps, geographic-field presence, limitations, and commands are recorded in [dataset acquisition](dataset_acquisition.md) and [the data dictionary](data_dictionary.md). No database import, cleaning, or crime-pattern analysis was performed.
+
 ## Milestone 2 — PostgreSQL schema and reproducible load
 
 ### Scope
