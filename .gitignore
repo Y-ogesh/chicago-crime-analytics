@@ -1,0 +1,69 @@
+# macOS and operating-system metadata
+.DS_Store
+Thumbs.db
+
+# Credentials and local environment configuration
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Python environments, caches, and build artifacts
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+build/
+dist/
+*.egg-info/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Raw and processed data (retain directory placeholders)
+data/raw/*
+!data/raw/.gitkeep
+data/processed/*
+!data/processed/.gitkeep
+*.csv
+*.csv.gz
+*.tsv
+*.parquet
+*.feather
+*.arrow
+
+# Database dumps and local database artifacts
+*.sql.gz
+*.dump
+*.backup
+*.sqlite
+*.sqlite3
+
+# Tableau generated and packaged exports
+*.hyper
+*.tfl
+*.tflx
+*.twbx
+
+# Large exports and archives
+exports/
+*.zip
+*.tar
+*.tar.gz
+*.7z
+
+# Logs, coverage, and temporary files
+*.log
+.coverage
+htmlcov/
+tmp/
+temp/
+*.tmp
+*.swp
+*~
+

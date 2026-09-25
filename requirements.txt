@@ -1,0 +1,11 @@
+# Initial dependency declaration. Runtime compatibility will be validated in a later milestone.
+pandas>=2.2
+numpy>=1.26
+matplotlib>=3.8
+SQLAlchemy>=2.0
+psycopg[binary]>=3.1
+python-dotenv>=1.0
+requests>=2.31
+jupyterlab>=4.0
+ipykernel>=6.0
+
