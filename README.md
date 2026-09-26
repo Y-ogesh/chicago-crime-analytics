@@ -52,7 +52,7 @@ Python QA and EDA                         Tableau extracts/dashboard
               documented findings and metrics
 ```
 
-The repository foundation, raw-data acquisition, PostgreSQL raw import, read-only data-quality assessment, record-level cleaning/feature engineering, core and advanced SQL analysis, quantified findings, and Python exploratory analysis are complete. Resource-planning recommendations and Tableau work remain planned.
+The repository foundation, raw-data acquisition, PostgreSQL raw import, read-only data-quality assessment, record-level cleaning/feature engineering, core and advanced SQL analysis, quantified findings, Python exploratory analysis, and descriptive geographic analysis are complete. Resource-planning recommendations and Tableau work remain planned.
 
 ## Repository structure
 
@@ -87,11 +87,12 @@ Empty working directories are retained with `.gitkeep` placeholders. Raw and lar
 | 5 | Core SQL analysis and verified year-over-year metrics | Complete |
 | 6 | Advanced SQL, reusable analytical views, and quantified portfolio findings | Complete |
 | 7 | Python exploratory analysis and static visuals | Complete |
-| 8 | Four-page interactive Tableau dashboard | Planned |
-| 9 | Findings and resource-planning recommendations | Planned |
-| 10 | Final QA, portfolio packaging, and resume metrics | Planned |
+| 8 | Geographic and descriptive hotspot analysis | Complete |
+| 9 | Four-page interactive Tableau dashboard | Planned |
+| 10 | Findings and resource-planning recommendations | Planned |
+| 11 | Final QA, portfolio packaging, and resume metrics | Planned |
 
-Detailed gates and acceptance criteria are in the [project plan](docs/project_plan.md). The executed extraction evidence is in [dataset acquisition](docs/dataset_acquisition.md), the PostgreSQL workflow and import validation are in [database setup](docs/database_setup.md), observed quality issues are in the [data-quality report](docs/data_quality_report.md), implemented record-level transformations are in the [cleaning report](docs/cleaning_report.md), and verified descriptive SQL findings are in the [core SQL analysis report](docs/sql_analysis_report.md). Independent Pandas validation, exploratory findings, and the visualization inventory are in the [Python EDA report](docs/python_eda_report.md). Claim-level calculations and candidate resume evidence are in [quantified findings](docs/quantified_findings.md). Metric formulas and comparison rules are in [metric definitions](docs/metric_definitions.md), and raw and clean fields are described in the [data dictionary](docs/data_dictionary.md).
+Detailed gates and acceptance criteria are in the [project plan](docs/project_plan.md). The executed extraction evidence is in [dataset acquisition](docs/dataset_acquisition.md), the PostgreSQL workflow and import validation are in [database setup](docs/database_setup.md), observed quality issues are in the [data-quality report](docs/data_quality_report.md), implemented record-level transformations are in the [cleaning report](docs/cleaning_report.md), and verified descriptive SQL findings are in the [core SQL analysis report](docs/sql_analysis_report.md). Independent Pandas validation, exploratory findings, and the visualization inventory are in the [Python EDA report](docs/python_eda_report.md); geographic methods, density limitations, and Tableau-ready exports are in the [geographic analysis report](docs/geographic_analysis_report.md). Claim-level calculations and candidate resume evidence are in [quantified findings](docs/quantified_findings.md). Metric formulas and comparison rules are in [metric definitions](docs/metric_definitions.md), and raw and clean fields are described in the [data dictionary](docs/data_dictionary.md).
 
 ## Reproducibility overview
 
@@ -161,6 +162,16 @@ jupyter nbconvert --to notebook --execute --inplace \
 
 The notebooks locate the repository dynamically, read PostgreSQL settings from environment variables or a Git-ignored `.env`, force database transactions to read-only mode, and do not print credentials or machine-specific paths. The validation notebook independently reconstructs annual and all 154 community-area comparisons from record-level data; the exploratory notebook covers yearly, monthly, seasonal, weekday, hourly, category, arrest, domestic, and community-area patterns.
 
+The geographic notebook and its compact Tableau-ready derived data can be reproduced with:
+
+```bash
+python scripts/build_geographic_notebook.py
+jupyter nbconvert --to notebook --execute --inplace \
+  --ExecutePreprocessor.timeout=900 notebooks/03_geographic_analysis.ipynb
+```
+
+The notebook validates community-area and coordinate coverage, analyzes community and district volume, category concentration, annual geographic change, persistence, location-time profiles, and coordinate density, then writes five derived CSVs under Git-ignored `data/processed/tableau_geographic/`. Coordinate density is explicitly descriptive; no formal spatial-significance test or population-normalized rate is claimed.
+
 ## Current status
 
-**Status: Complete through Milestone 7.** Both notebooks executed from fresh kernels with sequential execution counts and zero errors. Pandas independently reproduced all annual totals, adjacent-year percentages, and 154 community-area comparisons; the maximum SQL/Python numeric difference was zero. The exploratory notebook generated eight reviewed figures and confirmed the verified 2024–2025 citywide decline (259,633 to 238,086; -21,547; -8.2990%), Forest Glen's leading eligible percentage decrease (545 to 409; -24.9541%), and Austin's leading absolute decrease (12,958 to 11,806; -1,152). It also found all 12 months of 2025 below their corresponding 2024 months and explored category-specific calendar-month profiles. Geographic tables report counts—not population-normalized rates—and arrest results remain arrest-indicator percentages, not clearance or conviction rates. No Tableau workbook, causal conclusion, or resource-planning recommendation has been produced.
+**Status: Complete through Milestone 8.** The geographic notebook executed 15 code cells with zero errors, passed all 14 SQL/Python reconciliation checks, and generated seven reviewed figures plus five Git-ignored Tableau-ready exports. Community-area coverage was 760,496 records (99.8599%); coordinate coverage was 754,866 (99.1206%), with 6,697 records retained outside coordinate-density analysis. Austin remained the highest-volume community area over 2023–2025, district `008` was the highest-volume observed district code, and all 154 annual community-area comparisons reconciled to SQL with zero difference. Coordinate density is labeled descriptive—not a statistically significant hotspot test—and no population-normalized risk claim is made. No Tableau workbook, causal conclusion, or resource-planning recommendation has been produced.

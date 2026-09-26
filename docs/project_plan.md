@@ -174,7 +174,28 @@ Implement reproducible Python analysis that validates SQL outputs and produces p
 
 Milestone 7 is complete. Both version-controlled notebooks were rebuilt, restarted, and executed from beginning to end using a fresh repository-local virtual environment and read-only PostgreSQL connections configured through environment variables. `01_data_validation.ipynb` executed nine code cells with zero errors and passed all 10 gates: 761,563 records and source IDs, annual counts, adjacent-year percentages, 760,496 community-area-eligible records, all 154 area comparisons, rank eligibility, and all percentage/absolute ranks reconciled between independently calculated Pandas results and SQL. The maximum annual count difference and maximum community-area numeric difference were both zero. `02_exploratory_analysis.ipynb` executed 14 code cells with zero errors, covered every required analytical domain, added category-specific calendar-month profiles, and regenerated eight visually inspected Matplotlib PNGs. Findings and limitations are documented in [the Python EDA report](python_eda_report.md). No Tableau, causal, or resource-planning work was performed.
 
-## Milestone 8 — Four-page interactive Tableau dashboard
+## Milestone 8 — Geographic and descriptive hotspot analysis
+
+### Scope
+
+Validate geographic coverage and analyze community-area, district, category-concentration, annual-change, persistent-volume, location-time, and coordinate-density patterns. Produce reproducible geographic figures and compact Tableau-ready derived datasets while distinguishing incident volume, population-normalized rates, descriptive density, statistical significance, and individual risk.
+
+### Acceptance criteria
+
+- Community-area and coordinate coverage reconcile to SQL and remain separate denominators.
+- All 77 official community areas use the documented City lookup; invalid or missing IDs are not imputed from coordinates.
+- District analysis retains observed source-derived codes and documents current-reference exceptions.
+- Category geographic concentration, annual change, persistence, and location-time patterns use stated denominators and complete-year ordering.
+- Coordinate density excludes only non-mappable records, documents binning and resolution dependence, and is never labeled statistically significant without a formal spatial test.
+- Incident-volume rankings are never called population-normalized rates or individual-risk measures.
+- Tableau-ready geographic data or views are reproducible, documented, and excluded from Git when they are generated datasets.
+- The notebook restarts and executes completely, all geographic totals reconcile to SQL, and reports contain only executed findings.
+
+### Status: Complete
+
+Milestone 8 is complete. `03_geographic_analysis.ipynb` executed 15 code cells with zero errors, passed all 14 geographic validation checks, and generated seven source-attributed figures. Pandas matched 761,563 clean records, 760,496 community-area-eligible records, 754,866 coordinate-mappable records, all 77 community-area totals, and all 154 adjacent-year area comparisons to SQL with zero observed difference. The analysis covered community areas, 24 observed district codes, category concentration, annual changes, persistent high-volume areas, location-description time profiles, and coordinate density. Five compact Tableau-ready CSVs were created locally under Git-ignored `data/processed/tableau_geographic/`; `vw_geographic_crime_points` remains the 754,866-row point layer. Density outputs are explicitly descriptive, no formal hotspot-significance method was applied, and no Tableau dashboard was built. Full methods, findings, validation, and limitations are in [the geographic analysis report](geographic_analysis_report.md).
+
+## Milestone 9 — Four-page interactive Tableau dashboard
 
 ### Status: Planned
 
@@ -191,7 +212,7 @@ Build and document a four-page Tableau dashboard using validated analytical data
 - Missing-coordinate records are excluded only from coordinate maps and are disclosed through coverage metrics.
 - Dashboard completion is claimed only after the workbook is opened and tested in Tableau; screenshots reflect actual functionality.
 
-## Milestone 9 — Findings and resource-planning recommendations
+## Milestone 10 — Findings and resource-planning recommendations
 
 ### Status: Planned
 
@@ -208,7 +229,7 @@ Synthesize verified evidence into findings and cautious resource-planning recomm
 - Citywide and community-area statements use the correct comparison eligibility rules.
 - README and technical reports agree on findings, definitions, and date coverage.
 
-## Milestone 10 — Final QA, portfolio packaging, and resume metrics
+## Milestone 11 — Final QA, portfolio packaging, and resume metrics
 
 ### Status: Planned
 
