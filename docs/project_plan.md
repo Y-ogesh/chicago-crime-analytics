@@ -157,8 +157,6 @@ Milestone 6 is complete. `sql/05_advanced_analysis.sql` created seven non-materi
 
 ## Milestone 7 — Python exploratory analysis and static visuals
 
-### Status: Planned
-
 ### Scope
 
 Implement reproducible Python analysis that validates SQL outputs and produces portfolio-quality exploratory charts.
@@ -171,6 +169,10 @@ Implement reproducible Python analysis that validates SQL outputs and produces p
 - Partial periods, missing geography, and category grouping are visibly or textually disclosed.
 - Generated images are reproducible; large intermediate exports remain ignored.
 - Observed associations are not framed as causal effects.
+
+### Status: Complete
+
+Milestone 7 is complete. Both version-controlled notebooks were rebuilt, restarted, and executed from beginning to end using a fresh repository-local virtual environment and read-only PostgreSQL connections configured through environment variables. `01_data_validation.ipynb` executed nine code cells with zero errors and passed all 10 gates: 761,563 records and source IDs, annual counts, adjacent-year percentages, 760,496 community-area-eligible records, all 154 area comparisons, rank eligibility, and all percentage/absolute ranks reconciled between independently calculated Pandas results and SQL. The maximum annual count difference and maximum community-area numeric difference were both zero. `02_exploratory_analysis.ipynb` executed 14 code cells with zero errors, covered every required analytical domain, added category-specific calendar-month profiles, and regenerated eight visually inspected Matplotlib PNGs. Findings and limitations are documented in [the Python EDA report](python_eda_report.md). No Tableau, causal, or resource-planning work was performed.
 
 ## Milestone 8 — Four-page interactive Tableau dashboard
 

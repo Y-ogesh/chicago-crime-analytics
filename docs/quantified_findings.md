@@ -2,9 +2,13 @@
 
 ## Scope and evidence standard
 
-These findings were produced from `public.clean_chicago_crimes` using [`sql/05_advanced_analysis.sql`](../sql/05_advanced_analysis.sql). The canonical population is 761,563 source-ID-distinct reported incident records dated January 1, 2023 through December 31, 2025. All annual comparisons use adjacent complete calendar years and the same record scope in both periods. Counts are reported incident counts, not population-normalized crime rates, and the results do not establish causation.
+These findings were produced from `public.clean_chicago_crimes` using [`sql/05_advanced_analysis.sql`](../sql/05_advanced_analysis.sql) and independently validated from record-level data in [`01_data_validation.ipynb`](../notebooks/01_data_validation.ipynb). The canonical population is 761,563 source-ID-distinct reported incident records dated January 1, 2023 through December 31, 2025. All annual comparisons use adjacent complete calendar years and the same record scope in both periods. Counts are reported incident counts, not population-normalized crime rates, and the results do not establish causation.
 
 The script was executed with stop-on-error behavior against PostgreSQL 14.20. It created seven non-materialized analytical views, ran all analytical outputs, and passed fail-fast reconciliation against `raw_chicago_crimes`. Raw and clean citywide counts, plus raw and clean valid-community-area counts, differed by zero in each of 2023, 2024, and 2025.
+
+## Independent Python validation
+
+The Milestone 7 validation notebook executed nine code cells from a fresh kernel with zero errors and passed all 10 gates. Pandas independently aggregated the canonical records rather than using view totals as inputs. Python and SQL differed by zero for all three annual counts, both year-over-year percentages within a `1e-10` tolerance, 760,496 community-area-eligible records, and all values and ranks across 154 community-area comparisons. Forest Glen and Austin reproduced exactly. The exploratory notebook executed 14 code cells with zero errors and generated eight reviewed Matplotlib figures. Full evidence is in the [Python EDA report](python_eda_report.md).
 
 ## Supplied candidate claims
 
@@ -17,6 +21,7 @@ The script was executed with stop-on-error behavior against PostgreSQL 14.20. It
 - **Absolute change:** -21,547 reported incidents.
 - **Percentage change:** -8.2990%, using `(238,086 - 259,633) / 259,633 * 100`.
 - **Supporting SQL:** A01 and E01 in [`sql/05_advanced_analysis.sql`](../sql/05_advanced_analysis.sql); reusable result in `vw_yearly_crime_trends`.
+- **Supporting Python:** Independent annual aggregation and validation gate in [`01_data_validation.ipynb`](../notebooks/01_data_validation.ipynb).
 - **Denominator:** 259,633 reported incidents in the prior complete calendar year.
 - **Caveats:** The supplied 260,381-to-237,849 values imply -8.6535%, not exactly -8.7% before display rounding. The current extract differs by -748 records in the proposed prior value and +237 in the proposed current value. No filters were changed to reproduce the candidate. Source records can be revised after extraction.
 
@@ -29,6 +34,7 @@ The script was executed with stop-on-error behavior against PostgreSQL 14.20. It
 - **Absolute change:** -136 reported incidents.
 - **Percentage change:** -24.9541%, using `(409 - 545) / 545 * 100`.
 - **Supporting SQL:** B01, B02, and E01 in [`sql/05_advanced_analysis.sql`](../sql/05_advanced_analysis.sql); reusable result in `vw_community_area_yoy` for community area 12.
+- **Supporting Python:** Complete 77-area grid, adjacent-year calculation, and rank reproduction in [`01_data_validation.ipynb`](../notebooks/01_data_validation.ipynb).
 - **Denominator:** 545 Forest Glen reported incidents in the prior complete calendar year.
 - **Caveats:** Percentage rank 1 applies only among areas with at least 500 prior-year incidents; 75 of 77 areas qualified for the 2024–2025 percentage ranking. Forest Glen ranked 46th for absolute decrease, demonstrating that proportional and volume impacts are different. This is a count comparison, not a population-normalized rate.
 
@@ -43,6 +49,7 @@ The script was executed with stop-on-error behavior against PostgreSQL 14.20. It
 - **Absolute change:** -1,152 reported incidents.
 - **Percentage change:** -8.8903%.
 - **Supporting SQL:** B01 in [`sql/05_advanced_analysis.sql`](../sql/05_advanced_analysis.sql); `absolute_decrease_rank = 1` in `vw_community_area_yoy`.
+- **Supporting Python:** Community-area comparison in both executed notebooks; see [`01_data_validation.ipynb`](../notebooks/01_data_validation.ipynb).
 - **Denominator:** 12,958 Austin reported incidents in 2024.
 - **Caveats:** Austin ranked 34th by percentage decrease among baseline-eligible areas. Community-area counts are not adjusted for population, land area, commuting, tourism, or exposure.
 
@@ -55,6 +62,7 @@ The script was executed with stop-on-error behavior against PostgreSQL 14.20. It
 - **Absolute change:** -3,303 reported incidents.
 - **Percentage change:** -36.2171%.
 - **Supporting SQL:** C04 in [`sql/05_advanced_analysis.sql`](../sql/05_advanced_analysis.sql); reusable result in `vw_crime_type_trends`.
+- **Supporting Python:** Annual source-category trend calculation in [`02_exploratory_analysis.ipynb`](../notebooks/02_exploratory_analysis.ipynb).
 - **Denominator:** 9,120 robbery records in 2024.
 - **Caveats:** `primary_type` is the official source category and can be revised. The comparison does not measure prevalence among unreported crimes and does not identify a cause.
 
@@ -67,6 +75,7 @@ The script was executed with stop-on-error behavior against PostgreSQL 14.20. It
 - **Absolute change:** +2.2902 percentage points.
 - **Percentage change:** +16.5670% relative to the 2024 percentage.
 - **Supporting SQL:** C05 in [`sql/05_advanced_analysis.sql`](../sql/05_advanced_analysis.sql); underlying annual numerator and denominator are also documented in the [core SQL analysis report](sql_analysis_report.md).
+- **Supporting Python:** Independently calculated annual numerators, denominators, and percentages in [`02_exploratory_analysis.ipynb`](../notebooks/02_exploratory_analysis.ipynb).
 - **Denominator:** All records with a non-null arrest indicator in each year; the current extract has zero null arrest indicators.
 - **Caveats:** This is an arrest-indicator percentage, not a clearance, prosecution, or conviction rate. It does not establish when an arrest occurred or why the percentage changed.
 
@@ -82,12 +91,12 @@ The script was executed with stop-on-error behavior against PostgreSQL 14.20. It
 
 The following wording stays within the executed evidence:
 
-- Analyzed 761,563 official Chicago reported-crime records across three complete calendar years and reconciled every annual total to the immutable PostgreSQL raw layer with zero count differences.
+- Analyzed 761,563 official Chicago reported-crime records across three complete calendar years and reconciled annual SQL and independent Pandas totals with zero count differences.
 - Built seven reusable PostgreSQL views using CTEs, `LAG`, `RANK`, `DENSE_RANK`, partitioned windows, conditional aggregation, rolling averages, and percentage-of-total calculations.
 - Verified a 21,547-record citywide decline from 2024 to 2025 (-8.2990%) and produced all 154 adjacent-year comparisons across Chicago's 77 official community areas.
 - Distinguished proportional from operational-volume change: Forest Glen ranked first for percentage decrease (-24.9541%; -136 records), while Austin ranked first for absolute decrease (-1,152 records; -8.8903%).
 
-These statements describe completed SQL work. Python analysis, Tableau validation, resource-planning recommendations, and final resume packaging remain future milestones.
+These statements describe completed SQL and independently reconciled Python work. Tableau validation, resource-planning recommendations, and final resume packaging remain future milestones.
 
 ## Limitations
 

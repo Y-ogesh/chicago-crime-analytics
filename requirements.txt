@@ -1,4 +1,4 @@
-# Initial dependency declaration. Runtime compatibility will be validated in a later milestone.
+# Runtime dependencies validated during the executed Milestone 7 notebooks.
 pandas>=2.2
 numpy>=1.26
 matplotlib>=3.8
@@ -8,4 +8,6 @@ python-dotenv>=1.0
 requests>=2.31
 jupyterlab>=4.0
 ipykernel>=6.0
-
+nbformat>=5.10
+nbclient>=0.10
+nbconvert>=7.0
