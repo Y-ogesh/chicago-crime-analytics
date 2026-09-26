@@ -52,7 +52,7 @@ Python QA and EDA                         Tableau extracts/dashboard
               documented findings and metrics
 ```
 
-The repository foundation, raw-data acquisition, PostgreSQL raw import, read-only data-quality assessment, record-level cleaning/feature engineering, and core SQL analysis are complete. Python analysis, visualization, and Tableau work remain planned.
+The repository foundation, raw-data acquisition, PostgreSQL raw import, read-only data-quality assessment, record-level cleaning/feature engineering, core SQL analysis, and advanced SQL/quantified findings are complete. Python analysis, visualization, resource-planning recommendations, and Tableau work remain planned.
 
 ## Repository structure
 
@@ -85,12 +85,13 @@ Empty working directories are retained with `.gitkeep` placeholders. Raw and gen
 | 3 | Read-only data-quality assessment and proposed treatments | Complete |
 | 4 | Data cleaning and feature engineering | Complete |
 | 5 | Core SQL analysis and verified year-over-year metrics | Complete |
-| 6 | Python exploratory analysis and static visuals | Planned |
-| 7 | Four-page interactive Tableau dashboard | Planned |
-| 8 | Findings and resource-planning recommendations | Planned |
-| 9 | Final QA, portfolio packaging, and resume metrics | Planned |
+| 6 | Advanced SQL, reusable analytical views, and quantified portfolio findings | Complete |
+| 7 | Python exploratory analysis and static visuals | Planned |
+| 8 | Four-page interactive Tableau dashboard | Planned |
+| 9 | Findings and resource-planning recommendations | Planned |
+| 10 | Final QA, portfolio packaging, and resume metrics | Planned |
 
-Detailed gates and acceptance criteria are in the [project plan](docs/project_plan.md). The executed extraction evidence is in [dataset acquisition](docs/dataset_acquisition.md), the PostgreSQL workflow and import validation are in [database setup](docs/database_setup.md), observed quality issues are in the [data-quality report](docs/data_quality_report.md), implemented record-level transformations are in the [cleaning report](docs/cleaning_report.md), and verified descriptive SQL findings are in the [core SQL analysis report](docs/sql_analysis_report.md). Metric formulas and comparison rules are in [metric definitions](docs/metric_definitions.md), and raw and clean fields are described in the [data dictionary](docs/data_dictionary.md).
+Detailed gates and acceptance criteria are in the [project plan](docs/project_plan.md). The executed extraction evidence is in [dataset acquisition](docs/dataset_acquisition.md), the PostgreSQL workflow and import validation are in [database setup](docs/database_setup.md), observed quality issues are in the [data-quality report](docs/data_quality_report.md), implemented record-level transformations are in the [cleaning report](docs/cleaning_report.md), and verified descriptive SQL findings are in the [core SQL analysis report](docs/sql_analysis_report.md). Claim-level calculations and candidate resume evidence are in [quantified findings](docs/quantified_findings.md). Metric formulas and comparison rules are in [metric definitions](docs/metric_definitions.md), and raw and clean fields are described in the [data dictionary](docs/data_dictionary.md).
 
 ## Reproducibility overview
 
@@ -139,6 +140,15 @@ psql -d chicago_crime -X -v ON_ERROR_STOP=1 \
 
 Each query documents its business question, metric, assumptions, and denominator. The suite covers dataset coverage, complete-year changes, categories and descriptions, month/day/hour/time-band patterns, weekday versus weekend, community areas, police districts, location descriptions, arrest and domestic indicators, seasonal patterns, and cross-query reconciliation. It executes inside a read-only transaction.
 
+The advanced analytical views, rankings, rolling averages, quantified findings, and fail-fast source reconciliation can be reproduced with:
+
+```bash
+psql -d chicago_crime -X -v ON_ERROR_STOP=1 -P pager=off \
+  -f sql/05_advanced_analysis.sql
+```
+
+The script uses an official 77-area City lookup, calculates citywide and community-area year-over-year changes, applies a documented 500-incident prior-year threshold only to percentage ranks, and preserves all 77 areas in absolute-change ranks. It creates reusable views for executive KPIs, yearly trends, community-area changes, crime-type trends, monthly/rolling patterns, and coordinate-eligible map records. Non-geocoded incidents remain in the canonical clean table and all applicable non-map analyses.
+
 ## Current status
 
-Milestone 5 was completed on September 25, 2026. All 29 read-only business queries executed successfully against 761,563 clean records, including 154 adjacent-year comparisons covering all 77 eligible community areas with zero undefined prior-year denominators. Every year/category/month/weekday/hour/time-band/district/location/season reconciliation returned zero difference from the canonical total. Verified citywide reported incident counts were 263,844 in 2023, 259,633 in 2024, and 238,086 in 2025, corresponding to adjacent-year changes of -1.5960% and -8.2990%. Theft was the largest source primary type (173,282; 22.7535%); July had the largest pooled calendar-month count; Afternoon was the largest six-hour time band; and Summer was the largest meteorological-season count. Geographic tables report counts—not population-normalized rates—and retain separate coverage denominators. Arrest results are explicitly labeled arrest percentages, not clearance or conviction rates. No Python analysis, Tableau workbook, causal conclusion, resource-planning recommendation, or resume metric has been produced.
+**Status: Complete through Milestone 6.** The advanced SQL script executed successfully, created seven non-materialized analytical views including the official 77-area lookup, and passed raw-to-clean and view-level reconciliation with zero count differences. It produced 154 community-area comparisons and 150 percentage-ranked comparisons after applying the documented prior-year baseline. Verified 2024–2025 citywide reported incidents decreased from 259,633 to 238,086 (-21,547; -8.2990%). Forest Glen had the largest eligible percentage decrease (545 to 409; -24.9541%), while Austin had the largest absolute decrease (12,958 to 11,806; -1,152). These values do not exactly support the supplied 260,381-to-237,849 or Forest Glen -25.1% candidates. Geographic tables report counts—not population-normalized rates—and arrest results remain arrest-indicator percentages, not clearance or conviction rates. Candidate interview-defensible statements are documented, but no Python analysis, Tableau workbook, causal conclusion, or resource-planning recommendation has been produced.

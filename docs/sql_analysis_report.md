@@ -311,6 +311,38 @@ Q29 independently summed the major grouping dimensions back to the canonical tab
 
 Null arrest indicators: 0. Null domestic indicators: 0. Therefore the overall arrest and domestic denominators equal all 761,563 records. The analysis transaction committed without SQL errors and did not modify database state.
 
+## Advanced SQL extension
+
+Milestone 6 adds [`sql/05_advanced_analysis.sql`](../sql/05_advanced_analysis.sql), executed successfully on September 26, 2026 with stop-on-error behavior. It creates seven non-materialized views: the official community-area lookup plus `vw_executive_kpis`, `vw_yearly_crime_trends`, `vw_community_area_yoy`, `vw_crime_type_trends`, `vw_temporal_patterns`, and `vw_geographic_crime_points`. The views centralize definitions for later Python and Tableau work without duplicating the raw or clean tables.
+
+The extension uses CTEs, `LAG`, `RANK`, `DENSE_RANK`, partitioned windows, conditional aggregation, three-month rolling averages, and percentage-of-total calculations. It also distinguishes community-area ranking methods: absolute-change ranks cover all 77 areas, while percentage-change ranks require a prior-year baseline of at least 500 reported incidents. That threshold retained 75 areas in each adjacent-year comparison and bounds a one-record change to at most 0.2 percentage points at the baseline.
+
+### Verified 2024–2025 comparisons
+
+| Result | Previous value | Current value | Absolute change | Percentage change |
+|---|---:|---:|---:|---:|
+| Citywide reported incidents | 259,633 | 238,086 | -21,547 | -8.2990% |
+| Forest Glen reported incidents | 545 | 409 | -136 | -24.9541% |
+| Austin reported incidents | 12,958 | 11,806 | -1,152 | -8.8903% |
+| Robbery reported incidents | 9,120 | 5,817 | -3,303 | -36.2171% |
+| Arrest-indicator percentage | 13.8237% | 16.1139% | +2.2902 percentage points | +16.5670% relative |
+
+Forest Glen ranked first for percentage decrease among the 75 baseline-eligible areas but 46th for absolute decrease. Austin ranked first for absolute decrease among all 77 areas but 34th for percentage decrease among eligible areas. Seventy-one areas decreased and six increased. All 12 months in 2025 were below the corresponding 2024 month. These results demonstrate why percentage, volume, and temporal consistency must be reported separately.
+
+The supplied citywide candidate (260,381 to 237,849, described as 8.7%) was not reproduced: those candidate counts calculate to -8.6535%, while the canonical extract produced 259,633 to 238,086 (-8.2990%). The supplied Forest Glen candidate of -25.1% was also not exact: 545 to 409 calculates to -24.9541%, or -25.0% at one decimal. No filters or definitions were changed to target either candidate. Full claim-level evidence, denominators, and caveats are in [quantified findings](quantified_findings.md).
+
+Both observed citywide adjacent-year comparisons were decreases, so the extrema query reports 2024–2025 as the largest decrease and an explicit null result for largest increase rather than implying that a positive comparison occurred.
+
+### Advanced validation
+
+- The official lookup returned 77 rows and 77 distinct area IDs.
+- `vw_community_area_yoy` returned 154 rows: 77 areas for each of two adjacent-year comparisons, with zero prior-year denominators equal to zero.
+- Annual, primary-type, and monthly view totals reconciled to the clean table with zero differences for every year.
+- Community-area view totals reconciled to 259,292 eligible records in 2024 and 237,757 in 2025 with zero differences.
+- `vw_geographic_crime_points` returned exactly 754,866 coordinate-mappable records.
+- Raw versus clean citywide and valid-community-area annual counts differed by zero in 2023, 2024, and 2025.
+- `vw_executive_kpis` returned exactly one row. The script's fail-fast validation block completed without raising an exception.
+
 ## Limitations
 
 - Reported-crime data does not include all crime and may reflect reporting practices, administrative processes, and later revisions.

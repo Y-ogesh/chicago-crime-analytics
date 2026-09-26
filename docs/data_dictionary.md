@@ -141,6 +141,22 @@ Milestone 3 confirmed no partial coordinate pairs, no latitude/longitude versus 
 
 Milestone 4 produced 760,496 community-area-eligible rows, 760,527 ward-eligible rows, and 754,866 coordinate-mappable rows. All 6,697 rows lacking coordinates remain in the table for applicable non-coordinate analysis.
 
+## Milestone 6 analytical views
+
+All objects below are non-materialized PostgreSQL views created reproducibly by `sql/05_advanced_analysis.sql`; they do not replace or modify the raw or clean tables.
+
+| View | Grain | Purpose and key fields |
+|---|---|---|
+| `vw_community_area_lookup` | One row per official community area (77 rows) | Maps `community_area` to `community_area_name` using City dataset `igwz-8jzy` (map `cauq-8yn6`). |
+| `vw_executive_kpis` | One row | Canonical count/date coverage, geographic and community-area coverage, arrest/domestic numerators and denominators, and latest complete-year change. |
+| `vw_yearly_crime_trends` | One row per complete year | `reported_incident_count`, prior year/count, absolute and percentage change, and volume rank. |
+| `vw_community_area_yoy` | One row per area per adjacent-year comparison | Official name, prior/current counts, absolute/percentage changes, 500-record percentage-rank eligibility, percentage ranks, and all-area absolute ranks. |
+| `vw_crime_type_trends` | One row per year and source `primary_type` | Counts, annual percentage of total, prior values, changes, and within-year category volume rank. |
+| `vw_temporal_patterns` | One row per calendar month | Monthly count/share, trailing three-month average, and same-month prior-year absolute/percentage change. |
+| `vw_geographic_crime_points` | One row per coordinate-mappable incident | Selected incident, category, time, geography, coordinate, and indicator fields for point mapping; non-mappable incidents remain in `clean_chicago_crimes`. |
+
+All view percentages retain PostgreSQL numeric precision and are rounded only in query/report display. Their metric and denominator rules are defined in [metric definitions](metric_definitions.md).
+
 ## Database-load validation completed
 
 - Every source timestamp and boolean value cast successfully.

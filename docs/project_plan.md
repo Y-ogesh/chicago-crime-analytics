@@ -32,7 +32,7 @@ Create the repository scaffold, environment template, dependency declaration, ig
 - All repository-relative documentation links resolve.
 - No dataset is downloaded, no database object is created, and no analysis is performed.
 
-### Completion record (2026-09-25)
+### Status: Complete
 
 Milestone 0 is complete. The required root files, eight required directories, and seven `.gitkeep` placeholders were created. A read-only validation checked 22 required paths, three repository-relative documentation links, six representative ignored artifacts, and seven unignored placeholders with zero errors. A separate scan found no raw or processed tabular data files. No dataset was acquired, no SQL was executed, and no analytical result was produced. PostgreSQL did not respond at `localhost:5432`; a database connection was not required for this repository-foundation milestone.
 
@@ -51,7 +51,7 @@ Implement a reproducible, parameterized extraction from the official City of Chi
 - Duplicate identifiers, nulls, date range, and basic domain values are profiled with saved, reproducible evidence.
 - Partial and complete calendar-year availability is documented without presenting analytical findings.
 
-### Completion record (2026-09-25)
+### Status: Complete
 
 Milestone 1 is complete. The reproducible downloader selected the three adjacent complete calendar years 2023–2025 and used the half-open source filter `date >= '2023-01-01T00:00:00.000' AND date < '2026-01-01T00:00:00.000'`. It downloaded 761,563 untransformed source rows in 16 keyset-paginated API requests ordered by `id ASC`. The pre-download source count, downloaded count, post-download source count, and unique source-ID count all equaled 761,563; no duplicate IDs were found. The raw CSV is 219,747,521 bytes with SHA-256 `8b74425af7936af7b88226664b1b1cafe6c8805fe95ff1ca6ac4d75d364c4757` and remains excluded from Git. Source schema, empty-field counts, extraction timestamps, geographic-field presence, limitations, and commands are recorded in [dataset acquisition](dataset_acquisition.md) and [the data dictionary](data_dictionary.md). No database import, cleaning, or crime-pattern analysis was performed.
 
@@ -70,7 +70,7 @@ Create version-controlled PostgreSQL DDL and load workflows for raw staging and 
 - Unique record identifiers, parsing behavior, rejected rows, and load duration are validated and reported.
 - No analytical conclusion is claimed from load validation alone.
 
-### Completion record (2026-09-25)
+### Status: Complete
 
 Milestone 2 is complete. PostgreSQL 14.20 was configured with a local `chicago_crime` database and three version-controlled tables: text-preserving staging, typed `raw_chicago_crimes`, and load audit. The loader verified the raw SHA-256 and header, loaded 761,563 staging rows, cast all rows transactionally, and reconciled every source field to its typed representation. Expected, staging, imported, and distinct-ID counts all equaled 761,563; date bounds and yearly counts matched the acquisition manifest. The final measured schema/load/validation workflow completed in 12.384 seconds. Repeated successful rebuilds produced identical table totals, proving idempotent table contents. Two implementation discrepancies—source-null location fields and coordinate display-scale normalization—were investigated; both failed attempts rolled back with zero partial rows before the schema and validation rules were corrected. No cleaning, analytical transformation, or finding was produced. Full commands, types, checks, and evidence are recorded in [database setup](database_setup.md).
 
@@ -90,7 +90,7 @@ Profile the imported raw table without modifying it, quantify material data-qual
 - Every quality query executes successfully inside a read-only transaction, and source values remain unchanged.
 - README, project plan, data dictionary, and quality report agree on the executed results and explicitly identify cleaning as future work.
 
-### Completion record (2026-09-25)
+### Status: Complete
 
 Milestone 3 is complete as a read-only assessment. All queries in `sql/02_data_quality.sql` executed successfully against 761,563 raw records inside a PostgreSQL read-only transaction. Source IDs were unique; source/typed dates, year consistency, primary crime type, tested categorical whitespace, and arrest/domestic completeness had no observed defects. The assessment found 64 repeated case-number values affecting 138 rows, including 17 repeated substantive homicide fingerprints affecting 34 source-ID-distinct rows; no automatic deduplication is proposed. It also quantified 6,697 records without coordinate pairs (0.8794%), 3,947 without location descriptions (0.5183%), 35 missing and 1,032 out-of-range community areas, four missing and 1,032 out-of-range wards, one non-padded district code, and 1,020 records using district `061`, which is absent from the current official district reference. All records were retained and the raw layer was not modified. Proposed treatments and limitations are recorded in [data quality assessment](data_quality_report.md); no cleaning or analytical layer was implemented.
 
@@ -112,7 +112,7 @@ Build a reproducible, record-level clean table from the validated raw table with
 - Indexes support documented temporal, crime-category, and eligible-community-area access patterns.
 - README, project plan, data dictionary, metric definitions, and cleaning report agree with the executed implementation.
 
-### Completion record (2026-09-25)
+### Status: Complete
 
 Milestone 4 is complete. `sql/03_data_cleaning.sql` transactionally rebuilt and validated `clean_chicago_crimes` three times on PostgreSQL 14.20. Raw rows, distinct raw IDs, clean rows, and distinct clean IDs each equaled 761,563, producing zero deduplication removals, zero unexplained record loss, zero source-lineage gaps, and zero preserved-source-field mismatches. All 138 rows associated with 64 repeated case numbers were retained. Required temporal features had zero nulls and zero definition mismatches across year 2023–2025, month 1–12, quarter 1–4, ISO weekday 1–7, and hour 0–23. The clean table retained 6,697 records without coordinates, flagged 754,866 as coordinate-mappable (99.1206%), validated 760,496 records for named community-area analysis, normalized one district `16` to derived `016`, and preserved 1,020 `061` rows as non-current-reference codes. Source and clean primary-type cardinality both remained 31; no broader crime grouping was created. Five targeted indexes were built. Full decisions, counts, definitions, queries, and limitations are recorded in [the cleaning report](cleaning_report.md). No analytical SQL or year-over-year metric was produced.
 
@@ -131,11 +131,33 @@ Create reproducible SQL for temporal, geographic, seasonal, category, domestic, 
 - Independent reconciliation queries verify totals, denominators, year coverage, and ranking outputs.
 - Results and caveats are recorded only from executed queries.
 
-### Completion record (2026-09-25)
+### Status: Complete
 
 Milestone 5 is complete. `sql/04_business_analysis.sql` contains 29 read-only analytical queries, each documenting its business question, metric definition, assumptions, and denominator. Every query executed successfully against 761,563 records in `clean_chicago_crimes`. The suite covers scope and coverage, complete-year totals and adjacent-year changes, source categories and descriptions, calendar month and year-month patterns, ISO weekday, hour, time of day, weekday/weekend comparisons, all 77 eligible community areas, 154 adjacent-year community-area comparisons with zero undefined prior-year denominators, current-reference and unmatched police districts, location descriptions, arrest percentages, domestic-indicator percentages, and seasonal patterns for the fixed ten largest primary categories. The final validation reconciled year, category, month, weekday, hour, time-of-day, weekend, district, location, season, and community-area partitions to the canonical total with zero mismatches; arrest and domestic null-indicator counts were also zero. Verified findings and limitations are documented in [the core SQL analysis report](sql_analysis_report.md). Counts are never labeled population-normalized rates, arrest percentages are not presented as clearance or conviction rates, and no causal claim or resource-planning recommendation was produced.
 
-## Milestone 6 — Python exploratory analysis and static visuals
+## Milestone 6 — Advanced SQL and quantified portfolio findings
+
+### Scope
+
+Create reusable analytical views and advanced SQL for complete-year citywide and community-area change, rolling temporal patterns, source-category trends, persistent high-volume areas, arrest-indicator trends, and seasonal patterns. Test supplied candidate figures without changing canonical filters and document only executed, denominator-backed portfolio findings.
+
+### Acceptance criteria
+
+- Advanced SQL demonstrates CTEs, `LAG`, `RANK`, `DENSE_RANK`, partitioned windows, conditional aggregation, rolling averages, and percentage-of-total calculations.
+- Citywide comparisons return every complete year, prior values, absolute changes, percentage changes, and observed extrema with safe zero-denominator handling.
+- Community-area output covers all 77 official areas, includes City names, distinguishes percentage from absolute rankings, and documents a defensible percentage-rank baseline.
+- Forest Glen and the supplied citywide candidate values are tested against canonical data without filter manipulation.
+- Reusable views centralize executive, annual, community-area, category, temporal, and coordinate-mapping outputs without redundant persisted data.
+- Annual and community-area counts reconcile to clean and raw source records, and all view validation executes successfully.
+- Claim-level findings record periods, prior/current values, absolute/percentage changes, supporting SQL, denominators, and caveats.
+
+### Status: Complete
+
+Milestone 6 is complete. `sql/05_advanced_analysis.sql` created seven non-materialized views, including the official 77-area lookup, and executed all advanced analyses plus fail-fast validation. Citywide view totals matched the immutable raw source and clean table in every year; annual category/month totals, 154 community-area comparisons, and 754,866 geographic-point rows also reconciled with zero differences. Percentage ranks use a 500-incident prior-year minimum, retaining 75 of 77 areas in each comparison, while absolute ranks retain all 77. The canonical 2024–2025 citywide result was 259,633 to 238,086 (-21,547; -8.2990%), not the supplied 260,381 to 237,849. Forest Glen was the largest eligible percentage decrease at 545 to 409 (-24.9541%, not -25.1%), while Austin had the largest absolute decrease at -1,152 records. Evidence, denominators, caveats, and interview-defensible wording are recorded in [quantified findings](quantified_findings.md). No Python, Tableau, causal, or resource-planning work was performed.
+
+## Milestone 7 — Python exploratory analysis and static visuals
+
+### Status: Planned
 
 ### Scope
 
@@ -150,7 +172,9 @@ Implement reproducible Python analysis that validates SQL outputs and produces p
 - Generated images are reproducible; large intermediate exports remain ignored.
 - Observed associations are not framed as causal effects.
 
-## Milestone 7 — Four-page interactive Tableau dashboard
+## Milestone 8 — Four-page interactive Tableau dashboard
+
+### Status: Planned
 
 ### Scope
 
@@ -165,7 +189,9 @@ Build and document a four-page Tableau dashboard using validated analytical data
 - Missing-coordinate records are excluded only from coordinate maps and are disclosed through coverage metrics.
 - Dashboard completion is claimed only after the workbook is opened and tested in Tableau; screenshots reflect actual functionality.
 
-## Milestone 8 — Findings and resource-planning recommendations
+## Milestone 9 — Findings and resource-planning recommendations
+
+### Status: Planned
 
 ### Scope
 
@@ -180,7 +206,9 @@ Synthesize verified evidence into findings and cautious resource-planning recomm
 - Citywide and community-area statements use the correct comparison eligibility rules.
 - README and technical reports agree on findings, definitions, and date coverage.
 
-## Milestone 9 — Final QA, portfolio packaging, and resume metrics
+## Milestone 10 — Final QA, portfolio packaging, and resume metrics
+
+### Status: Planned
 
 ### Scope
 

@@ -2,7 +2,7 @@
 
 ## Purpose
 
-These definitions are the project contract for SQL, Python, Tableau, and narrative reporting. Changes require an explicit documentation update and must not be made silently. Milestone 4 implemented the canonical record-level scope and validation flags, but no analytical metric or finding has yet been published.
+These definitions are the project contract for SQL, Python, Tableau, and narrative reporting. Changes require an explicit documentation update and must not be made silently. Milestone 4 implemented the canonical record-level scope and validation flags; Milestones 5 and 6 applied these definitions to executed core and advanced SQL findings.
 
 ## Shared record scope
 
@@ -75,6 +75,17 @@ Null or unparseable indicators are excluded from the denominator and reported. A
 **Eligibility:** A community area is eligible for a reported comparison when it has a valid identifier in both compared periods. For year-over-year percentage change, a zero prior-year denominator produces an undefined percentage as described above; the area remains listed with counts and absolute change.
 
 Missing, null, non-integer, and out-of-range community-area values are grouped separately as `Unknown/unassigned` for quality reporting and are excluded from named community-area rankings. Community-area availability does not imply coordinate availability, and coordinates must not be used to silently impute a community area unless a future, documented geospatial method is explicitly authorized.
+
+### Community-area year-over-year ranking rule
+
+`vw_community_area_yoy` returns every official community area for each adjacent complete-year comparison. Absolute-change and absolute-decrease ranks include all 77 areas because a record-count change remains interpretable at any baseline volume. Percentage-change and percentage-decrease ranks require at least **500 reported incidents in the prior year**. The threshold was selected before ranking because one incident then changes the percentage by no more than 0.2 percentage points; it retained 75 of 77 areas for 2023–2024 and 75 of 77 for 2024–2025 in the current extract. Areas below the threshold remain in the view with counts, absolute change, and calculated percentage, but their percentage ranks are null.
+
+The two ranking concepts must remain distinct:
+
+- `percentage_decrease_rank = 1` identifies the largest proportional decrease among threshold-eligible areas.
+- `absolute_decrease_rank = 1` identifies the largest decrease in reported incident records among all 77 areas.
+
+Community-area names come from the official City of Chicago [Boundaries - Community Areas (current)](https://data.cityofchicago.org/Facilities-Geographic-Boundaries/Boundaries-Community-Areas-current-/cauq-8yn6/about) lookup (map ID `cauq-8yn6`, underlying dataset ID `igwz-8jzy`). Names provide labels only; the source crime record's community-area identifier determines analytical membership.
 
 ## Geographic coverage percentage
 
