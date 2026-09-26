@@ -52,7 +52,7 @@ Python QA and EDA                         Tableau extracts/dashboard
               documented findings and metrics
 ```
 
-The repository foundation, raw-data acquisition, PostgreSQL raw import, read-only data-quality assessment, and record-level cleaning/feature engineering are complete. Analytical SQL, visualization, and Tableau work remain planned.
+The repository foundation, raw-data acquisition, PostgreSQL raw import, read-only data-quality assessment, record-level cleaning/feature engineering, and core SQL analysis are complete. Python analysis, visualization, and Tableau work remain planned.
 
 ## Repository structure
 
@@ -84,13 +84,13 @@ Empty working directories are retained with `.gitkeep` placeholders. Raw and gen
 | 2 | PostgreSQL schema and reproducible load | Complete |
 | 3 | Read-only data-quality assessment and proposed treatments | Complete |
 | 4 | Data cleaning and feature engineering | Complete |
-| 5 | SQL analysis and verified year-over-year metrics | Planned |
+| 5 | Core SQL analysis and verified year-over-year metrics | Complete |
 | 6 | Python exploratory analysis and static visuals | Planned |
 | 7 | Four-page interactive Tableau dashboard | Planned |
 | 8 | Findings and resource-planning recommendations | Planned |
 | 9 | Final QA, portfolio packaging, and resume metrics | Planned |
 
-Detailed gates and acceptance criteria are in the [project plan](docs/project_plan.md). The executed extraction evidence is in [dataset acquisition](docs/dataset_acquisition.md), the PostgreSQL workflow and import validation are in [database setup](docs/database_setup.md), observed quality issues are in the [data-quality report](docs/data_quality_report.md), and implemented record-level transformations are in the [cleaning report](docs/cleaning_report.md). Metric formulas and comparison rules are in [metric definitions](docs/metric_definitions.md), and raw and clean fields are described in the [data dictionary](docs/data_dictionary.md).
+Detailed gates and acceptance criteria are in the [project plan](docs/project_plan.md). The executed extraction evidence is in [dataset acquisition](docs/dataset_acquisition.md), the PostgreSQL workflow and import validation are in [database setup](docs/database_setup.md), observed quality issues are in the [data-quality report](docs/data_quality_report.md), implemented record-level transformations are in the [cleaning report](docs/cleaning_report.md), and verified descriptive SQL findings are in the [core SQL analysis report](docs/sql_analysis_report.md). Metric formulas and comparison rules are in [metric definitions](docs/metric_definitions.md), and raw and clean fields are described in the [data dictionary](docs/data_dictionary.md).
 
 ## Reproducibility overview
 
@@ -130,6 +130,15 @@ psql -d chicago_crime -X -v ON_ERROR_STOP=1 \
 
 The script transactionally recreates `clean_chicago_crimes` while leaving `raw_chicago_crimes` unchanged. It preserves source identifiers and crime categories, applies deterministic source-ID deduplication, validates administrative and coordinate geography, derives calendar/time features, creates targeted indexes, and aborts on row-lineage or feature-definition failures. Missing-coordinate incidents remain in the clean table for non-map analysis.
 
+The 29-query core SQL analysis can be reproduced with:
+
+```bash
+psql -d chicago_crime -X -v ON_ERROR_STOP=1 \
+  -f sql/04_business_analysis.sql
+```
+
+Each query documents its business question, metric, assumptions, and denominator. The suite covers dataset coverage, complete-year changes, categories and descriptions, month/day/hour/time-band patterns, weekday versus weekend, community areas, police districts, location descriptions, arrest and domestic indicators, seasonal patterns, and cross-query reconciliation. It executes inside a read-only transaction.
+
 ## Current status
 
-Milestone 4 was completed on September 25, 2026. The reproducible clean-table build retained all 761,563 distinct source IDs, so the raw-to-clean row-count difference and deterministic deduplication removal count were both zero. All required temporal features were complete and had zero definition mismatches. The clean layer retains 6,697 non-geocoded records for non-map analysis, identifies 754,866 coordinate-mappable records (99.1206%), validates 760,496 records for named community-area analysis, preserves source crime categories and identifiers, and adds no subjective broader crime grouping. The script passed three complete builds with identical validated totals and zero preserved-source-field mismatches. No analytical SQL, year-over-year result, Tableau workbook, finding, recommendation, or resume metric has been produced.
+Milestone 5 was completed on September 25, 2026. All 29 read-only business queries executed successfully against 761,563 clean records, including 154 adjacent-year comparisons covering all 77 eligible community areas with zero undefined prior-year denominators. Every year/category/month/weekday/hour/time-band/district/location/season reconciliation returned zero difference from the canonical total. Verified citywide reported incident counts were 263,844 in 2023, 259,633 in 2024, and 238,086 in 2025, corresponding to adjacent-year changes of -1.5960% and -8.2990%. Theft was the largest source primary type (173,282; 22.7535%); July had the largest pooled calendar-month count; Afternoon was the largest six-hour time band; and Summer was the largest meteorological-season count. Geographic tables report counts—not population-normalized rates—and retain separate coverage denominators. Arrest results are explicitly labeled arrest percentages, not clearance or conviction rates. No Python analysis, Tableau workbook, causal conclusion, resource-planning recommendation, or resume metric has been produced.

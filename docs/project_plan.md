@@ -131,6 +131,10 @@ Create reproducible SQL for temporal, geographic, seasonal, category, domestic, 
 - Independent reconciliation queries verify totals, denominators, year coverage, and ranking outputs.
 - Results and caveats are recorded only from executed queries.
 
+### Completion record (2026-09-25)
+
+Milestone 5 is complete. `sql/04_business_analysis.sql` contains 29 read-only analytical queries, each documenting its business question, metric definition, assumptions, and denominator. Every query executed successfully against 761,563 records in `clean_chicago_crimes`. The suite covers scope and coverage, complete-year totals and adjacent-year changes, source categories and descriptions, calendar month and year-month patterns, ISO weekday, hour, time of day, weekday/weekend comparisons, all 77 eligible community areas, 154 adjacent-year community-area comparisons with zero undefined prior-year denominators, current-reference and unmatched police districts, location descriptions, arrest percentages, domestic-indicator percentages, and seasonal patterns for the fixed ten largest primary categories. The final validation reconciled year, category, month, weekday, hour, time-of-day, weekend, district, location, season, and community-area partitions to the canonical total with zero mismatches; arrest and domestic null-indicator counts were also zero. Verified findings and limitations are documented in [the core SQL analysis report](sql_analysis_report.md). Counts are never labeled population-normalized rates, arrest percentages are not presented as clearance or conviction rates, and no causal claim or resource-planning recommendation was produced.
+
 ## Milestone 6 — Python exploratory analysis and static visuals
 
 ### Scope
