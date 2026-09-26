@@ -1,6 +1,6 @@
 # Chicago Crime Analytics
 
-An end-to-end data analytics and business intelligence portfolio project built from official City of Chicago reported-crime data. The project uses reproducible PostgreSQL, SQL, and Python workflows to examine temporal, geographic, seasonal, crime-category, domestic-incident, and arrest patterns. The acquired source extract contains 761,563 records across the three complete calendar years 2023–2025. A four-page Tableau dashboard and evidence-backed resource-planning recommendations are planned deliverables; they have not yet been built.
+An end-to-end data analytics and business intelligence portfolio project built from official City of Chicago reported-crime data. The project uses reproducible PostgreSQL, SQL, and Python workflows to examine temporal, geographic, seasonal, crime-category, domestic-incident, and arrest patterns. The acquired source extract contains 761,563 records across the three complete calendar years 2023–2025. The validated Tableau presentation layer and four-page dashboard specification are complete; the Tableau workbook itself and evidence-backed resource-planning recommendations remain planned deliverables.
 
 ## Project objective
 
@@ -52,7 +52,7 @@ Python QA and EDA                         Tableau extracts/dashboard
               documented findings and metrics
 ```
 
-The repository foundation, raw-data acquisition, PostgreSQL raw import, read-only data-quality assessment, record-level cleaning/feature engineering, core and advanced SQL analysis, quantified findings, Python exploratory analysis, and descriptive geographic analysis are complete. Resource-planning recommendations and Tableau work remain planned.
+The repository foundation, data pipeline, SQL/Python analysis, descriptive geographic analysis, and Tableau data preparation are complete. The interactive Tableau workbook has not been created or manually tested. Resource-planning recommendations remain planned.
 
 ## Repository structure
 
@@ -73,7 +73,7 @@ The repository foundation, raw-data acquisition, PostgreSQL raw import, read-onl
 └── tableau/             # Tableau workbook instructions and small artifacts
 ```
 
-Empty working directories are retained with `.gitkeep` placeholders. Raw and large generated data exports remain local and are not committed; the eight small, reproducible Python figures are versioned for portfolio review.
+Empty working directories are retained with `.gitkeep` placeholders. Raw and large generated data exports remain local and are not committed; the small, reproducible Python figures are versioned for portfolio review.
 
 ## Milestone roadmap
 
@@ -88,11 +88,12 @@ Empty working directories are retained with `.gitkeep` placeholders. Raw and lar
 | 6 | Advanced SQL, reusable analytical views, and quantified portfolio findings | Complete |
 | 7 | Python exploratory analysis and static visuals | Complete |
 | 8 | Geographic and descriptive hotspot analysis | Complete |
-| 9 | Four-page interactive Tableau dashboard | Planned |
+| 9A | Tableau data preparation and dashboard specification | Complete |
+| 9B | Four-page interactive Tableau workbook | Planned |
 | 10 | Findings and resource-planning recommendations | Planned |
 | 11 | Final QA, portfolio packaging, and resume metrics | Planned |
 
-Detailed gates and acceptance criteria are in the [project plan](docs/project_plan.md). The executed extraction evidence is in [dataset acquisition](docs/dataset_acquisition.md), the PostgreSQL workflow and import validation are in [database setup](docs/database_setup.md), observed quality issues are in the [data-quality report](docs/data_quality_report.md), implemented record-level transformations are in the [cleaning report](docs/cleaning_report.md), and verified descriptive SQL findings are in the [core SQL analysis report](docs/sql_analysis_report.md). Independent Pandas validation, exploratory findings, and the visualization inventory are in the [Python EDA report](docs/python_eda_report.md); geographic methods, density limitations, and Tableau-ready exports are in the [geographic analysis report](docs/geographic_analysis_report.md). Claim-level calculations and candidate resume evidence are in [quantified findings](docs/quantified_findings.md). Metric formulas and comparison rules are in [metric definitions](docs/metric_definitions.md), and raw and clean fields are described in the [data dictionary](docs/data_dictionary.md).
+Detailed gates and acceptance criteria are in the [project plan](docs/project_plan.md). The executed extraction evidence is in [dataset acquisition](docs/dataset_acquisition.md), the PostgreSQL workflow and import validation are in [database setup](docs/database_setup.md), observed quality issues are in the [data-quality report](docs/data_quality_report.md), implemented record-level transformations are in the [cleaning report](docs/cleaning_report.md), and verified descriptive SQL findings are in the [core SQL analysis report](docs/sql_analysis_report.md). Independent Pandas validation, exploratory findings, and the visualization inventory are in the [Python EDA report](docs/python_eda_report.md); geographic methods and density limitations are in the [geographic analysis report](docs/geographic_analysis_report.md). Exact data sources, fields, calculations, filters, tooltips, sorting, interactions, validation criteria, and manual build steps for the planned four-page workbook are in the [Tableau dashboard plan](docs/tableau_dashboard_plan.md). Claim-level calculations and candidate resume evidence are in [quantified findings](docs/quantified_findings.md). Metric formulas and comparison rules are in [metric definitions](docs/metric_definitions.md), and raw, clean, and analytical-view fields are described in the [data dictionary](docs/data_dictionary.md).
 
 ## Reproducibility overview
 
@@ -172,6 +173,21 @@ jupyter nbconvert --to notebook --execute --inplace \
 
 The notebook validates community-area and coordinate coverage, analyzes community and district volume, category concentration, annual geographic change, persistence, location-time profiles, and coordinate density, then writes five derived CSVs under Git-ignored `data/processed/tableau_geographic/`. Coordinate density is explicitly descriptive; no formal spatial-significance test or population-normalized rate is claimed.
 
+The validated Tableau presentation layer can be rebuilt with:
+
+```bash
+psql -d chicago_crime -X -v ON_ERROR_STOP=1 -P pager=off \
+  -f sql/06_tableau_preparation.sql
+```
+
+The SQL creates nine page-oriented aggregate views and fails before commit if executive, geographic, temporal, category, arrest, domestic, or coordinate-density totals do not reconcile. Optional portable CSV extracts can then be generated with:
+
+```bash
+python scripts/export_tableau_data.py
+```
+
+The exporter uses a read-only environment-configured connection, deterministic ordering, CSV row-count reconciliation, and a local checksum manifest under Git-ignored `data/processed/tableau/`. The [Tableau dashboard plan](docs/tableau_dashboard_plan.md) provides the exact PostgreSQL and extract connection steps plus the specification and validation gate for every planned visual. No Tableau workbook has been created or tested.
+
 ## Current status
 
-**Status: Complete through Milestone 8.** The geographic notebook executed 15 code cells with zero errors, passed all 14 SQL/Python reconciliation checks, and generated seven reviewed figures plus five Git-ignored Tableau-ready exports. Community-area coverage was 760,496 records (99.8599%); coordinate coverage was 754,866 (99.1206%), with 6,697 records retained outside coordinate-density analysis. Austin remained the highest-volume community area over 2023–2025, district `008` was the highest-volume observed district code, and all 154 annual community-area comparisons reconciled to SQL with zero difference. Coordinate density is labeled descriptive—not a statistically significant hotspot test—and no population-normalized risk claim is made. No Tableau workbook, causal conclusion, or resource-planning recommendation has been produced.
+**Status: Milestone 9A complete; Milestone 9B planned.** Nine non-materialized Tableau views were created and validated at grains ranging from three executive-year rows to 5,395 area/category/year rows. Their fail-fast checks reconciled the 761,563-record citywide scope, 760,496 community-area-eligible records, 754,866 coordinate-mappable records, all yearly and monthly totals, arrest/domestic numerators and denominators, and geographic partitions. The optional exporter produced nine Git-ignored CSVs and reconciled every file to its PostgreSQL view. The four planned pages—Executive Overview, Geographic Crime Patterns, Temporal and Seasonal Patterns, and Crime and Arrest Analysis—now have field-level build and validation specifications. No Tableau workbook, dashboard interaction, screenshot, causal conclusion, or resource-planning recommendation has been produced or claimed.

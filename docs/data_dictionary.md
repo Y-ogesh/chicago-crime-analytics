@@ -157,6 +157,24 @@ All objects below are non-materialized PostgreSQL views created reproducibly by 
 
 All view percentages retain PostgreSQL numeric precision and are rounded only in query/report display. Their metric and denominator rules are defined in [metric definitions](metric_definitions.md).
 
+## Milestone 9A Tableau presentation views
+
+All objects below are non-materialized PostgreSQL views created by `sql/06_tableau_preparation.sql`. They summarize the canonical clean table at dashboard-safe grains. Views with different grains must remain separate Tableau data sources; physically joining them can duplicate measures.
+
+| View | Grain / validated rows | Purpose and key fields |
+|---|---|---|
+| `vw_tableau_executive_year` | Complete calendar year / 3 | Period dates/status, source metadata, reported incidents, prior-year values/change, arrest and domestic numerators/denominators/percentages, and community/coordinate coverage. |
+| `vw_tableau_community_area_year` | Year × 77 official areas / 231 | Area count, yearly eligible denominator/share/rank, canonical adjacent-year values, 500-record percentage-rank eligibility, and percentage/absolute ranks. |
+| `vw_tableau_district_year` | Year × observed source district code / 72 | District label/reference status, count, citywide denominator/share/rank, and adjacent-year values. Unmatched current-reference codes remain visible. |
+| `vw_tableau_area_category_year` | Year × area × observed `primary_type` / 5,395 | Count, area-year and category-year denominators/shares, category rank within area, and area rank within category. |
+| `vw_tableau_monthly_patterns` | Calendar month / 36 | `month_start`, month/quarter/season, count/share, trailing three-month average, same-month prior-year change, and weighted indicator components. |
+| `vw_tableau_time_patterns` | Year × ISO weekday × hour / 504 | Count and arrest/domestic components with documented day, hour, time-of-day, and weekend fields. |
+| `vw_tableau_location_time` | Fixed full-period top-ten locations × four time bands / 40 | Location rank/total, ordered time band, count, and percentage of the location total. This view is intentionally full-period rather than year-filterable. |
+| `vw_tableau_crime_arrest_year` | Year × source `primary_type` / 93 | Count/share/rank, prior-year values/change, and arrest/domestic numerators, denominators, and percentages. |
+| `vw_tableau_coordinate_density` | Year × 0.01-degree display cell / 2,127 | Cell-center latitude/longitude, stable cell ID, and reported-incident count for coordinate-mappable records. Cells are descriptive, resolution-dependent, not equal-area, and do not test statistical significance. |
+
+The optional exporter writes one CSV per view plus a checksum manifest under Git-ignored `data/processed/tableau/`. Detailed visual assignments and aggregation rules are in [the Tableau dashboard plan](tableau_dashboard_plan.md).
+
 ## Database-load validation completed
 
 - Every source timestamp and boolean value cast successfully.

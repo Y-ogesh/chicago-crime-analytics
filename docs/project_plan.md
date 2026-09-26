@@ -195,20 +195,47 @@ Validate geographic coverage and analyze community-area, district, category-conc
 
 Milestone 8 is complete. `03_geographic_analysis.ipynb` executed 15 code cells with zero errors, passed all 14 geographic validation checks, and generated seven source-attributed figures. Pandas matched 761,563 clean records, 760,496 community-area-eligible records, 754,866 coordinate-mappable records, all 77 community-area totals, and all 154 adjacent-year area comparisons to SQL with zero observed difference. The analysis covered community areas, 24 observed district codes, category concentration, annual changes, persistent high-volume areas, location-description time profiles, and coordinate density. Five compact Tableau-ready CSVs were created locally under Git-ignored `data/processed/tableau_geographic/`; `vw_geographic_crime_points` remains the 754,866-row point layer. Density outputs are explicitly descriptive, no formal hotspot-significance method was applied, and no Tableau dashboard was built. Full methods, findings, validation, and limitations are in [the geographic analysis report](geographic_analysis_report.md).
 
-## Milestone 9 — Four-page interactive Tableau dashboard
+## Milestone 9A — Tableau data preparation and dashboard specification
+
+### Status: Complete
+
+### Scope
+
+Create an efficient, validated Tableau presentation layer; provide reproducible local extracts; and specify every visual and interaction for the four planned dashboard pages without claiming that the workbook exists.
+
+### Acceptance criteria
+
+- Page-oriented views cover executive KPIs, community areas, district codes, area/category composition, coordinate density, monthly patterns, weekday/hour patterns, location/time profiles, and category arrest/domestic indicators.
+- Every view has a documented grain and reconciles to the applicable citywide, geographic, category, temporal, arrest, or domestic denominator.
+- Optional extracts use environment-configured read-only access, deterministic ordering, row-count checks, and Git-ignored output paths.
+- The dashboard plan specifies four pages: Executive Overview, Geographic Crime Patterns, Temporal and Seasonal Patterns, and Crime and Arrest Analysis.
+- Every planned visual documents its data source, dimensions/measures, calculations, filters, tooltip fields, sorting, interactions, and validation criteria.
+- Exact PostgreSQL and CSV connection instructions preserve credentials outside Git and avoid joins that could multiply aggregate measures.
+- Counts remain distinct from population-normalized rates; density remains descriptive; arrest percentage remains distinct from clearance or conviction.
+- README, data dictionary, project plan, SQL, export tooling, and dashboard specification agree on completed versus planned work.
+
+### Completion evidence
+
+[`sql/06_tableau_preparation.sql`](../sql/06_tableau_preparation.sql) created nine non-materialized views in a single successful transaction and executed fail-fast validation. The views contain 3 executive-year rows, 231 community-area/year rows, 72 district/year rows, 5,395 area/category/year rows, 36 monthly rows, 504 weekday/hour/year rows, 40 location/time rows, 93 crime-type/year rows, and 2,127 descriptive coordinate-density rows. Executive and temporal totals reconciled to 761,563 clean records; community-area views reconciled to 760,496 eligible records; coordinate density reconciled to 754,866 mappable records; crime-type arrest and domestic numerators also reconciled.
+
+[`scripts/export_tableau_data.py`](../scripts/export_tableau_data.py) executed through a read-only PostgreSQL connection and produced nine Git-ignored CSVs plus a checksum manifest under `data/processed/tableau/`. Every reloaded CSV row count matched its source view. The exact four-page visual and interaction specification, connection procedure, metric rules, and future manual validation gate are in [the Tableau dashboard plan](tableau_dashboard_plan.md).
+
+One initial SQL execution encountered an existing-view column-name mismatch and rolled back before commit. The reference was corrected and the full script then completed successfully. No Tableau workbook, dashboard page, interaction, or screenshot was created or manually tested.
+
+## Milestone 9B — Four-page interactive Tableau workbook
 
 ### Status: Planned
 
 ### Scope
 
-Build and document a four-page Tableau dashboard using validated analytical data.
+Build and document the four-page Tableau workbook from the Milestone 9A specification.
 
 ### Acceptance criteria
 
-- Four pages cover executive overview, temporal/seasonal patterns, geographic/community-area patterns, and category/arrest/domestic patterns.
-- Filters, tooltips, legends, navigation, and interaction behavior are documented and manually tested in Tableau.
-- KPI values reconcile with validated SQL/Python outputs for defined test cases.
-- Full-year and partial-year labels, counts versus percentages, data cutoff, and limitations are visible.
+- Four pages cover Executive Overview, Geographic Crime Patterns, Temporal and Seasonal Patterns, and Crime and Arrest Analysis.
+- Filters, tooltips, legends, navigation, and interaction behavior are implemented and manually tested in Tableau.
+- KPI values and defined visual samples reconcile with validated SQL/Python outputs.
+- Complete-year labels, counts versus percentages, data cutoff, and limitations are visible.
 - Missing-coordinate records are excluded only from coordinate maps and are disclosed through coverage metrics.
 - Dashboard completion is claimed only after the workbook is opened and tested in Tableau; screenshots reflect actual functionality.
 
