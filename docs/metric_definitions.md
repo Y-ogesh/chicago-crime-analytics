@@ -2,11 +2,11 @@
 
 ## Purpose
 
-These definitions are the project contract for SQL, Python, Tableau, and narrative reporting. Changes require an explicit documentation update and must not be made silently. No metric has been calculated yet.
+These definitions are the project contract for SQL, Python, Tableau, and narrative reporting. Changes require an explicit documentation update and must not be made silently. Milestone 4 implemented the canonical record-level scope and validation flags, but no analytical metric or finding has yet been published.
 
 ## Shared record scope
 
-Unless a result explicitly says otherwise, the analytical population is the canonical typed crime table after load and documented quality checks. Each retained source record is keyed by the source `id`; the canonical table will enforce one row per `id`. The official source describes a row as a reported crime, with the important exception that murder records represent victims. Analyses must disclose this source convention.
+Unless a result explicitly says otherwise, the analytical population is `public.clean_chicago_crimes`. Each retained source record is keyed by `source_id`, copied from the official source `id`; the primary key enforces one row per source ID. Deterministic source-ID deduplication is applied during the rebuild, but removed zero records from the current unique-ID extract. The official source describes a row as a reported crime, with the important exception that murder records represent victims. Analyses must disclose this source convention.
 
 Records lacking coordinates remain eligible for temporal, category, arrest-indicator, domestic-indicator, and other non-coordinate analyses when their required fields are valid. Geography-specific metrics apply their own eligibility rules and must report exclusions.
 
@@ -14,7 +14,7 @@ Records lacking coordinates remain eligible for temporal, category, arrest-indic
 
 **Definition:** Number of records in the stated analytical scope.
 
-**Canonical calculation:** `COUNT(*)` on the canonical one-row-per-`id` table after applying only the filters stated with the result.
+**Canonical calculation:** `COUNT(*)` on `clean_chicago_crimes` after applying only the filters stated with the result.
 
 **Rules:**
 
@@ -70,7 +70,7 @@ Null or unparseable indicators are excluded from the denominator and reported. A
 
 ## Community-area incident count
 
-**Definition:** Reported incident count grouped by the source community-area identifier for records whose community area is an integer from 1 through 77.
+**Definition:** Reported incident count grouped by `clean_chicago_crimes.community_area` for rows where `community_area_eligible_flag = TRUE`. The clean field is copied from the source only when it is an integer from 1 through 77; the unchanged input remains available as `source_community_area`.
 
 **Eligibility:** A community area is eligible for a reported comparison when it has a valid identifier in both compared periods. For year-over-year percentage change, a zero prior-year denominator produces an undefined percentage as described above; the area remains listed with counts and absolute change.
 
@@ -78,16 +78,18 @@ Missing, null, non-integer, and out-of-range community-area values are grouped s
 
 ## Geographic coverage percentage
 
-**Definition:** Percentage of all in-scope analytical records that have both parseable, non-null latitude and longitude values and are therefore eligible for coordinate-based mapping.
+**Definition:** Percentage of all in-scope analytical records with `coordinate_mappable_flag = TRUE`.
 
 **Formula:**
 
 ```text
-100 * count(records with usable latitude and usable longitude)
+100 * count(records where coordinate_mappable_flag is TRUE)
     / count(all in-scope analytical records)
 ```
 
-Both coordinates are required. Records with a missing or unparseable coordinate are `not coordinate-mappable`, remain in the denominator, and remain eligible for non-coordinate analyses. Coordinate values later found outside an approved validity rule must be separately flagged; that rule and its impact must be documented before exclusion. A zero overall denominator returns null.
+Both coordinates are required. The Milestone 4 approved validity rule defines a record as coordinate-mappable only when latitude and longitude are both present, pass global latitude/longitude limits, are not the pair `(0,0)`, and fall within the documented City map rectangular envelope. `coordinate_available_flag`, nullable `coordinate_valid_flag`, and nullable `within_city_bounds_flag` preserve the component results. The envelope is a plausibility screen, not a municipal point-in-polygon test. Records without a coordinate pair remain in the denominator and remain eligible for non-coordinate analyses. Any future change to this rule requires an explicit definition and impact update. A zero overall denominator returns null.
+
+This implements the previously documented provision for an approved coordinate-validity rule. In the current extract, all 754,866 available coordinate pairs passed both validity screens, so adding the rule excluded zero additional records beyond the 6,697 missing pairs.
 
 Community-area coverage is a separate quality measure:
 
@@ -98,11 +100,29 @@ Community-area coverage is a separate quality measure:
 
 The two coverage percentages must not be substituted for one another.
 
+## Temporal feature definitions
+
+All temporal features are derived from the timezone-unqualified source incident timestamp stored as `crime_timestamp`:
+
+- `crime_date`: timestamp cast to calendar date.
+- `crime_year`: four-digit calendar year.
+- `crime_month`: integer 1–12.
+- `month_name`: English month name mapped from `crime_month`.
+- `crime_quarter`: calendar quarter 1–4.
+- `day_of_week_num`: ISO weekday number, Monday=1 through Sunday=7.
+- `day_of_week`: English weekday name mapped from `day_of_week_num`.
+- `hour_of_day`: integer hour 0–23.
+- `time_of_day`: `Overnight` for 00:00–05:59, `Morning` for 06:00–11:59, `Afternoon` for 12:00–17:59, and `Evening` for 18:00–23:59.
+- `season`: meteorological `Winter` for December–February, `Spring` for March–May, `Summer` for June–August, and `Fall` for September–November.
+- `weekend_flag`: true for Saturday or Sunday (`day_of_week_num` 6 or 7), false otherwise.
+
+These definitions are database-constrained and must be reproduced exactly in Python and Tableau. The source says incident timestamps can be estimated, and no timezone or daylight-saving conversion is inferred.
+
 ## Full-year versus partial-year comparisons
 
 ### Complete calendar year
 
-A year is eligible for annual comparison only when the authorized extract and validated canonical data cover January 1 through December 31 and the year is closed relative to the documented source-data cutoff. Coverage is assessed from the extraction metadata and validation results, not merely from the minimum and maximum incident timestamps.
+A year is eligible for annual comparison only when the authorized extract and validated `clean_chicago_crimes` data cover January 1 through December 31 and the year is closed relative to the documented source-data cutoff. Coverage is assessed from the extraction metadata and validation results, not merely from the minimum and maximum incident timestamps.
 
 ### Partial year or partial period
 
@@ -118,4 +138,3 @@ A year is eligible for annual comparison only when the authorized extract and va
 - Apply display rounding consistently only in the presentation layer.
 - Every result must carry or clearly reference its filters, period, data cutoff, and denominator.
 - SQL, Python, Tableau, and README values must reconcile before publication.
-

@@ -4,7 +4,7 @@
 
 This dictionary documents the official City of Chicago [Crimes - 2001 to Present](https://data.cityofchicago.org/Public-Safety/Crimes-2001-to-Present/ijzp-q8t2/data) dataset (`ijzp-q8t2`) as verified on September 25, 2026. The acquired raw extract covers incident timestamps from January 1, 2023 through December 31, 2025 and contains 761,563 rows.
 
-The official metadata contained 31 columns: 22 core published fields returned by the explicit CSV export and nine portal-computed geographic fields. The acquisition script preserved the 22 exported fields. Milestone 2 loaded all 761,563 records into a text staging table and the typed PostgreSQL table `raw_chicago_crimes` without filtering or analytical cleaning.
+The official metadata contained 31 columns: 22 core published fields returned by the explicit CSV export and nine portal-computed geographic fields. The acquisition script preserved the 22 exported fields. Milestone 2 loaded all 761,563 records into a text staging table and the typed PostgreSQL table `raw_chicago_crimes` without filtering or analytical cleaning. Milestone 4 created `clean_chicago_crimes` with the same 761,563 source IDs, preserved source-value columns, validated analytical geography, and constrained temporal features.
 
 Empty-field counts below are observations from the raw CSV. PostgreSQL CSV parsing represents unavailable unquoted fields as SQL `NULL`; present text is retained unchanged in staging. Milestone 3 assessed domain, formatting, completeness, and geographic plausibility without modifying the raw layer.
 
@@ -72,9 +72,74 @@ These nine fields were present in official dataset metadata but marked with `:@c
 
 Milestone 3 confirmed no partial coordinate pairs, no latitude/longitude versus projected-coordinate presence mismatches, no globally invalid or zero coordinate pairs, and no points outside the tested City map envelope. The envelope is a rectangular plausibility screen, not a point-in-polygon or positional-accuracy test. Records without coordinates remain available for applicable non-coordinate analyses.
 
-## Planned derived fields
+## PostgreSQL clean layer
 
-No derived fields have been created. A future authorized cleaning milestone may add calendar parts, complete-period flags, coordinate-availability flags, normalized join keys, and data-quality status fields only after documenting their formulas and lineage. Source columns will not be silently overwritten.
+`clean_chicago_crimes` is a reproducibly rebuilt one-row-per-`source_id` analytical table. It retains every current raw source ID. Exact source versions of normalized identifiers and categories use a `source_` prefix; analytical counterparts are uppercase/outer-trimmed or domain-validated as documented below. The raw table remains authoritative and unchanged.
+
+### Identity and source-preservation fields
+
+| Clean column | Type | Definition / lineage |
+|---|---|---|
+| `source_id` | `bigint` | Official `raw_chicago_crimes.id`; clean primary key and deterministic deduplication key. |
+| `source_case_number` | `text` | Exact raw case number. Repeated values are retained. |
+| `case_number` | `text` | Uppercase/outer-trimmed case number for consistent filtering. |
+| `source_iucr`, `source_beat`, `source_district`, `source_fbi_code` | `text` | Exact raw identifier/code values. |
+| `iucr`, `beat`, `fbi_code` | `text` | Uppercase/outer-trimmed analytical codes; leading zeros are retained. |
+| `district` | `text` | Uppercase/outer-trimmed district join key; one-to-three-digit numeric codes are left-padded to three characters. |
+| `district_current_flag` | `boolean` | True when `district` matches the current City district reference verified September 25, 2026. False is an unmatched-reference status, not proof of source error. |
+| `block` | `text` | Exact privacy-protected raw block value. |
+| `updated_on` | `timestamp(3) without time zone` | Exact typed source update timestamp. |
+
+### Crime-category and indicator fields
+
+| Clean column | Type | Definition / lineage |
+|---|---|---|
+| `source_primary_type` | `text` | Exact raw primary crime category. |
+| `primary_type` | `text` | Uppercase/outer-trimmed source primary type. No broader grouping is applied. |
+| `source_description` | `text` | Exact raw secondary description. |
+| `description` | `text` | Uppercase/outer-trimmed description. |
+| `source_location_description` | `text` | Exact nullable raw location category. |
+| `location_description` | `text` | Uppercase/outer-trimmed location category; null/blank becomes `UNKNOWN / NOT REPORTED`. |
+| `arrest` | `boolean` | Unchanged source arrest indicator; not clearance or conviction. |
+| `domestic` | `boolean` | Unchanged source domestic-related indicator. |
+
+### Temporal fields
+
+| Clean column | Type | Definition / allowed values |
+|---|---|---|
+| `crime_timestamp` | `timestamp(3) without time zone` | Typed raw incident timestamp; no timezone is inferred. |
+| `crime_date` | `date` | Calendar date cast from `crime_timestamp`. |
+| `source_year` | `smallint` | Exact typed source year. |
+| `crime_year` | `smallint` | Year extracted from `crime_timestamp`; constrained to equal `source_year`. |
+| `crime_month` | `smallint` | Month 1–12. |
+| `month_name` | `text` | English month name mapped from `crime_month`. |
+| `crime_quarter` | `smallint` | Calendar quarter 1–4. |
+| `day_of_week_num` | `smallint` | ISO weekday: Monday=1 through Sunday=7. |
+| `day_of_week` | `text` | English weekday mapped from `day_of_week_num`. |
+| `hour_of_day` | `smallint` | Hour 0–23. |
+| `time_of_day` | `text` | `Overnight` 00–05; `Morning` 06–11; `Afternoon` 12–17; `Evening` 18–23. |
+| `season` | `text` | Meteorological `Winter` Dec–Feb, `Spring` Mar–May, `Summer` Jun–Aug, `Fall` Sep–Nov. |
+| `weekend_flag` | `boolean` | True for Saturday/Sunday; false otherwise. |
+
+### Administrative and coordinate geography
+
+| Clean column | Type | Definition / lineage |
+|---|---|---|
+| `source_ward` | `smallint` | Exact typed raw ward, including null or `0`. |
+| `ward` | `smallint` | Source ward when 1–50; otherwise null. |
+| `ward_eligible_flag` | `boolean` | True exactly when `ward` is non-null. |
+| `source_community_area` | `smallint` | Exact typed raw community area, including null or `0`. |
+| `community_area` | `smallint` | Source community area when 1–77; otherwise null. |
+| `community_area_eligible_flag` | `boolean` | True exactly when `community_area` is non-null. |
+| `x_coordinate`, `y_coordinate` | `integer` | Unchanged nullable typed source projected coordinates. |
+| `latitude`, `longitude` | `numeric(12,9)` | Unchanged nullable typed source geographic coordinates. |
+| `location` | `text` | Unchanged nullable raw combined-location text. |
+| `coordinate_available_flag` | `boolean` | True when both latitude and longitude are present. |
+| `coordinate_valid_flag` | `boolean` | For present pairs, true when values satisfy global limits and are not `(0,0)`; null when unavailable. |
+| `within_city_bounds_flag` | `boolean` | For present pairs, result of the documented City map rectangular-envelope screen; null when unavailable. |
+| `coordinate_mappable_flag` | `boolean` | True when the pair is available, globally valid, and within the City envelope. |
+
+Milestone 4 produced 760,496 community-area-eligible rows, 760,527 ward-eligible rows, and 754,866 coordinate-mappable rows. All 6,697 rows lacking coordinates remain in the table for applicable non-coordinate analysis.
 
 ## Database-load validation completed
 
@@ -95,4 +160,16 @@ No derived fields have been created. A future authorized cleaning milestone may 
 - Arrest and domestic fields are complete booleans. Their observed distributions are validation evidence, not clearance or conviction measures.
 - Raw category cardinality is 31 primary types, 337 descriptions, 142 non-null location descriptions, 359 IUCR codes, and 26 FBI codes.
 
-See [dataset acquisition](dataset_acquisition.md) for source queries and extraction evidence, [database setup](database_setup.md) for the executed PostgreSQL workflow, and [data quality assessment](data_quality_report.md) for counts, percentages, proposed treatments, validation queries, and limitations.
+## Cleaning and feature-engineering validation completed
+
+- Raw rows, distinct raw IDs, clean rows, and distinct clean IDs each equal 761,563; no record was removed.
+- Source-ID lineage differences in either direction: 0.
+- Missing required temporal/category features: 0; exact temporal-definition mismatches: 0.
+- Source and clean primary-type cardinality: 31 each; source and clean description cardinality: 337 each.
+- Location-description source nulls labeled in the analytical column: 3,947.
+- Clean community-area nulls after 1–77 validation: 1,067; clean ward nulls after 1–50 validation: 1,036.
+- Coordinate-mappable rows: 754,866 (99.1206%); missing-coordinate rows retained: 6,697.
+- Preserved-source-field mismatches across all source columns copied into the clean table: 0.
+- The idempotent rebuild completed three times with the same validated totals.
+
+See [dataset acquisition](dataset_acquisition.md) for source queries and extraction evidence, [database setup](database_setup.md) for the executed PostgreSQL workflow, [data quality assessment](data_quality_report.md) for observed issues, and [cleaning report](cleaning_report.md) for transformations, features, validation evidence, indexes, and limitations.

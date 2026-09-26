@@ -94,7 +94,29 @@ Profile the imported raw table without modifying it, quantify material data-qual
 
 Milestone 3 is complete as a read-only assessment. All queries in `sql/02_data_quality.sql` executed successfully against 761,563 raw records inside a PostgreSQL read-only transaction. Source IDs were unique; source/typed dates, year consistency, primary crime type, tested categorical whitespace, and arrest/domestic completeness had no observed defects. The assessment found 64 repeated case-number values affecting 138 rows, including 17 repeated substantive homicide fingerprints affecting 34 source-ID-distinct rows; no automatic deduplication is proposed. It also quantified 6,697 records without coordinate pairs (0.8794%), 3,947 without location descriptions (0.5183%), 35 missing and 1,032 out-of-range community areas, four missing and 1,032 out-of-range wards, one non-padded district code, and 1,020 records using district `061`, which is absent from the current official district reference. All records were retained and the raw layer was not modified. Proposed treatments and limitations are recorded in [data quality assessment](data_quality_report.md); no cleaning or analytical layer was implemented.
 
-## Milestone 4 — SQL analysis and verified year-over-year metrics
+## Milestone 4 — Data cleaning and feature engineering
+
+### Scope
+
+Build a reproducible, record-level clean table from the validated raw table without changing the raw layer; preserve source lineage; implement only evidence-backed treatments; and derive constrained temporal and geographic eligibility features.
+
+### Acceptance criteria
+
+- `clean_chicago_crimes` is reproducibly rebuilt from `raw_chicago_crimes` inside a transaction without modifying raw records.
+- Deterministic source-ID deduplication is explicit; repeated case numbers do not trigger row removal.
+- Original source identifiers, source crime categories, and relevant invalid source values remain traceable in separate columns.
+- Blank normalization, text standardization, invalid-domain handling, and coordinate validation follow the completed quality assessment.
+- Non-geocoded incidents remain available for every analysis that does not require coordinates.
+- Calendar date/year/month/quarter, month/day labels, ISO weekday number, hour, time-of-day, season, and weekend features use documented exact definitions and database constraints.
+- Raw and clean row counts, IDs, date coverage, feature completeness/ranges, geography eligibility, category cardinality, and source lineage reconcile with no unexplained loss.
+- Indexes support documented temporal, crime-category, and eligible-community-area access patterns.
+- README, project plan, data dictionary, metric definitions, and cleaning report agree with the executed implementation.
+
+### Completion record (2026-09-25)
+
+Milestone 4 is complete. `sql/03_data_cleaning.sql` transactionally rebuilt and validated `clean_chicago_crimes` three times on PostgreSQL 14.20. Raw rows, distinct raw IDs, clean rows, and distinct clean IDs each equaled 761,563, producing zero deduplication removals, zero unexplained record loss, zero source-lineage gaps, and zero preserved-source-field mismatches. All 138 rows associated with 64 repeated case numbers were retained. Required temporal features had zero nulls and zero definition mismatches across year 2023–2025, month 1–12, quarter 1–4, ISO weekday 1–7, and hour 0–23. The clean table retained 6,697 records without coordinates, flagged 754,866 as coordinate-mappable (99.1206%), validated 760,496 records for named community-area analysis, normalized one district `16` to derived `016`, and preserved 1,020 `061` rows as non-current-reference codes. Source and clean primary-type cardinality both remained 31; no broader crime grouping was created. Five targeted indexes were built. Full decisions, counts, definitions, queries, and limitations are recorded in [the cleaning report](cleaning_report.md). No analytical SQL or year-over-year metric was produced.
+
+## Milestone 5 — SQL analysis and verified year-over-year metrics
 
 ### Scope
 
@@ -109,7 +131,7 @@ Create reproducible SQL for temporal, geographic, seasonal, category, domestic, 
 - Independent reconciliation queries verify totals, denominators, year coverage, and ranking outputs.
 - Results and caveats are recorded only from executed queries.
 
-## Milestone 5 — Python exploratory analysis and static visuals
+## Milestone 6 — Python exploratory analysis and static visuals
 
 ### Scope
 
@@ -124,7 +146,7 @@ Implement reproducible Python analysis that validates SQL outputs and produces p
 - Generated images are reproducible; large intermediate exports remain ignored.
 - Observed associations are not framed as causal effects.
 
-## Milestone 6 — Four-page interactive Tableau dashboard
+## Milestone 7 — Four-page interactive Tableau dashboard
 
 ### Scope
 
@@ -139,7 +161,7 @@ Build and document a four-page Tableau dashboard using validated analytical data
 - Missing-coordinate records are excluded only from coordinate maps and are disclosed through coverage metrics.
 - Dashboard completion is claimed only after the workbook is opened and tested in Tableau; screenshots reflect actual functionality.
 
-## Milestone 7 — Findings and resource-planning recommendations
+## Milestone 8 — Findings and resource-planning recommendations
 
 ### Scope
 
@@ -154,7 +176,7 @@ Synthesize verified evidence into findings and cautious resource-planning recomm
 - Citywide and community-area statements use the correct comparison eligibility rules.
 - README and technical reports agree on findings, definitions, and date coverage.
 
-## Milestone 8 — Final QA, portfolio packaging, and resume metrics
+## Milestone 9 — Final QA, portfolio packaging, and resume metrics
 
 ### Scope
 
