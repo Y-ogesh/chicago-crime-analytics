@@ -2,13 +2,13 @@
 
 ## Milestone 9A status and scope
 
-Tableau data preparation is complete. The PostgreSQL presentation layer and optional CSV extracts described below were created and validated on September 26, 2026. The four-page Tableau workbook is **planned but has not been created or manually tested**. Dashboard behavior in this document is therefore a build specification and acceptance checklist, not a claim of completed functionality.
+Tableau data preparation is complete. The PostgreSQL presentation layer and optional CSV extracts described below were created and validated on September 26, 2026. Executive Overview Page 1 is generated and validated in `tableau/chicago_crime_analytics.twb`; the other three pages remain planned. The generated workbook passed structural, Tableau load, visual-rendering, and filter-interaction checks. Dashboard behavior for the remaining pages is still a specification and acceptance checklist, not a completion claim.
 
 The dashboard will use the official City of Chicago Crimes dataset (`ijzp-q8t2`) extract acquired September 25, 2026. Its analytical scope is 761,563 reported-incident records dated January 1, 2023 through December 31, 2025. All three years are complete calendar years. Counts are reported incidents, not population-normalized crime rates. Arrest percentages are source-indicator percentages, not clearance, prosecution, or conviction rates.
 
 ## Prepared data layer
 
-Run [`sql/06_tableau_preparation.sql`](../sql/06_tableau_preparation.sql) after the advanced views in `sql/05_advanced_analysis.sql`. It creates nine non-materialized, page-oriented views and executes fail-fast reconciliations in one transaction.
+Run [`sql/06_tableau_preparation.sql`](../sql/06_tableau_preparation.sql) after the advanced views in `sql/05_advanced_analysis.sql`. It creates ten non-materialized, page-oriented views and executes fail-fast reconciliations in one transaction.
 
 | PostgreSQL view | Grain | Validated rows | Primary page |
 |---|---|---:|---|
@@ -18,6 +18,7 @@ Run [`sql/06_tableau_preparation.sql`](../sql/06_tableau_preparation.sql) after 
 | `vw_tableau_area_category_year` | Year × community area × observed primary type | 5,395 | Geographic Crime Patterns |
 | `vw_tableau_coordinate_density` | Year × 0.01-degree coordinate cell | 2,127 | Geographic Crime Patterns |
 | `vw_tableau_monthly_patterns` | Calendar month | 36 | Temporal and Seasonal Patterns |
+| `vw_tableau_month_category` | Calendar month × all 31 source primary types | 1,116 | Executive Overview filtered monthly trend |
 | `vw_tableau_time_patterns` | Year × ISO weekday × hour | 504 | Temporal and Seasonal Patterns |
 | `vw_tableau_location_time` | Fixed full-period top-ten location descriptions × time band | 40 | Temporal and Seasonal Patterns |
 | `vw_tableau_crime_arrest_year` | Year × source primary type | 93 | Crime and Arrest Analysis |
@@ -83,6 +84,7 @@ PostgreSQL is the preferred development connection because it preserves data typ
        public.vw_tableau_area_category_year,
        public.vw_tableau_coordinate_density,
        public.vw_tableau_monthly_patterns,
+       public.vw_tableau_month_category,
        public.vw_tableau_time_patterns,
        public.vw_tableau_location_time,
        public.vw_tableau_crime_arrest_year TO tableau_reader;
@@ -90,7 +92,7 @@ PostgreSQL is the preferred development connection because it preserves data typ
 
    Role creation and password policy are environment-specific and intentionally not scripted here.
 5. Select schema `public`. Create **one Tableau data source per view** and name it after the view without the `vw_tableau_` prefix. Do not physically join these aggregate views: their grains differ and a join can multiply measures.
-6. Choose **Extract** for the nine aggregate sources. Use a full refresh after rerunning the SQL. A live connection is also acceptable for local development. Keep `vw_geographic_crime_points` separate and use it only if a record-level point view is explicitly added later.
+6. Choose **Extract** for the ten aggregate sources. Use a full refresh after rerunning the SQL. A live connection is also acceptable for local development. Keep `vw_geographic_crime_points` separate and use it only if a record-level point view is explicitly added later.
 7. Assign geographic roles: `cell_latitude` → Latitude and `cell_longitude` → Longitude. Keep `community_area_name` as a text dimension unless an official boundary spatial file is added; do not rely on ambiguous automatic geocoding.
 
 Official Tableau references: [PostgreSQL connector](https://help.tableau.com/current/pro/desktop/en-us/examples_postgresql.htm), [extract data](https://help.tableau.com/current/pro/desktop/en-us/extracting_data.htm), and [filter actions](https://help.tableau.com/current/pro/desktop/en-us/actions_filter.htm).
@@ -103,7 +105,7 @@ For a portable build without a live database connection:
 python scripts/export_tableau_data.py
 ```
 
-The script uses environment variables or a Git-ignored `.env`, forces PostgreSQL transactions to read-only mode, orders every export deterministically, rereads each CSV, reconciles its rows to the source view, and writes checksums and metadata to `data/processed/tableau/manifest.json`. It generated nine non-empty CSV files in the current validation run. The entire directory is ignored by Git.
+The script uses environment variables or a Git-ignored `.env`, forces PostgreSQL transactions to read-only mode, orders every export deterministically, rereads each CSV, reconciles its rows to the source view, and writes checksums and metadata to `data/processed/tableau/manifest.json`. The `--profile page1` option writes only the two Executive Overview sources and a dedicated manifest under `data/processed/tableau/page1/`. The entire directory is ignored by Git.
 
 In Tableau, choose **Connect → To a File → Text file** and add each required CSV as a separate data source. Confirm that year/order fields are whole numbers, dates are dates, counts are whole numbers, percentages are decimal numbers, and latitude/longitude are geographic decimal numbers. Do not union or join files with different grains.
 
@@ -122,7 +124,7 @@ In Tableau, choose **Connect → To a File → Text file** and add each required
 
 ### Manual workbook build sequence
 
-1. Create a workbook and add the nine sources listed above, using either PostgreSQL extracts or the nine documented CSVs. Keep every source separate.
+1. Create a workbook and add only the sources required by the page being built. Keep every aggregate source separate.
 2. Create `pSelectedYear` and the canonical calculations. Add `Selected Year Filter = True` to single-year sheets. Use a parameter action on E5 so selecting a year changes `pSelectedYear`; clearing the selection leaves the current parameter value unchanged.
 3. Build worksheets E1–E6, G1–G5, T1–T5, and C1–C5 from the field specifications below. Add the required source/definition text to each caption before assembling dashboards.
 4. Create four dashboards at 1,360 × 850 and add the common header, year control, page navigation, filter rail, limitation footer, and reset control.
@@ -133,16 +135,18 @@ In Tableau, choose **Connect → To a File → Text file** and add each required
 
 ## Page 1 — Executive Overview
 
-Default source: `vw_tableau_executive_year`. The year control is single-select, defaults to 2025, and allows 2023–2025. The first year has no prior-year change and must display `Not available`.
+**Implementation status: Complete for Page 1; overall Milestone 9B remains In Progress.** The data sources, validation SQL, reproducible workbook generator, opening instructions, Tableau Desktop results, and exported screenshots are documented in [the Page 1 build guide](tableau_page1_build_guide.md). The other three planned dashboard pages are not implemented.
+
+Generate the Page 1 bundle with `python scripts/export_tableau_data.py --profile page1`, then create or refresh the workbook with `python scripts/generate_tableau_workbook.py`. The generated workbook references `data/processed/tableau/page1/vw_tableau_crime_arrest_year.csv` as `Executive Category Year` and `data/processed/tableau/page1/vw_tableau_month_category.csv` as `Executive Month Category`. The paths are relative to the workbook. The sources are not joined, related, unioned, or blended; workbook parameters synchronize Year and Crime Type filters. `vw_tableau_executive_year` remains the PostgreSQL validation benchmark rather than a third Tableau source.
 
 | ID and visual | Data source | Dimensions and measures / calculation | Filters | Tooltip fields | Sorting | Expected interaction | Validation criterion |
 |---|---|---|---|---|---|---|---|
-| E1 KPI — Reported incidents | Executive year | `crime_year`; `SUM(reported_incident_count)` | Single selected year | Year, period dates/status, exact count | Not applicable | Updates with year selector; no cross-filter action | 2025 displays 238,086 |
-| E2 KPI — Year-over-year change | Executive year | `crime_year`; `MIN(absolute_change)`, `MIN(percentage_change)` | Single selected year | Current/prior year and counts, absolute and percentage change | Not applicable | Updates with year; 2023 shows `Not available` | 2025 displays -21,547 and -8.2990% before display rounding |
-| E3 KPI — Arrest percentage | Executive year | `Weighted Arrest Percentage` | Single selected year | Arrest count, non-null denominator, percentage, definition warning | Not applicable | Updates with year | 2025 uses 38,365 / 238,086 = 16.1139% |
-| E4 KPI — Domestic incident percentage | Executive year | `Weighted Domestic Incident Percentage` | Single selected year | Domestic count, non-null denominator, percentage, limitation | Not applicable | Updates with year | 2025 uses 45,319 / 238,086 = 19.0347% |
-| E5 line — Annual reported incidents | Executive year | `crime_year` on columns; `reported_incident_count` on rows | Always show all complete years; do not inherit KPI year filter | Year, count, prior count, absolute and percentage change | `crime_year` ascending | Selecting a mark updates a year-selection parameter or the four KPI sheets only | Three marks: 263,844; 259,633; 238,086 in chronological order |
-| E6 bars — Geographic coverage | Executive year | Measure Names/Values for `community_area_eligible_count` and `coordinate_mappable_count`; percentage labels use their coverage fields | Single selected year | Eligible count, excluded count, coverage percentage, eligibility definition | Coverage type in fixed order: community area, coordinates | Hover only; no filtering | For 2025: 237,757 area eligible and 236,099 coordinate mappable; neither replaces the full incident denominator |
+| E1 KPI — Reported incidents | Crime/arrest year | `SUM(reported_incident_count)` | Selected year; primary type | Year, category scope, exact count | Not applicable | Updates with year and crime-type controls | 2025 All = 238,086; 2025 Theft = 55,198 |
+| E2 KPI — Arrest percentage | Crime/arrest year | Weighted `SUM(arrest_count) / SUM(arrest_indicator_denominator) * 100` | Selected year; primary type | Numerator, non-null denominator, percentage, definition warning | Not applicable | Updates with year and crime-type controls | 2025 All = 16.1139%; Theft = 9.0420% |
+| E3 KPI — Domestic incident percentage | Crime/arrest year | Weighted `SUM(domestic_count) / SUM(domestic_indicator_denominator) * 100` | Selected year; primary type | Numerator, non-null denominator, percentage, limitation | Not applicable | Updates with year and crime-type controls | 2025 All = 19.0347%; Theft = 5.1270% |
+| E4 line — Annual reported incidents | Crime/arrest year | `crime_year`; `SUM(reported_incident_count)` | Primary type; intentionally ignores selected-year filter | Year, category scope, exact count | `crime_year` ascending | Crime-type selection updates all three complete-year marks | All-category marks: 263,844; 259,633; 238,086 |
+| E5 bars — Leading crime categories | Crime/arrest year | `primary_type`; `SUM(reported_incident_count)`; source `incident_volume_rank <= 10` when All is selected | Selected year; parameter-aware category display | Year, type, count, annual share/rank | Count descending; type ascending for ties | All shows the top 10; a specific Crime Type displays that category even if it is outside the top 10 | 2025 leader is Theft with 55,198; top ten match saved SQL |
+| E6 line — Monthly trend | Month/category | `month_start`; `SUM(reported_incident_count)`; category rolling average in tooltip | Selected year and primary type through shared parameters | Month, type scope, count, trailing-three-month average | `month_start` ascending | Year and crime-type parameters update all 12 months | 2025 All sums to 238,086; 2025 Theft sums to 55,198 |
 
 ## Page 2 — Geographic Crime Patterns
 
@@ -184,7 +188,7 @@ This page retains the City's source `primary_type` categories; no broader groupi
 
 Before Milestone 9B can be marked complete:
 
-1. Open the workbook in Tableau and verify all nine data sources refresh without credential exposure.
+1. Open the workbook in Tableau and verify every data source used by the implemented pages refreshes without credential exposure.
 2. Confirm page titles, cutoff label, complete-year language, definitions, and limitation footers are visible at 1,360 × 850.
 3. Test every filter, navigation button, highlight action, and reset action described above.
 4. Verify chronological sorting for years, months, weekdays, hours, and time bands.
@@ -196,8 +200,8 @@ Before Milestone 9B can be marked complete:
 
 ## Milestone 9A execution evidence
 
-The SQL completed successfully with `ON_ERROR_STOP=1`. All nine views were created in a single committed transaction after one initial failed run rolled back cleanly due to an existing-view column-name mismatch; that reference was corrected before the successful run. The fail-fast block reconciled executive, community-area, district, area/category, monthly, weekday/hour, crime/indicator, and coordinate-density totals to their canonical scopes.
+The SQL completed successfully with `ON_ERROR_STOP=1`. The original nine-view preparation completed in a single committed transaction after one initial failed run rolled back cleanly due to an existing-view column-name mismatch. Page 1 preparation later added the validated `vw_tableau_month_category` view, bringing the presentation layer to ten views. Its complete 1,116-row grid reconciles to both monthly citywide totals and all 93 year/category rows.
 
-The extract script then generated all nine CSVs and verified each file's reloaded row count against PostgreSQL. The local manifest records row/column counts, byte sizes, deterministic ordering, and SHA-256 checksums. These extracts are derived data and remain excluded from Git.
+The extract script verifies every exported file's reloaded row count against PostgreSQL. The Page 1 profile generated exactly two CSVs—93 annual/category rows and 1,116 month/category rows—plus a local manifest recording row/column counts, byte sizes, deterministic ordering, and SHA-256 checksums. These extracts are derived data and remain excluded from Git.
 
-No Tableau workbook, dashboard page, filter action, screenshot, or manual Tableau validation exists yet. Those tasks belong to Milestone 9B.
+Milestone 9B has generated `tableau/chicago_crime_analytics.twb` with six Page 1 worksheets, a fixed-size Executive Overview dashboard, and Year/Crime Type parameter controls. XML and source-reference checks passed, PostgreSQL benchmarks reconciled, and Tableau Desktop 2026.2.3 completed load, layout, model-computation, visual-rendering, and filter-interaction checks. Page 1 displays the year without grouping, emphasizes KPI values, labels the annual trend, uses human-readable measure captions, and limits the all-crimes distribution to a parameter-aware top 10 while preserving any specifically selected crime type. Tableau-exported 2025 All Crime Types and THEFT screenshots are stored under `images/tableau/`. Both independent sources were visible in Tableau's Data menu. The other three dashboard pages remain outstanding, so Milestone 9B remains In Progress.

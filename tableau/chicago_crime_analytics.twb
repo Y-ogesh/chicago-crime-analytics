@@ -1,0 +1,1343 @@
+<?xml version='1.0' encoding='utf-8'?>
+<workbook locale="en_US" source-build="20262.26.0912.1023" source-platform="mac" version="18.1" xmlns:user="http://www.tableausoftware.com/xml/user">
+  <preferences>
+    <preference name="ui.encoding.shelf.height" value="24" />
+    <preference name="ui.shelf.height" value="26" />
+  </preferences>
+  <style-theme name="smooth" />
+  <datasources>
+    <datasource hasconnection="false" inline="true" name="Parameters" version="18.1">
+      <aliases enabled="yes" />
+      <column caption="Year" datatype="string" name="[pSelectedYear]" param-domain-type="list" role="measure" type="nominal" value="&quot;2025&quot;">
+        <calculation class="tableau" formula="&quot;2025&quot;" />
+        <members>
+          <member value="&quot;2023&quot;" />
+          <member value="&quot;2024&quot;" />
+          <member value="&quot;2025&quot;" />
+        </members>
+      </column>
+      <column caption="Crime Type" datatype="string" name="[pCrimeType]" param-domain-type="list" role="measure" type="nominal" value="&quot;All Crime Types&quot;">
+        <calculation class="tableau" formula="&quot;All Crime Types&quot;" />
+        <members>
+          <member value="&quot;All Crime Types&quot;" />
+          <member value="&quot;ARSON&quot;" />
+          <member value="&quot;ASSAULT&quot;" />
+          <member value="&quot;BATTERY&quot;" />
+          <member value="&quot;BURGLARY&quot;" />
+          <member value="&quot;CONCEALED CARRY LICENSE VIOLATION&quot;" />
+          <member value="&quot;CRIMINAL DAMAGE&quot;" />
+          <member value="&quot;CRIMINAL SEXUAL ASSAULT&quot;" />
+          <member value="&quot;CRIMINAL TRESPASS&quot;" />
+          <member value="&quot;DECEPTIVE PRACTICE&quot;" />
+          <member value="&quot;GAMBLING&quot;" />
+          <member value="&quot;HOMICIDE&quot;" />
+          <member value="&quot;HUMAN TRAFFICKING&quot;" />
+          <member value="&quot;INTERFERENCE WITH PUBLIC OFFICER&quot;" />
+          <member value="&quot;INTIMIDATION&quot;" />
+          <member value="&quot;KIDNAPPING&quot;" />
+          <member value="&quot;LIQUOR LAW VIOLATION&quot;" />
+          <member value="&quot;MOTOR VEHICLE THEFT&quot;" />
+          <member value="&quot;NARCOTICS&quot;" />
+          <member value="&quot;NON-CRIMINAL&quot;" />
+          <member value="&quot;OBSCENITY&quot;" />
+          <member value="&quot;OFFENSE INVOLVING CHILDREN&quot;" />
+          <member value="&quot;OTHER NARCOTIC VIOLATION&quot;" />
+          <member value="&quot;OTHER OFFENSE&quot;" />
+          <member value="&quot;PROSTITUTION&quot;" />
+          <member value="&quot;PUBLIC INDECENCY&quot;" />
+          <member value="&quot;PUBLIC PEACE VIOLATION&quot;" />
+          <member value="&quot;ROBBERY&quot;" />
+          <member value="&quot;SEX OFFENSE&quot;" />
+          <member value="&quot;STALKING&quot;" />
+          <member value="&quot;THEFT&quot;" />
+          <member value="&quot;WEAPONS VIOLATION&quot;" />
+        </members>
+      </column>
+    </datasource>
+    <datasource caption="Executive Category Year" inline="true" name="AnnualDS" version="18.1">
+      <connection class="federated">
+        <named-connections>
+          <named-connection caption="Executive Category Year" name="AnnualDSLeaf">
+            <connection character-set="UTF-8" class="textscan" directory="../data/processed/tableau/page1" filename="vw_tableau_crime_arrest_year.csv" force-character-set="no" force-header="no" force-separator="no" header="yes" password="" separator="," server="" text-qualifier="&quot;" />
+          </named-connection>
+        </named-connections>
+        <relation connection="AnnualDSLeaf" name="vw_tableau_crime_arrest_year.csv" table="[vw_tableau_crime_arrest_year#csv]" type="table">
+          <columns character-set="UTF-8" header="yes" locale="en_US" separator="," text-qualifier="&quot;">
+            <column datatype="integer" name="crime_year" ordinal="0" />
+            <column datatype="date" name="period_start" ordinal="1" />
+            <column datatype="string" name="primary_type" ordinal="2" />
+            <column datatype="integer" name="reported_incident_count" ordinal="3" />
+            <column datatype="integer" name="yearly_reported_incident_count" ordinal="4" />
+            <column datatype="real" name="percentage_of_year_total" ordinal="5" />
+            <column datatype="integer" name="incident_volume_rank" ordinal="6" />
+            <column datatype="integer" name="previous_year" ordinal="7" />
+            <column datatype="integer" name="previous_year_incident_count" ordinal="8" />
+            <column datatype="integer" name="absolute_change" ordinal="9" />
+            <column datatype="real" name="percentage_change" ordinal="10" />
+            <column datatype="integer" name="arrest_count" ordinal="11" />
+            <column datatype="integer" name="arrest_indicator_denominator" ordinal="12" />
+            <column datatype="real" name="arrest_percentage" ordinal="13" />
+            <column datatype="integer" name="domestic_count" ordinal="14" />
+            <column datatype="integer" name="domestic_indicator_denominator" ordinal="15" />
+            <column datatype="real" name="domestic_incident_percentage" ordinal="16" />
+          </columns>
+        </relation>
+        <metadata-records>
+          <metadata-record class="column">
+            <remote-name>crime_year</remote-name>
+            <remote-type>20</remote-type>
+            <local-name>[crime_year]</local-name>
+            <parent-name>[vw_tableau_crime_arrest_year#csv]</parent-name>
+            <remote-alias>crime_year</remote-alias>
+            <ordinal>0</ordinal>
+            <local-type>integer</local-type>
+            <aggregation>Sum</aggregation>
+            <contains-null>true</contains-null>
+          </metadata-record>
+          <metadata-record class="column">
+            <remote-name>period_start</remote-name>
+            <remote-type>7</remote-type>
+            <local-name>[period_start]</local-name>
+            <parent-name>[vw_tableau_crime_arrest_year#csv]</parent-name>
+            <remote-alias>period_start</remote-alias>
+            <ordinal>1</ordinal>
+            <local-type>date</local-type>
+            <aggregation>Year</aggregation>
+            <contains-null>true</contains-null>
+          </metadata-record>
+          <metadata-record class="column">
+            <remote-name>primary_type</remote-name>
+            <remote-type>129</remote-type>
+            <local-name>[primary_type]</local-name>
+            <parent-name>[vw_tableau_crime_arrest_year#csv]</parent-name>
+            <remote-alias>primary_type</remote-alias>
+            <ordinal>2</ordinal>
+            <local-type>string</local-type>
+            <aggregation>Count</aggregation>
+            <contains-null>true</contains-null>
+          </metadata-record>
+          <metadata-record class="column">
+            <remote-name>reported_incident_count</remote-name>
+            <remote-type>20</remote-type>
+            <local-name>[reported_incident_count]</local-name>
+            <parent-name>[vw_tableau_crime_arrest_year#csv]</parent-name>
+            <remote-alias>reported_incident_count</remote-alias>
+            <ordinal>3</ordinal>
+            <local-type>integer</local-type>
+            <aggregation>Sum</aggregation>
+            <contains-null>true</contains-null>
+          </metadata-record>
+          <metadata-record class="column">
+            <remote-name>yearly_reported_incident_count</remote-name>
+            <remote-type>20</remote-type>
+            <local-name>[yearly_reported_incident_count]</local-name>
+            <parent-name>[vw_tableau_crime_arrest_year#csv]</parent-name>
+            <remote-alias>yearly_reported_incident_count</remote-alias>
+            <ordinal>4</ordinal>
+            <local-type>integer</local-type>
+            <aggregation>Sum</aggregation>
+            <contains-null>true</contains-null>
+          </metadata-record>
+          <metadata-record class="column">
+            <remote-name>percentage_of_year_total</remote-name>
+            <remote-type>5</remote-type>
+            <local-name>[percentage_of_year_total]</local-name>
+            <parent-name>[vw_tableau_crime_arrest_year#csv]</parent-name>
+            <remote-alias>percentage_of_year_total</remote-alias>
+            <ordinal>5</ordinal>
+            <local-type>real</local-type>
+            <aggregation>Sum</aggregation>
+            <contains-null>true</contains-null>
+          </metadata-record>
+          <metadata-record class="column">
+            <remote-name>incident_volume_rank</remote-name>
+            <remote-type>20</remote-type>
+            <local-name>[incident_volume_rank]</local-name>
+            <parent-name>[vw_tableau_crime_arrest_year#csv]</parent-name>
+            <remote-alias>incident_volume_rank</remote-alias>
+            <ordinal>6</ordinal>
+            <local-type>integer</local-type>
+            <aggregation>Sum</aggregation>
+            <contains-null>true</contains-null>
+          </metadata-record>
+          <metadata-record class="column">
+            <remote-name>previous_year</remote-name>
+            <remote-type>20</remote-type>
+            <local-name>[previous_year]</local-name>
+            <parent-name>[vw_tableau_crime_arrest_year#csv]</parent-name>
+            <remote-alias>previous_year</remote-alias>
+            <ordinal>7</ordinal>
+            <local-type>integer</local-type>
+            <aggregation>Sum</aggregation>
+            <contains-null>true</contains-null>
+          </metadata-record>
+          <metadata-record class="column">
+            <remote-name>previous_year_incident_count</remote-name>
+            <remote-type>20</remote-type>
+            <local-name>[previous_year_incident_count]</local-name>
+            <parent-name>[vw_tableau_crime_arrest_year#csv]</parent-name>
+            <remote-alias>previous_year_incident_count</remote-alias>
+            <ordinal>8</ordinal>
+            <local-type>integer</local-type>
+            <aggregation>Sum</aggregation>
+            <contains-null>true</contains-null>
+          </metadata-record>
+          <metadata-record class="column">
+            <remote-name>absolute_change</remote-name>
+            <remote-type>20</remote-type>
+            <local-name>[absolute_change]</local-name>
+            <parent-name>[vw_tableau_crime_arrest_year#csv]</parent-name>
+            <remote-alias>absolute_change</remote-alias>
+            <ordinal>9</ordinal>
+            <local-type>integer</local-type>
+            <aggregation>Sum</aggregation>
+            <contains-null>true</contains-null>
+          </metadata-record>
+          <metadata-record class="column">
+            <remote-name>percentage_change</remote-name>
+            <remote-type>5</remote-type>
+            <local-name>[percentage_change]</local-name>
+            <parent-name>[vw_tableau_crime_arrest_year#csv]</parent-name>
+            <remote-alias>percentage_change</remote-alias>
+            <ordinal>10</ordinal>
+            <local-type>real</local-type>
+            <aggregation>Sum</aggregation>
+            <contains-null>true</contains-null>
+          </metadata-record>
+          <metadata-record class="column">
+            <remote-name>arrest_count</remote-name>
+            <remote-type>20</remote-type>
+            <local-name>[arrest_count]</local-name>
+            <parent-name>[vw_tableau_crime_arrest_year#csv]</parent-name>
+            <remote-alias>arrest_count</remote-alias>
+            <ordinal>11</ordinal>
+            <local-type>integer</local-type>
+            <aggregation>Sum</aggregation>
+            <contains-null>true</contains-null>
+          </metadata-record>
+          <metadata-record class="column">
+            <remote-name>arrest_indicator_denominator</remote-name>
+            <remote-type>20</remote-type>
+            <local-name>[arrest_indicator_denominator]</local-name>
+            <parent-name>[vw_tableau_crime_arrest_year#csv]</parent-name>
+            <remote-alias>arrest_indicator_denominator</remote-alias>
+            <ordinal>12</ordinal>
+            <local-type>integer</local-type>
+            <aggregation>Sum</aggregation>
+            <contains-null>true</contains-null>
+          </metadata-record>
+          <metadata-record class="column">
+            <remote-name>arrest_percentage</remote-name>
+            <remote-type>5</remote-type>
+            <local-name>[arrest_percentage]</local-name>
+            <parent-name>[vw_tableau_crime_arrest_year#csv]</parent-name>
+            <remote-alias>arrest_percentage</remote-alias>
+            <ordinal>13</ordinal>
+            <local-type>real</local-type>
+            <aggregation>Sum</aggregation>
+            <contains-null>true</contains-null>
+          </metadata-record>
+          <metadata-record class="column">
+            <remote-name>domestic_count</remote-name>
+            <remote-type>20</remote-type>
+            <local-name>[domestic_count]</local-name>
+            <parent-name>[vw_tableau_crime_arrest_year#csv]</parent-name>
+            <remote-alias>domestic_count</remote-alias>
+            <ordinal>14</ordinal>
+            <local-type>integer</local-type>
+            <aggregation>Sum</aggregation>
+            <contains-null>true</contains-null>
+          </metadata-record>
+          <metadata-record class="column">
+            <remote-name>domestic_indicator_denominator</remote-name>
+            <remote-type>20</remote-type>
+            <local-name>[domestic_indicator_denominator]</local-name>
+            <parent-name>[vw_tableau_crime_arrest_year#csv]</parent-name>
+            <remote-alias>domestic_indicator_denominator</remote-alias>
+            <ordinal>15</ordinal>
+            <local-type>integer</local-type>
+            <aggregation>Sum</aggregation>
+            <contains-null>true</contains-null>
+          </metadata-record>
+          <metadata-record class="column">
+            <remote-name>domestic_incident_percentage</remote-name>
+            <remote-type>5</remote-type>
+            <local-name>[domestic_incident_percentage]</local-name>
+            <parent-name>[vw_tableau_crime_arrest_year#csv]</parent-name>
+            <remote-alias>domestic_incident_percentage</remote-alias>
+            <ordinal>16</ordinal>
+            <local-type>real</local-type>
+            <aggregation>Sum</aggregation>
+            <contains-null>true</contains-null>
+          </metadata-record>
+        </metadata-records>
+      </connection>
+      <aliases enabled="yes" />
+      <column datatype="integer" name="[crime_year]" role="measure" type="quantitative" />
+      <column datatype="date" name="[period_start]" role="dimension" type="ordinal" />
+      <column datatype="string" name="[primary_type]" role="dimension" type="nominal" />
+      <column datatype="integer" name="[reported_incident_count]" role="measure" type="quantitative" caption="Reported Incidents" />
+      <column datatype="integer" name="[yearly_reported_incident_count]" role="measure" type="quantitative" />
+      <column datatype="real" name="[percentage_of_year_total]" role="measure" type="quantitative" />
+      <column datatype="integer" name="[incident_volume_rank]" role="measure" type="quantitative" />
+      <column datatype="integer" name="[previous_year]" role="measure" type="quantitative" />
+      <column datatype="integer" name="[previous_year_incident_count]" role="measure" type="quantitative" />
+      <column datatype="integer" name="[absolute_change]" role="measure" type="quantitative" />
+      <column datatype="real" name="[percentage_change]" role="measure" type="quantitative" />
+      <column datatype="integer" name="[arrest_count]" role="measure" type="quantitative" />
+      <column datatype="integer" name="[arrest_indicator_denominator]" role="measure" type="quantitative" />
+      <column datatype="real" name="[arrest_percentage]" role="measure" type="quantitative" />
+      <column datatype="integer" name="[domestic_count]" role="measure" type="quantitative" />
+      <column datatype="integer" name="[domestic_indicator_denominator]" role="measure" type="quantitative" />
+      <column datatype="real" name="[domestic_incident_percentage]" role="measure" type="quantitative" />
+      <column caption="Selected Year Filter" datatype="boolean" name="[Calculation_SelectedYear]" role="dimension" type="nominal">
+        <calculation class="tableau" formula="STR([crime_year]) = [Parameters].[pSelectedYear]" />
+      </column>
+      <column caption="Selected Crime Type Filter" datatype="boolean" name="[Calculation_SelectedCrimeType]" role="dimension" type="nominal">
+        <calculation class="tableau" formula="[Parameters].[pCrimeType] = &quot;All Crime Types&quot; OR [primary_type] = [Parameters].[pCrimeType]" />
+      </column>
+      <column caption="Show Category in Distribution" datatype="boolean" name="[Calculation_CategoryDisplay]" role="dimension" type="nominal">
+        <calculation class="tableau" formula="[Parameters].[pCrimeType] &lt;&gt; &quot;All Crime Types&quot; OR [incident_volume_rank] &lt;= 10" />
+      </column>
+      <column caption="Weighted Arrest Percentage" datatype="real" name="[Calculation_ArrestPercentage]" role="measure" type="quantitative" default-format="n#,##0.0&quot;%&quot;;-#,##0.0&quot;%&quot;">
+        <calculation class="tableau" formula="IF SUM([arrest_indicator_denominator]) = 0 THEN NULL ELSE 100.0 * SUM([arrest_count]) / SUM([arrest_indicator_denominator]) END" />
+      </column>
+      <column caption="Weighted Domestic Incident Percentage" datatype="real" name="[Calculation_DomesticPercentage]" role="measure" type="quantitative" default-format="n#,##0.0&quot;%&quot;;-#,##0.0&quot;%&quot;">
+        <calculation class="tableau" formula="IF SUM([domestic_indicator_denominator]) = 0 THEN NULL ELSE 100.0 * SUM([domestic_count]) / SUM([domestic_indicator_denominator]) END" />
+      </column>
+    </datasource>
+    <datasource caption="Executive Month Category" inline="true" name="MonthlyDS" version="18.1">
+      <connection class="federated">
+        <named-connections>
+          <named-connection caption="Executive Month Category" name="MonthlyDSLeaf">
+            <connection character-set="UTF-8" class="textscan" directory="../data/processed/tableau/page1" filename="vw_tableau_month_category.csv" force-character-set="no" force-header="no" force-separator="no" header="yes" password="" separator="," server="" text-qualifier="&quot;" />
+          </named-connection>
+        </named-connections>
+        <relation connection="MonthlyDSLeaf" name="vw_tableau_month_category.csv" table="[vw_tableau_month_category#csv]" type="table">
+          <columns character-set="UTF-8" header="yes" locale="en_US" separator="," text-qualifier="&quot;">
+            <column datatype="date" name="month_start" ordinal="0" />
+            <column datatype="integer" name="crime_year" ordinal="1" />
+            <column datatype="integer" name="crime_month" ordinal="2" />
+            <column datatype="string" name="month_name" ordinal="3" />
+            <column datatype="integer" name="crime_quarter" ordinal="4" />
+            <column datatype="string" name="season" ordinal="5" />
+            <column datatype="string" name="primary_type" ordinal="6" />
+            <column datatype="integer" name="reported_incident_count" ordinal="7" />
+            <column datatype="integer" name="yearly_reported_incident_count" ordinal="8" />
+            <column datatype="real" name="percentage_of_yearly_total" ordinal="9" />
+            <column datatype="integer" name="yearly_category_incident_count" ordinal="10" />
+            <column datatype="real" name="percentage_of_category_year_total" ordinal="11" />
+            <column datatype="real" name="trailing_three_month_average" ordinal="12" />
+            <column datatype="integer" name="same_month_previous_year_count" ordinal="13" />
+            <column datatype="integer" name="same_month_absolute_change" ordinal="14" />
+            <column datatype="real" name="same_month_percentage_change" ordinal="15" />
+            <column datatype="integer" name="arrest_count" ordinal="16" />
+            <column datatype="integer" name="arrest_indicator_denominator" ordinal="17" />
+            <column datatype="real" name="arrest_percentage" ordinal="18" />
+            <column datatype="integer" name="domestic_count" ordinal="19" />
+            <column datatype="integer" name="domestic_indicator_denominator" ordinal="20" />
+            <column datatype="real" name="domestic_incident_percentage" ordinal="21" />
+          </columns>
+        </relation>
+        <metadata-records>
+          <metadata-record class="column">
+            <remote-name>month_start</remote-name>
+            <remote-type>7</remote-type>
+            <local-name>[month_start]</local-name>
+            <parent-name>[vw_tableau_month_category#csv]</parent-name>
+            <remote-alias>month_start</remote-alias>
+            <ordinal>0</ordinal>
+            <local-type>date</local-type>
+            <aggregation>Year</aggregation>
+            <contains-null>true</contains-null>
+          </metadata-record>
+          <metadata-record class="column">
+            <remote-name>crime_year</remote-name>
+            <remote-type>20</remote-type>
+            <local-name>[crime_year]</local-name>
+            <parent-name>[vw_tableau_month_category#csv]</parent-name>
+            <remote-alias>crime_year</remote-alias>
+            <ordinal>1</ordinal>
+            <local-type>integer</local-type>
+            <aggregation>Sum</aggregation>
+            <contains-null>true</contains-null>
+          </metadata-record>
+          <metadata-record class="column">
+            <remote-name>crime_month</remote-name>
+            <remote-type>20</remote-type>
+            <local-name>[crime_month]</local-name>
+            <parent-name>[vw_tableau_month_category#csv]</parent-name>
+            <remote-alias>crime_month</remote-alias>
+            <ordinal>2</ordinal>
+            <local-type>integer</local-type>
+            <aggregation>Sum</aggregation>
+            <contains-null>true</contains-null>
+          </metadata-record>
+          <metadata-record class="column">
+            <remote-name>month_name</remote-name>
+            <remote-type>129</remote-type>
+            <local-name>[month_name]</local-name>
+            <parent-name>[vw_tableau_month_category#csv]</parent-name>
+            <remote-alias>month_name</remote-alias>
+            <ordinal>3</ordinal>
+            <local-type>string</local-type>
+            <aggregation>Count</aggregation>
+            <contains-null>true</contains-null>
+          </metadata-record>
+          <metadata-record class="column">
+            <remote-name>crime_quarter</remote-name>
+            <remote-type>20</remote-type>
+            <local-name>[crime_quarter]</local-name>
+            <parent-name>[vw_tableau_month_category#csv]</parent-name>
+            <remote-alias>crime_quarter</remote-alias>
+            <ordinal>4</ordinal>
+            <local-type>integer</local-type>
+            <aggregation>Sum</aggregation>
+            <contains-null>true</contains-null>
+          </metadata-record>
+          <metadata-record class="column">
+            <remote-name>season</remote-name>
+            <remote-type>129</remote-type>
+            <local-name>[season]</local-name>
+            <parent-name>[vw_tableau_month_category#csv]</parent-name>
+            <remote-alias>season</remote-alias>
+            <ordinal>5</ordinal>
+            <local-type>string</local-type>
+            <aggregation>Count</aggregation>
+            <contains-null>true</contains-null>
+          </metadata-record>
+          <metadata-record class="column">
+            <remote-name>primary_type</remote-name>
+            <remote-type>129</remote-type>
+            <local-name>[primary_type]</local-name>
+            <parent-name>[vw_tableau_month_category#csv]</parent-name>
+            <remote-alias>primary_type</remote-alias>
+            <ordinal>6</ordinal>
+            <local-type>string</local-type>
+            <aggregation>Count</aggregation>
+            <contains-null>true</contains-null>
+          </metadata-record>
+          <metadata-record class="column">
+            <remote-name>reported_incident_count</remote-name>
+            <remote-type>20</remote-type>
+            <local-name>[reported_incident_count]</local-name>
+            <parent-name>[vw_tableau_month_category#csv]</parent-name>
+            <remote-alias>reported_incident_count</remote-alias>
+            <ordinal>7</ordinal>
+            <local-type>integer</local-type>
+            <aggregation>Sum</aggregation>
+            <contains-null>true</contains-null>
+          </metadata-record>
+          <metadata-record class="column">
+            <remote-name>yearly_reported_incident_count</remote-name>
+            <remote-type>20</remote-type>
+            <local-name>[yearly_reported_incident_count]</local-name>
+            <parent-name>[vw_tableau_month_category#csv]</parent-name>
+            <remote-alias>yearly_reported_incident_count</remote-alias>
+            <ordinal>8</ordinal>
+            <local-type>integer</local-type>
+            <aggregation>Sum</aggregation>
+            <contains-null>true</contains-null>
+          </metadata-record>
+          <metadata-record class="column">
+            <remote-name>percentage_of_yearly_total</remote-name>
+            <remote-type>5</remote-type>
+            <local-name>[percentage_of_yearly_total]</local-name>
+            <parent-name>[vw_tableau_month_category#csv]</parent-name>
+            <remote-alias>percentage_of_yearly_total</remote-alias>
+            <ordinal>9</ordinal>
+            <local-type>real</local-type>
+            <aggregation>Sum</aggregation>
+            <contains-null>true</contains-null>
+          </metadata-record>
+          <metadata-record class="column">
+            <remote-name>yearly_category_incident_count</remote-name>
+            <remote-type>20</remote-type>
+            <local-name>[yearly_category_incident_count]</local-name>
+            <parent-name>[vw_tableau_month_category#csv]</parent-name>
+            <remote-alias>yearly_category_incident_count</remote-alias>
+            <ordinal>10</ordinal>
+            <local-type>integer</local-type>
+            <aggregation>Sum</aggregation>
+            <contains-null>true</contains-null>
+          </metadata-record>
+          <metadata-record class="column">
+            <remote-name>percentage_of_category_year_total</remote-name>
+            <remote-type>5</remote-type>
+            <local-name>[percentage_of_category_year_total]</local-name>
+            <parent-name>[vw_tableau_month_category#csv]</parent-name>
+            <remote-alias>percentage_of_category_year_total</remote-alias>
+            <ordinal>11</ordinal>
+            <local-type>real</local-type>
+            <aggregation>Sum</aggregation>
+            <contains-null>true</contains-null>
+          </metadata-record>
+          <metadata-record class="column">
+            <remote-name>trailing_three_month_average</remote-name>
+            <remote-type>5</remote-type>
+            <local-name>[trailing_three_month_average]</local-name>
+            <parent-name>[vw_tableau_month_category#csv]</parent-name>
+            <remote-alias>trailing_three_month_average</remote-alias>
+            <ordinal>12</ordinal>
+            <local-type>real</local-type>
+            <aggregation>Sum</aggregation>
+            <contains-null>true</contains-null>
+          </metadata-record>
+          <metadata-record class="column">
+            <remote-name>same_month_previous_year_count</remote-name>
+            <remote-type>20</remote-type>
+            <local-name>[same_month_previous_year_count]</local-name>
+            <parent-name>[vw_tableau_month_category#csv]</parent-name>
+            <remote-alias>same_month_previous_year_count</remote-alias>
+            <ordinal>13</ordinal>
+            <local-type>integer</local-type>
+            <aggregation>Sum</aggregation>
+            <contains-null>true</contains-null>
+          </metadata-record>
+          <metadata-record class="column">
+            <remote-name>same_month_absolute_change</remote-name>
+            <remote-type>20</remote-type>
+            <local-name>[same_month_absolute_change]</local-name>
+            <parent-name>[vw_tableau_month_category#csv]</parent-name>
+            <remote-alias>same_month_absolute_change</remote-alias>
+            <ordinal>14</ordinal>
+            <local-type>integer</local-type>
+            <aggregation>Sum</aggregation>
+            <contains-null>true</contains-null>
+          </metadata-record>
+          <metadata-record class="column">
+            <remote-name>same_month_percentage_change</remote-name>
+            <remote-type>5</remote-type>
+            <local-name>[same_month_percentage_change]</local-name>
+            <parent-name>[vw_tableau_month_category#csv]</parent-name>
+            <remote-alias>same_month_percentage_change</remote-alias>
+            <ordinal>15</ordinal>
+            <local-type>real</local-type>
+            <aggregation>Sum</aggregation>
+            <contains-null>true</contains-null>
+          </metadata-record>
+          <metadata-record class="column">
+            <remote-name>arrest_count</remote-name>
+            <remote-type>20</remote-type>
+            <local-name>[arrest_count]</local-name>
+            <parent-name>[vw_tableau_month_category#csv]</parent-name>
+            <remote-alias>arrest_count</remote-alias>
+            <ordinal>16</ordinal>
+            <local-type>integer</local-type>
+            <aggregation>Sum</aggregation>
+            <contains-null>true</contains-null>
+          </metadata-record>
+          <metadata-record class="column">
+            <remote-name>arrest_indicator_denominator</remote-name>
+            <remote-type>20</remote-type>
+            <local-name>[arrest_indicator_denominator]</local-name>
+            <parent-name>[vw_tableau_month_category#csv]</parent-name>
+            <remote-alias>arrest_indicator_denominator</remote-alias>
+            <ordinal>17</ordinal>
+            <local-type>integer</local-type>
+            <aggregation>Sum</aggregation>
+            <contains-null>true</contains-null>
+          </metadata-record>
+          <metadata-record class="column">
+            <remote-name>arrest_percentage</remote-name>
+            <remote-type>5</remote-type>
+            <local-name>[arrest_percentage]</local-name>
+            <parent-name>[vw_tableau_month_category#csv]</parent-name>
+            <remote-alias>arrest_percentage</remote-alias>
+            <ordinal>18</ordinal>
+            <local-type>real</local-type>
+            <aggregation>Sum</aggregation>
+            <contains-null>true</contains-null>
+          </metadata-record>
+          <metadata-record class="column">
+            <remote-name>domestic_count</remote-name>
+            <remote-type>20</remote-type>
+            <local-name>[domestic_count]</local-name>
+            <parent-name>[vw_tableau_month_category#csv]</parent-name>
+            <remote-alias>domestic_count</remote-alias>
+            <ordinal>19</ordinal>
+            <local-type>integer</local-type>
+            <aggregation>Sum</aggregation>
+            <contains-null>true</contains-null>
+          </metadata-record>
+          <metadata-record class="column">
+            <remote-name>domestic_indicator_denominator</remote-name>
+            <remote-type>20</remote-type>
+            <local-name>[domestic_indicator_denominator]</local-name>
+            <parent-name>[vw_tableau_month_category#csv]</parent-name>
+            <remote-alias>domestic_indicator_denominator</remote-alias>
+            <ordinal>20</ordinal>
+            <local-type>integer</local-type>
+            <aggregation>Sum</aggregation>
+            <contains-null>true</contains-null>
+          </metadata-record>
+          <metadata-record class="column">
+            <remote-name>domestic_incident_percentage</remote-name>
+            <remote-type>5</remote-type>
+            <local-name>[domestic_incident_percentage]</local-name>
+            <parent-name>[vw_tableau_month_category#csv]</parent-name>
+            <remote-alias>domestic_incident_percentage</remote-alias>
+            <ordinal>21</ordinal>
+            <local-type>real</local-type>
+            <aggregation>Sum</aggregation>
+            <contains-null>true</contains-null>
+          </metadata-record>
+        </metadata-records>
+      </connection>
+      <aliases enabled="yes" />
+      <column datatype="date" name="[month_start]" role="dimension" type="ordinal" />
+      <column datatype="integer" name="[crime_year]" role="measure" type="quantitative" />
+      <column datatype="integer" name="[crime_month]" role="measure" type="quantitative" />
+      <column datatype="string" name="[month_name]" role="dimension" type="nominal" />
+      <column datatype="integer" name="[crime_quarter]" role="measure" type="quantitative" />
+      <column datatype="string" name="[season]" role="dimension" type="nominal" />
+      <column datatype="string" name="[primary_type]" role="dimension" type="nominal" />
+      <column datatype="integer" name="[reported_incident_count]" role="measure" type="quantitative" caption="Reported Incidents" />
+      <column datatype="integer" name="[yearly_reported_incident_count]" role="measure" type="quantitative" />
+      <column datatype="real" name="[percentage_of_yearly_total]" role="measure" type="quantitative" />
+      <column datatype="integer" name="[yearly_category_incident_count]" role="measure" type="quantitative" />
+      <column datatype="real" name="[percentage_of_category_year_total]" role="measure" type="quantitative" />
+      <column datatype="real" name="[trailing_three_month_average]" role="measure" type="quantitative" />
+      <column datatype="integer" name="[same_month_previous_year_count]" role="measure" type="quantitative" />
+      <column datatype="integer" name="[same_month_absolute_change]" role="measure" type="quantitative" />
+      <column datatype="real" name="[same_month_percentage_change]" role="measure" type="quantitative" />
+      <column datatype="integer" name="[arrest_count]" role="measure" type="quantitative" />
+      <column datatype="integer" name="[arrest_indicator_denominator]" role="measure" type="quantitative" />
+      <column datatype="real" name="[arrest_percentage]" role="measure" type="quantitative" />
+      <column datatype="integer" name="[domestic_count]" role="measure" type="quantitative" />
+      <column datatype="integer" name="[domestic_indicator_denominator]" role="measure" type="quantitative" />
+      <column datatype="real" name="[domestic_incident_percentage]" role="measure" type="quantitative" />
+      <column caption="Selected Year Filter" datatype="boolean" name="[Calculation_SelectedYear]" role="dimension" type="nominal">
+        <calculation class="tableau" formula="STR([crime_year]) = [Parameters].[pSelectedYear]" />
+      </column>
+      <column caption="Selected Crime Type Filter" datatype="boolean" name="[Calculation_SelectedCrimeType]" role="dimension" type="nominal">
+        <calculation class="tableau" formula="[Parameters].[pCrimeType] = &quot;All Crime Types&quot; OR [primary_type] = [Parameters].[pCrimeType]" />
+      </column>
+    </datasource>
+  </datasources>
+  <worksheets>
+    <worksheet name="Total Reported Crimes">
+      <layout-options>
+        <title>
+          <formatted-text>
+            <run bold="true" fontcolor="#243447" fontname="Tableau Semibold" fontsize="12">Total Reported Crimes</run>
+          </formatted-text>
+        </title>
+      </layout-options>
+      <table>
+        <view>
+          <datasources>
+            <datasource caption="Executive Category Year" name="AnnualDS" />
+            <datasource name="Parameters" />
+          </datasources>
+          <datasource-dependencies datasource="AnnualDS">
+            <column datatype="integer" name="[crime_year]" role="measure" type="quantitative" />
+            <column datatype="string" name="[primary_type]" role="dimension" type="nominal" />
+            <column datatype="integer" name="[reported_incident_count]" role="measure" type="quantitative" caption="Reported Incidents" />
+            <column caption="Selected Year Filter" datatype="boolean" name="[Calculation_SelectedYear]" role="dimension" type="nominal">
+              <calculation class="tableau" formula="STR([crime_year]) = [Parameters].[pSelectedYear]" />
+            </column>
+            <column caption="Selected Crime Type Filter" datatype="boolean" name="[Calculation_SelectedCrimeType]" role="dimension" type="nominal">
+              <calculation class="tableau" formula="[Parameters].[pCrimeType] = &quot;All Crime Types&quot; OR [primary_type] = [Parameters].[pCrimeType]" />
+            </column>
+            <column-instance column="[reported_incident_count]" derivation="Sum" name="[sum:reported_incident_count:qk]" pivot="key" type="quantitative" />
+          </datasource-dependencies>
+          <datasource-dependencies datasource="Parameters">
+            <column caption="Year" datatype="string" name="[pSelectedYear]" param-domain-type="list" role="measure" type="nominal" value="&quot;2025&quot;">
+              <calculation class="tableau" formula="&quot;2025&quot;" />
+            </column>
+            <column caption="Crime Type" datatype="string" name="[pCrimeType]" param-domain-type="list" role="measure" type="nominal" value="&quot;All Crime Types&quot;">
+              <calculation class="tableau" formula="&quot;All Crime Types&quot;" />
+            </column>
+          </datasource-dependencies>
+          <filter class="categorical" column="[AnnualDS].[Calculation_SelectedYear]">
+            <groupfilter function="member" level="[Calculation_SelectedYear]" member="true" user:ui-domain="database" user:ui-enumeration="inclusive" user:ui-marker="enumerate" />
+          </filter>
+          <filter class="categorical" column="[AnnualDS].[Calculation_SelectedCrimeType]">
+            <groupfilter function="member" level="[Calculation_SelectedCrimeType]" member="true" user:ui-domain="database" user:ui-enumeration="inclusive" user:ui-marker="enumerate" />
+          </filter>
+          <slices>
+            <column>[AnnualDS].[Calculation_SelectedYear]</column>
+            <column>[AnnualDS].[Calculation_SelectedCrimeType]</column>
+          </slices>
+          <aggregation value="true" />
+        </view>
+        <style>
+          <style-rule element="worksheet">
+            <format attr="font-family" value="Tableau Book" />
+            <format attr="color" value="#243447" />
+            <format attr="display-field-labels" scope="rows" value="false" />
+            <format attr="display-field-labels" scope="cols" value="false" />
+          </style-rule>
+          <style-rule element="gridline">
+            <format attr="line-visibility" scope="rows" value="off" />
+            <format attr="line-visibility" scope="cols" value="off" />
+          </style-rule>
+          <style-rule element="axis">
+            <format attr="line-visibility" scope="rows" value="off" />
+            <format attr="line-visibility" scope="cols" value="off" />
+          </style-rule>
+          <style-rule element="cell">
+            <format attr="font-family" value="Tableau Semibold" />
+            <format attr="font-size" value="26" />
+            <format attr="font-weight" value="bold" />
+            <format attr="color" value="#17324D" />
+            <format attr="text-align" value="center" />
+            <format attr="vertical-align" value="middle" />
+          </style-rule>
+        </style>
+        <panes>
+          <pane selection-relaxation-option="selection-relaxation-disallow">
+            <view>
+              <breakdown value="auto" />
+            </view>
+            <mark class="Text" />
+            <encodings>
+              <text column="[AnnualDS].[sum:reported_incident_count:qk]" />
+            </encodings>
+            <customized-tooltip>
+              <formatted-text>
+                <run fontname="Tableau Medium">Reported incident count for the selected complete calendar year and crime-type scope.</run>
+              </formatted-text>
+            </customized-tooltip>
+            <style>
+              <style-rule element="mark">
+                <format attr="mark-labels-show" value="true" />
+                <format attr="mark-labels-cull" value="true" />
+              </style-rule>
+              <style-rule element="datalabel">
+                <format attr="font-family" value="Tableau Semibold" />
+                <format attr="font-size" value="26" />
+                <format attr="color" value="#17324D" />
+              </style-rule>
+            </style>
+          </pane>
+        </panes>
+        <rows />
+        <cols />
+        <tooltip-style tooltip-mode="none" />
+      </table>
+    </worksheet>
+    <worksheet name="Arrest Percentage">
+      <layout-options>
+        <title>
+          <formatted-text>
+            <run bold="true" fontcolor="#243447" fontname="Tableau Semibold" fontsize="12">Arrest Percentage</run>
+          </formatted-text>
+        </title>
+      </layout-options>
+      <table>
+        <view>
+          <datasources>
+            <datasource caption="Executive Category Year" name="AnnualDS" />
+            <datasource name="Parameters" />
+          </datasources>
+          <datasource-dependencies datasource="AnnualDS">
+            <column datatype="integer" name="[crime_year]" role="measure" type="quantitative" />
+            <column datatype="string" name="[primary_type]" role="dimension" type="nominal" />
+            <column caption="Selected Year Filter" datatype="boolean" name="[Calculation_SelectedYear]" role="dimension" type="nominal">
+              <calculation class="tableau" formula="STR([crime_year]) = [Parameters].[pSelectedYear]" />
+            </column>
+            <column caption="Selected Crime Type Filter" datatype="boolean" name="[Calculation_SelectedCrimeType]" role="dimension" type="nominal">
+              <calculation class="tableau" formula="[Parameters].[pCrimeType] = &quot;All Crime Types&quot; OR [primary_type] = [Parameters].[pCrimeType]" />
+            </column>
+            <column caption="Weighted Arrest Percentage" datatype="real" name="[Calculation_ArrestPercentage]" role="measure" type="quantitative" default-format="n#,##0.0&quot;%&quot;;-#,##0.0&quot;%&quot;">
+              <calculation class="tableau" formula="IF SUM([arrest_indicator_denominator]) = 0 THEN NULL ELSE 100.0 * SUM([arrest_count]) / SUM([arrest_indicator_denominator]) END" />
+            </column>
+            <column-instance column="[Calculation_ArrestPercentage]" derivation="User" name="[usr:Calculation_ArrestPercentage:qk]" pivot="key" type="quantitative" />
+          </datasource-dependencies>
+          <datasource-dependencies datasource="Parameters">
+            <column caption="Year" datatype="string" name="[pSelectedYear]" param-domain-type="list" role="measure" type="nominal" value="&quot;2025&quot;">
+              <calculation class="tableau" formula="&quot;2025&quot;" />
+            </column>
+            <column caption="Crime Type" datatype="string" name="[pCrimeType]" param-domain-type="list" role="measure" type="nominal" value="&quot;All Crime Types&quot;">
+              <calculation class="tableau" formula="&quot;All Crime Types&quot;" />
+            </column>
+          </datasource-dependencies>
+          <filter class="categorical" column="[AnnualDS].[Calculation_SelectedYear]">
+            <groupfilter function="member" level="[Calculation_SelectedYear]" member="true" user:ui-domain="database" user:ui-enumeration="inclusive" user:ui-marker="enumerate" />
+          </filter>
+          <filter class="categorical" column="[AnnualDS].[Calculation_SelectedCrimeType]">
+            <groupfilter function="member" level="[Calculation_SelectedCrimeType]" member="true" user:ui-domain="database" user:ui-enumeration="inclusive" user:ui-marker="enumerate" />
+          </filter>
+          <slices>
+            <column>[AnnualDS].[Calculation_SelectedYear]</column>
+            <column>[AnnualDS].[Calculation_SelectedCrimeType]</column>
+          </slices>
+          <aggregation value="true" />
+        </view>
+        <style>
+          <style-rule element="worksheet">
+            <format attr="font-family" value="Tableau Book" />
+            <format attr="color" value="#243447" />
+            <format attr="display-field-labels" scope="rows" value="false" />
+            <format attr="display-field-labels" scope="cols" value="false" />
+          </style-rule>
+          <style-rule element="gridline">
+            <format attr="line-visibility" scope="rows" value="off" />
+            <format attr="line-visibility" scope="cols" value="off" />
+          </style-rule>
+          <style-rule element="axis">
+            <format attr="line-visibility" scope="rows" value="off" />
+            <format attr="line-visibility" scope="cols" value="off" />
+          </style-rule>
+          <style-rule element="cell">
+            <format attr="text-format" value="n#,##0.0&quot;%&quot;;-#,##0.0&quot;%&quot;" />
+            <format attr="font-family" value="Tableau Semibold" />
+            <format attr="font-size" value="26" />
+            <format attr="font-weight" value="bold" />
+            <format attr="color" value="#17324D" />
+            <format attr="text-align" value="center" />
+            <format attr="vertical-align" value="middle" />
+          </style-rule>
+        </style>
+        <panes>
+          <pane selection-relaxation-option="selection-relaxation-disallow">
+            <view>
+              <breakdown value="auto" />
+            </view>
+            <mark class="Text" />
+            <encodings>
+              <text column="[AnnualDS].[usr:Calculation_ArrestPercentage:qk]" />
+            </encodings>
+            <customized-tooltip>
+              <formatted-text>
+                <run fontname="Tableau Medium">Share of records marked arrest=true. This is not a clearance or conviction rate.</run>
+              </formatted-text>
+            </customized-tooltip>
+            <style>
+              <style-rule element="mark">
+                <format attr="mark-labels-show" value="true" />
+                <format attr="mark-labels-cull" value="true" />
+              </style-rule>
+              <style-rule element="datalabel">
+                <format attr="font-family" value="Tableau Semibold" />
+                <format attr="font-size" value="26" />
+                <format attr="color" value="#17324D" />
+              </style-rule>
+            </style>
+          </pane>
+        </panes>
+        <rows />
+        <cols />
+        <tooltip-style tooltip-mode="none" />
+      </table>
+    </worksheet>
+    <worksheet name="Domestic Incident Percentage">
+      <layout-options>
+        <title>
+          <formatted-text>
+            <run bold="true" fontcolor="#243447" fontname="Tableau Semibold" fontsize="12">Domestic Incident Percentage</run>
+          </formatted-text>
+        </title>
+      </layout-options>
+      <table>
+        <view>
+          <datasources>
+            <datasource caption="Executive Category Year" name="AnnualDS" />
+            <datasource name="Parameters" />
+          </datasources>
+          <datasource-dependencies datasource="AnnualDS">
+            <column datatype="integer" name="[crime_year]" role="measure" type="quantitative" />
+            <column datatype="string" name="[primary_type]" role="dimension" type="nominal" />
+            <column caption="Selected Year Filter" datatype="boolean" name="[Calculation_SelectedYear]" role="dimension" type="nominal">
+              <calculation class="tableau" formula="STR([crime_year]) = [Parameters].[pSelectedYear]" />
+            </column>
+            <column caption="Selected Crime Type Filter" datatype="boolean" name="[Calculation_SelectedCrimeType]" role="dimension" type="nominal">
+              <calculation class="tableau" formula="[Parameters].[pCrimeType] = &quot;All Crime Types&quot; OR [primary_type] = [Parameters].[pCrimeType]" />
+            </column>
+            <column caption="Weighted Domestic Incident Percentage" datatype="real" name="[Calculation_DomesticPercentage]" role="measure" type="quantitative" default-format="n#,##0.0&quot;%&quot;;-#,##0.0&quot;%&quot;">
+              <calculation class="tableau" formula="IF SUM([domestic_indicator_denominator]) = 0 THEN NULL ELSE 100.0 * SUM([domestic_count]) / SUM([domestic_indicator_denominator]) END" />
+            </column>
+            <column-instance column="[Calculation_DomesticPercentage]" derivation="User" name="[usr:Calculation_DomesticPercentage:qk]" pivot="key" type="quantitative" />
+          </datasource-dependencies>
+          <datasource-dependencies datasource="Parameters">
+            <column caption="Year" datatype="string" name="[pSelectedYear]" param-domain-type="list" role="measure" type="nominal" value="&quot;2025&quot;">
+              <calculation class="tableau" formula="&quot;2025&quot;" />
+            </column>
+            <column caption="Crime Type" datatype="string" name="[pCrimeType]" param-domain-type="list" role="measure" type="nominal" value="&quot;All Crime Types&quot;">
+              <calculation class="tableau" formula="&quot;All Crime Types&quot;" />
+            </column>
+          </datasource-dependencies>
+          <filter class="categorical" column="[AnnualDS].[Calculation_SelectedYear]">
+            <groupfilter function="member" level="[Calculation_SelectedYear]" member="true" user:ui-domain="database" user:ui-enumeration="inclusive" user:ui-marker="enumerate" />
+          </filter>
+          <filter class="categorical" column="[AnnualDS].[Calculation_SelectedCrimeType]">
+            <groupfilter function="member" level="[Calculation_SelectedCrimeType]" member="true" user:ui-domain="database" user:ui-enumeration="inclusive" user:ui-marker="enumerate" />
+          </filter>
+          <slices>
+            <column>[AnnualDS].[Calculation_SelectedYear]</column>
+            <column>[AnnualDS].[Calculation_SelectedCrimeType]</column>
+          </slices>
+          <aggregation value="true" />
+        </view>
+        <style>
+          <style-rule element="worksheet">
+            <format attr="font-family" value="Tableau Book" />
+            <format attr="color" value="#243447" />
+            <format attr="display-field-labels" scope="rows" value="false" />
+            <format attr="display-field-labels" scope="cols" value="false" />
+          </style-rule>
+          <style-rule element="gridline">
+            <format attr="line-visibility" scope="rows" value="off" />
+            <format attr="line-visibility" scope="cols" value="off" />
+          </style-rule>
+          <style-rule element="axis">
+            <format attr="line-visibility" scope="rows" value="off" />
+            <format attr="line-visibility" scope="cols" value="off" />
+          </style-rule>
+          <style-rule element="cell">
+            <format attr="text-format" value="n#,##0.0&quot;%&quot;;-#,##0.0&quot;%&quot;" />
+            <format attr="font-family" value="Tableau Semibold" />
+            <format attr="font-size" value="26" />
+            <format attr="font-weight" value="bold" />
+            <format attr="color" value="#17324D" />
+            <format attr="text-align" value="center" />
+            <format attr="vertical-align" value="middle" />
+          </style-rule>
+        </style>
+        <panes>
+          <pane selection-relaxation-option="selection-relaxation-disallow">
+            <view>
+              <breakdown value="auto" />
+            </view>
+            <mark class="Text" />
+            <encodings>
+              <text column="[AnnualDS].[usr:Calculation_DomesticPercentage:qk]" />
+            </encodings>
+            <customized-tooltip>
+              <formatted-text>
+                <run fontname="Tableau Medium">Share of reported incidents marked domestic=true for the selected scope.</run>
+              </formatted-text>
+            </customized-tooltip>
+            <style>
+              <style-rule element="mark">
+                <format attr="mark-labels-show" value="true" />
+                <format attr="mark-labels-cull" value="true" />
+              </style-rule>
+              <style-rule element="datalabel">
+                <format attr="font-family" value="Tableau Semibold" />
+                <format attr="font-size" value="26" />
+                <format attr="color" value="#17324D" />
+              </style-rule>
+            </style>
+          </pane>
+        </panes>
+        <rows />
+        <cols />
+        <tooltip-style tooltip-mode="none" />
+      </table>
+    </worksheet>
+    <worksheet name="Yearly Crime Trend">
+      <layout-options>
+        <title>
+          <formatted-text>
+            <run bold="true" fontcolor="#243447" fontname="Tableau Semibold" fontsize="12">Reported Incidents by Year</run>
+          </formatted-text>
+        </title>
+      </layout-options>
+      <table>
+        <view>
+          <datasources>
+            <datasource caption="Executive Category Year" name="AnnualDS" />
+            <datasource name="Parameters" />
+          </datasources>
+          <datasource-dependencies datasource="AnnualDS">
+            <column datatype="integer" name="[crime_year]" role="measure" type="quantitative" />
+            <column datatype="string" name="[primary_type]" role="dimension" type="nominal" />
+            <column datatype="integer" name="[reported_incident_count]" role="measure" type="quantitative" caption="Reported Incidents" />
+            <column caption="Selected Crime Type Filter" datatype="boolean" name="[Calculation_SelectedCrimeType]" role="dimension" type="nominal">
+              <calculation class="tableau" formula="[Parameters].[pCrimeType] = &quot;All Crime Types&quot; OR [primary_type] = [Parameters].[pCrimeType]" />
+            </column>
+            <column-instance column="[crime_year]" derivation="None" name="[none:crime_year:ok]" pivot="key" type="ordinal" />
+            <column-instance column="[reported_incident_count]" derivation="Sum" name="[sum:reported_incident_count:qk]" pivot="key" type="quantitative" />
+          </datasource-dependencies>
+          <datasource-dependencies datasource="Parameters">
+            <column caption="Year" datatype="string" name="[pSelectedYear]" param-domain-type="list" role="measure" type="nominal" value="&quot;2025&quot;">
+              <calculation class="tableau" formula="&quot;2025&quot;" />
+            </column>
+            <column caption="Crime Type" datatype="string" name="[pCrimeType]" param-domain-type="list" role="measure" type="nominal" value="&quot;All Crime Types&quot;">
+              <calculation class="tableau" formula="&quot;All Crime Types&quot;" />
+            </column>
+          </datasource-dependencies>
+          <filter class="categorical" column="[AnnualDS].[Calculation_SelectedCrimeType]">
+            <groupfilter function="member" level="[Calculation_SelectedCrimeType]" member="true" user:ui-domain="database" user:ui-enumeration="inclusive" user:ui-marker="enumerate" />
+          </filter>
+          <slices>
+            <column>[AnnualDS].[Calculation_SelectedCrimeType]</column>
+          </slices>
+          <aggregation value="true" />
+        </view>
+        <style>
+          <style-rule element="worksheet">
+            <format attr="font-family" value="Tableau Book" />
+            <format attr="color" value="#243447" />
+            <format attr="display-field-labels" scope="rows" value="false" />
+            <format attr="display-field-labels" scope="cols" value="false" />
+          </style-rule>
+          <style-rule element="gridline">
+            <format attr="line-visibility" scope="rows" value="off" />
+            <format attr="line-visibility" scope="cols" value="off" />
+          </style-rule>
+        </style>
+        <panes>
+          <pane selection-relaxation-option="selection-relaxation-disallow">
+            <view>
+              <breakdown value="auto" />
+            </view>
+            <mark class="Line" />
+            <encodings>
+              <text column="[AnnualDS].[sum:reported_incident_count:qk]" />
+            </encodings>
+            <customized-tooltip>
+              <formatted-text>
+                <run fontcolor="#666666">Year: </run>
+                <run bold="true">&lt;[AnnualDS].[none:crime_year:ok]&gt;</run>
+                <run fontcolor="#666666">
+Reported incidents: </run>
+                <run bold="true">&lt;[AnnualDS].[sum:reported_incident_count:qk]&gt;</run>
+              </formatted-text>
+            </customized-tooltip>
+            <style>
+              <style-rule element="mark">
+                <format attr="mark-labels-show" value="true" />
+                <format attr="mark-labels-cull" value="true" />
+              </style-rule>
+              <style-rule element="datalabel">
+                <format attr="font-family" value="Tableau Semibold" />
+                <format attr="font-size" value="9" />
+                <format attr="color" value="#17324D" />
+              </style-rule>
+            </style>
+          </pane>
+        </panes>
+        <rows>[AnnualDS].[sum:reported_incident_count:qk]</rows>
+        <cols>[AnnualDS].[none:crime_year:ok]</cols>
+      </table>
+    </worksheet>
+    <worksheet name="Crime Category Distribution">
+      <layout-options>
+        <title>
+          <formatted-text>
+            <run bold="true" fontcolor="#243447" fontname="Tableau Semibold" fontsize="12">Top Crime Categories by Reported Incidents</run>
+          </formatted-text>
+        </title>
+      </layout-options>
+      <table>
+        <view>
+          <datasources>
+            <datasource caption="Executive Category Year" name="AnnualDS" />
+            <datasource name="Parameters" />
+          </datasources>
+          <datasource-dependencies datasource="AnnualDS">
+            <column datatype="integer" name="[crime_year]" role="measure" type="quantitative" />
+            <column datatype="string" name="[primary_type]" role="dimension" type="nominal" />
+            <column datatype="integer" name="[reported_incident_count]" role="measure" type="quantitative" caption="Reported Incidents" />
+            <column datatype="integer" name="[incident_volume_rank]" role="measure" type="quantitative" />
+            <column caption="Selected Year Filter" datatype="boolean" name="[Calculation_SelectedYear]" role="dimension" type="nominal">
+              <calculation class="tableau" formula="STR([crime_year]) = [Parameters].[pSelectedYear]" />
+            </column>
+            <column caption="Selected Crime Type Filter" datatype="boolean" name="[Calculation_SelectedCrimeType]" role="dimension" type="nominal">
+              <calculation class="tableau" formula="[Parameters].[pCrimeType] = &quot;All Crime Types&quot; OR [primary_type] = [Parameters].[pCrimeType]" />
+            </column>
+            <column caption="Show Category in Distribution" datatype="boolean" name="[Calculation_CategoryDisplay]" role="dimension" type="nominal">
+              <calculation class="tableau" formula="[Parameters].[pCrimeType] &lt;&gt; &quot;All Crime Types&quot; OR [incident_volume_rank] &lt;= 10" />
+            </column>
+            <column-instance column="[primary_type]" derivation="None" name="[none:primary_type:nk]" pivot="key" type="nominal" />
+            <column-instance column="[reported_incident_count]" derivation="Sum" name="[sum:reported_incident_count:qk]" pivot="key" type="quantitative" />
+          </datasource-dependencies>
+          <datasource-dependencies datasource="Parameters">
+            <column caption="Year" datatype="string" name="[pSelectedYear]" param-domain-type="list" role="measure" type="nominal" value="&quot;2025&quot;">
+              <calculation class="tableau" formula="&quot;2025&quot;" />
+            </column>
+            <column caption="Crime Type" datatype="string" name="[pCrimeType]" param-domain-type="list" role="measure" type="nominal" value="&quot;All Crime Types&quot;">
+              <calculation class="tableau" formula="&quot;All Crime Types&quot;" />
+            </column>
+          </datasource-dependencies>
+          <filter class="categorical" column="[AnnualDS].[Calculation_SelectedYear]">
+            <groupfilter function="member" level="[Calculation_SelectedYear]" member="true" user:ui-domain="database" user:ui-enumeration="inclusive" user:ui-marker="enumerate" />
+          </filter>
+          <filter class="categorical" column="[AnnualDS].[Calculation_SelectedCrimeType]">
+            <groupfilter function="member" level="[Calculation_SelectedCrimeType]" member="true" user:ui-domain="database" user:ui-enumeration="inclusive" user:ui-marker="enumerate" />
+          </filter>
+          <filter class="categorical" column="[AnnualDS].[Calculation_CategoryDisplay]">
+            <groupfilter function="member" level="[Calculation_CategoryDisplay]" member="true" user:ui-domain="database" user:ui-enumeration="inclusive" user:ui-marker="enumerate" />
+          </filter>
+          <sort class="computed" column="[AnnualDS].[none:primary_type:nk]" direction="DESC" using="[AnnualDS].[sum:reported_incident_count:qk]" />
+          <slices>
+            <column>[AnnualDS].[Calculation_SelectedYear]</column>
+            <column>[AnnualDS].[Calculation_SelectedCrimeType]</column>
+            <column>[AnnualDS].[Calculation_CategoryDisplay]</column>
+          </slices>
+          <aggregation value="true" />
+        </view>
+        <style>
+          <style-rule element="worksheet">
+            <format attr="font-family" value="Tableau Book" />
+            <format attr="color" value="#243447" />
+            <format attr="display-field-labels" scope="rows" value="false" />
+            <format attr="display-field-labels" scope="cols" value="false" />
+          </style-rule>
+          <style-rule element="gridline">
+            <format attr="line-visibility" scope="rows" value="off" />
+            <format attr="line-visibility" scope="cols" value="off" />
+          </style-rule>
+        </style>
+        <panes>
+          <pane selection-relaxation-option="selection-relaxation-disallow">
+            <view>
+              <breakdown value="auto" />
+            </view>
+            <mark class="Bar" />
+            <encodings>
+              <text column="[AnnualDS].[sum:reported_incident_count:qk]" />
+            </encodings>
+            <customized-tooltip>
+              <formatted-text>
+                <run fontcolor="#666666">Crime type: </run>
+                <run bold="true">&lt;[AnnualDS].[none:primary_type:nk]&gt;</run>
+                <run fontcolor="#666666">
+Reported incidents: </run>
+                <run bold="true">&lt;[AnnualDS].[sum:reported_incident_count:qk]&gt;</run>
+              </formatted-text>
+            </customized-tooltip>
+            <style>
+              <style-rule element="mark">
+                <format attr="mark-labels-show" value="true" />
+                <format attr="mark-labels-cull" value="true" />
+              </style-rule>
+            </style>
+          </pane>
+        </panes>
+        <rows>[AnnualDS].[none:primary_type:nk]</rows>
+        <cols>[AnnualDS].[sum:reported_incident_count:qk]</cols>
+      </table>
+    </worksheet>
+    <worksheet name="Monthly Crime Trend">
+      <layout-options>
+        <title>
+          <formatted-text>
+            <run bold="true" fontcolor="#243447" fontname="Tableau Semibold" fontsize="12">Monthly Reported-Incident Trend</run>
+          </formatted-text>
+        </title>
+      </layout-options>
+      <table>
+        <view>
+          <datasources>
+            <datasource caption="Executive Month Category" name="MonthlyDS" />
+            <datasource name="Parameters" />
+          </datasources>
+          <datasource-dependencies datasource="MonthlyDS">
+            <column datatype="date" name="[month_start]" role="dimension" type="ordinal" />
+            <column datatype="integer" name="[crime_year]" role="measure" type="quantitative" />
+            <column datatype="string" name="[primary_type]" role="dimension" type="nominal" />
+            <column datatype="integer" name="[reported_incident_count]" role="measure" type="quantitative" caption="Reported Incidents" />
+            <column datatype="real" name="[trailing_three_month_average]" role="measure" type="quantitative" />
+            <column caption="Selected Year Filter" datatype="boolean" name="[Calculation_SelectedYear]" role="dimension" type="nominal">
+              <calculation class="tableau" formula="STR([crime_year]) = [Parameters].[pSelectedYear]" />
+            </column>
+            <column caption="Selected Crime Type Filter" datatype="boolean" name="[Calculation_SelectedCrimeType]" role="dimension" type="nominal">
+              <calculation class="tableau" formula="[Parameters].[pCrimeType] = &quot;All Crime Types&quot; OR [primary_type] = [Parameters].[pCrimeType]" />
+            </column>
+            <column-instance column="[month_start]" derivation="Month-Trunc" name="[tmn:month_start:ok]" pivot="key" type="ordinal" />
+            <column-instance column="[reported_incident_count]" derivation="Sum" name="[sum:reported_incident_count:qk]" pivot="key" type="quantitative" />
+            <column-instance column="[trailing_three_month_average]" derivation="Sum" name="[sum:trailing_three_month_average:qk]" pivot="key" type="quantitative" />
+          </datasource-dependencies>
+          <datasource-dependencies datasource="Parameters">
+            <column caption="Year" datatype="string" name="[pSelectedYear]" param-domain-type="list" role="measure" type="nominal" value="&quot;2025&quot;">
+              <calculation class="tableau" formula="&quot;2025&quot;" />
+            </column>
+            <column caption="Crime Type" datatype="string" name="[pCrimeType]" param-domain-type="list" role="measure" type="nominal" value="&quot;All Crime Types&quot;">
+              <calculation class="tableau" formula="&quot;All Crime Types&quot;" />
+            </column>
+          </datasource-dependencies>
+          <filter class="categorical" column="[MonthlyDS].[Calculation_SelectedYear]">
+            <groupfilter function="member" level="[Calculation_SelectedYear]" member="true" user:ui-domain="database" user:ui-enumeration="inclusive" user:ui-marker="enumerate" />
+          </filter>
+          <filter class="categorical" column="[MonthlyDS].[Calculation_SelectedCrimeType]">
+            <groupfilter function="member" level="[Calculation_SelectedCrimeType]" member="true" user:ui-domain="database" user:ui-enumeration="inclusive" user:ui-marker="enumerate" />
+          </filter>
+          <slices>
+            <column>[MonthlyDS].[Calculation_SelectedYear]</column>
+            <column>[MonthlyDS].[Calculation_SelectedCrimeType]</column>
+          </slices>
+          <aggregation value="true" />
+        </view>
+        <style>
+          <style-rule element="worksheet">
+            <format attr="font-family" value="Tableau Book" />
+            <format attr="color" value="#243447" />
+            <format attr="display-field-labels" scope="rows" value="false" />
+            <format attr="display-field-labels" scope="cols" value="false" />
+          </style-rule>
+          <style-rule element="gridline">
+            <format attr="line-visibility" scope="rows" value="off" />
+            <format attr="line-visibility" scope="cols" value="off" />
+          </style-rule>
+        </style>
+        <panes>
+          <pane selection-relaxation-option="selection-relaxation-disallow">
+            <view>
+              <breakdown value="auto" />
+            </view>
+            <mark class="Line" />
+            <encodings />
+            <customized-tooltip>
+              <formatted-text>
+                <run fontcolor="#666666">Month: </run>
+                <run bold="true">&lt;[MonthlyDS].[tmn:month_start:ok]&gt;</run>
+                <run fontcolor="#666666">
+Reported incidents: </run>
+                <run bold="true">&lt;[MonthlyDS].[sum:reported_incident_count:qk]&gt;</run>
+                <run fontcolor="#666666">
+Trailing 3-month average: </run>
+                <run bold="true">&lt;[MonthlyDS].[sum:trailing_three_month_average:qk]&gt;</run>
+              </formatted-text>
+            </customized-tooltip>
+            <style>
+              <style-rule element="mark">
+                <format attr="mark-labels-show" value="false" />
+                <format attr="mark-labels-cull" value="true" />
+              </style-rule>
+            </style>
+          </pane>
+        </panes>
+        <rows>[MonthlyDS].[sum:reported_incident_count:qk]</rows>
+        <cols>[MonthlyDS].[tmn:month_start:ok]</cols>
+      </table>
+    </worksheet>
+  </worksheets>
+  <dashboards>
+    <dashboard name="Executive Overview">
+      <layout-options>
+        <title>
+          <formatted-text>
+            <run bold="true" fontcolor="#17324D" fontname="Tableau Semibold" fontsize="22">Chicago Crime Analytics — Executive Overview</run>
+          </formatted-text>
+        </title>
+      </layout-options>
+      <style>
+        <style-rule element="dashboard">
+          <format attr="background-color" value="#F5F7FA" />
+        </style-rule>
+      </style>
+      <size maxheight="850" maxwidth="1360" minheight="850" minwidth="1360" sizing-mode="fixed" />
+      <datasources>
+        <datasource name="Parameters" />
+      </datasources>
+      <datasource-dependencies datasource="Parameters">
+        <column caption="Year" datatype="string" name="[pSelectedYear]" param-domain-type="list" role="measure" type="nominal" value="&quot;2025&quot;">
+          <calculation class="tableau" formula="&quot;2025&quot;" />
+        </column>
+        <column caption="Crime Type" datatype="string" name="[pCrimeType]" param-domain-type="list" role="measure" type="nominal" value="&quot;All Crime Types&quot;">
+          <calculation class="tableau" formula="&quot;All Crime Types&quot;" />
+        </column>
+      </datasource-dependencies>
+      <zones>
+        <zone h="100000" id="1" type-v2="layout-basic" w="100000" x="0" y="0">
+          <zone h="7200" id="2" type-v2="title" w="71000" x="1800" y="1200" />
+          <zone h="3600" id="3" type-v2="text" w="71000" x="1800" y="7800">
+            <formatted-text>
+              <run fontcolor="#5B6B7C" fontname="Tableau Book" fontsize="10">Complete calendar years 2023–2025 | Official City of Chicago Crimes dataset (ijzp-q8t2)</run>
+            </formatted-text>
+          </zone>
+          <zone custom-title="true" h="5200" id="4" mode="compact" param="[Parameters].[pSelectedYear]" type-v2="paramctrl" w="11500" x="74500" y="2200">
+            <formatted-text>
+              <run bold="true" fontcolor="#243447" fontsize="10">Year</run>
+            </formatted-text>
+          </zone>
+          <zone custom-title="true" h="5200" id="5" mode="compact" param="[Parameters].[pCrimeType]" type-v2="paramctrl" w="12500" x="86500" y="2200">
+            <formatted-text>
+              <run bold="true" fontcolor="#243447" fontsize="10">Crime Type</run>
+            </formatted-text>
+          </zone>
+          <zone h="15000" id="6" name="Total Reported Crimes" show-title="true" w="31200" x="1800" y="13000">
+            <zone-style>
+              <format attr="background-color" value="#FFFFFF" />
+              <format attr="border-color" value="#D9E1E8" />
+              <format attr="border-style" value="solid" />
+              <format attr="border-width" value="1" />
+              <format attr="margin" value="6" />
+            </zone-style>
+          </zone>
+          <zone h="15000" id="7" name="Arrest Percentage" show-title="true" w="31200" x="34400" y="13000">
+            <zone-style>
+              <format attr="background-color" value="#FFFFFF" />
+              <format attr="border-color" value="#D9E1E8" />
+              <format attr="border-style" value="solid" />
+              <format attr="border-width" value="1" />
+              <format attr="margin" value="6" />
+            </zone-style>
+          </zone>
+          <zone h="15000" id="8" name="Domestic Incident Percentage" show-title="true" w="31200" x="67000" y="13000">
+            <zone-style>
+              <format attr="background-color" value="#FFFFFF" />
+              <format attr="border-color" value="#D9E1E8" />
+              <format attr="border-style" value="solid" />
+              <format attr="border-width" value="1" />
+              <format attr="margin" value="6" />
+            </zone-style>
+          </zone>
+          <zone h="29000" id="9" name="Yearly Crime Trend" show-title="true" w="47000" x="1800" y="30000">
+            <zone-style>
+              <format attr="background-color" value="#FFFFFF" />
+              <format attr="border-color" value="#D9E1E8" />
+              <format attr="border-style" value="solid" />
+              <format attr="border-width" value="1" />
+              <format attr="margin" value="6" />
+            </zone-style>
+          </zone>
+          <zone h="29000" id="10" name="Crime Category Distribution" show-title="true" w="48200" x="50400" y="30000">
+            <zone-style>
+              <format attr="background-color" value="#FFFFFF" />
+              <format attr="border-color" value="#D9E1E8" />
+              <format attr="border-style" value="solid" />
+              <format attr="border-width" value="1" />
+              <format attr="margin" value="6" />
+            </zone-style>
+          </zone>
+          <zone h="28000" id="11" name="Monthly Crime Trend" show-title="true" w="96800" x="1800" y="61000">
+            <zone-style>
+              <format attr="background-color" value="#FFFFFF" />
+              <format attr="border-color" value="#D9E1E8" />
+              <format attr="border-style" value="solid" />
+              <format attr="border-width" value="1" />
+              <format attr="margin" value="6" />
+            </zone-style>
+          </zone>
+          <zone h="7800" id="12" type-v2="text" w="96800" x="1800" y="91000">
+            <formatted-text>
+              <run fontcolor="#4D5F70" fontsize="9">Source extract: Sep 25, 2026 | Incident dates: Jan 1, 2023–Dec 31, 2025 | Complete years
+Reported incident counts are not population-normalized crime rates. Results are descriptive and do not establish causation. Arrest percentage is the share of records marked arrest=true; it is not a clearance or conviction rate.</run>
+            </formatted-text>
+          </zone>
+        </zone>
+      </zones>
+    </dashboard>
+  </dashboards>
+  <windows source-height="32">
+    <window class="dashboard" maximized="true" name="Executive Overview">
+      <viewpoints>
+        <viewpoint name="Total Reported Crimes">
+          <zoom type="entire-view" />
+        </viewpoint>
+        <viewpoint name="Arrest Percentage">
+          <zoom type="entire-view" />
+        </viewpoint>
+        <viewpoint name="Domestic Incident Percentage">
+          <zoom type="entire-view" />
+        </viewpoint>
+        <viewpoint name="Yearly Crime Trend">
+          <zoom type="entire-view" />
+        </viewpoint>
+        <viewpoint name="Crime Category Distribution">
+          <zoom type="entire-view" />
+        </viewpoint>
+        <viewpoint name="Monthly Crime Trend">
+          <zoom type="entire-view" />
+        </viewpoint>
+      </viewpoints>
+      <active id="-1" />
+    </window>
+  </windows>
+</workbook>

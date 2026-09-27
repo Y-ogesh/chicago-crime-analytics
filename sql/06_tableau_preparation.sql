@@ -276,6 +276,95 @@ FROM with_windows;
 COMMENT ON VIEW public.vw_tableau_monthly_patterns IS
 'Tableau temporal page: one row per complete calendar month with reported incidents, annual share, trailing-three-month average, same-month change, and weighted indicator numerators/denominators.';
 
+-- Complete month-by-primary-type grid for Page 1 filtering. Zero-count
+-- combinations remain present so every category has 12 chronological months
+-- in each complete year selected in Tableau.
+CREATE OR REPLACE VIEW public.vw_tableau_month_category AS
+WITH categories AS (
+    SELECT DISTINCT primary_type
+    FROM public.clean_chicago_crimes
+), month_category_grid AS (
+    SELECT m.month_start,
+           m.crime_year,
+           m.crime_month,
+           m.month_name,
+           m.crime_quarter,
+           m.season,
+           m.yearly_reported_incident_count,
+           c.primary_type
+    FROM public.vw_tableau_monthly_patterns AS m
+    CROSS JOIN categories AS c
+), observed AS (
+    SELECT make_date(crime_year, crime_month, 1) AS month_start,
+           primary_type,
+           COUNT(*)::bigint AS reported_incident_count,
+           COUNT(*) FILTER (WHERE arrest)::bigint AS arrest_count,
+           COUNT(arrest)::bigint AS arrest_indicator_denominator,
+           COUNT(*) FILTER (WHERE domestic)::bigint AS domestic_count,
+           COUNT(domestic)::bigint AS domestic_indicator_denominator
+    FROM public.clean_chicago_crimes
+    GROUP BY crime_year, crime_month, primary_type
+), complete_grid AS (
+    SELECT g.*,
+           COALESCE(o.reported_incident_count, 0)::bigint AS reported_incident_count,
+           COALESCE(o.arrest_count, 0)::bigint AS arrest_count,
+           COALESCE(o.arrest_indicator_denominator, 0)::bigint
+               AS arrest_indicator_denominator,
+           COALESCE(o.domestic_count, 0)::bigint AS domestic_count,
+           COALESCE(o.domestic_indicator_denominator, 0)::bigint
+               AS domestic_indicator_denominator
+    FROM month_category_grid AS g
+    LEFT JOIN observed AS o
+      ON o.month_start = g.month_start
+     AND o.primary_type = g.primary_type
+), with_windows AS (
+    SELECT c.*,
+           SUM(reported_incident_count) OVER (
+               PARTITION BY crime_year, primary_type
+           )::bigint AS yearly_category_incident_count,
+           AVG(reported_incident_count) OVER (
+               PARTITION BY primary_type
+               ORDER BY month_start
+               ROWS BETWEEN 2 PRECEDING AND CURRENT ROW
+           ) AS trailing_three_month_average,
+           LAG(reported_incident_count, 12) OVER (
+               PARTITION BY primary_type ORDER BY month_start
+           ) AS same_month_previous_year_count
+    FROM complete_grid AS c
+)
+SELECT month_start,
+       crime_year,
+       crime_month,
+       month_name,
+       crime_quarter,
+       season,
+       primary_type,
+       reported_incident_count,
+       yearly_reported_incident_count,
+       100.0 * reported_incident_count
+           / NULLIF(yearly_reported_incident_count, 0) AS percentage_of_yearly_total,
+       yearly_category_incident_count,
+       100.0 * reported_incident_count
+           / NULLIF(yearly_category_incident_count, 0) AS percentage_of_category_year_total,
+       trailing_three_month_average,
+       same_month_previous_year_count,
+       reported_incident_count - same_month_previous_year_count
+           AS same_month_absolute_change,
+       100.0 * (reported_incident_count - same_month_previous_year_count)
+           / NULLIF(same_month_previous_year_count, 0) AS same_month_percentage_change,
+       arrest_count,
+       arrest_indicator_denominator,
+       100.0 * arrest_count / NULLIF(arrest_indicator_denominator, 0)
+           AS arrest_percentage,
+       domestic_count,
+       domestic_indicator_denominator,
+       100.0 * domestic_count / NULLIF(domestic_indicator_denominator, 0)
+           AS domestic_incident_percentage
+FROM with_windows;
+
+COMMENT ON VIEW public.vw_tableau_month_category IS
+'Tableau Executive Overview monthly source: complete calendar-month by source primary-type grid with counts, weighted indicator components, annual denominators, rolling averages, and same-month changes.';
+
 CREATE OR REPLACE VIEW public.vw_tableau_time_patterns AS
 SELECT crime_year,
        day_of_week_num,
@@ -444,6 +533,66 @@ BEGIN
         RAISE EXCEPTION 'Monthly Tableau view does not reconcile';
     END IF;
 
+    IF (SELECT COUNT(*) FROM public.vw_tableau_month_category)
+       <> 36 * (SELECT COUNT(DISTINCT primary_type)
+                FROM public.clean_chicago_crimes) THEN
+        RAISE EXCEPTION 'Month/category view must contain every month/type combination';
+    END IF;
+
+    IF EXISTS (
+        SELECT crime_year, primary_type
+        FROM public.vw_tableau_month_category
+        GROUP BY crime_year, primary_type
+        HAVING COUNT(*) <> 12
+    ) THEN
+        RAISE EXCEPTION 'Every year/type combination must contain 12 months';
+    END IF;
+
+    IF EXISTS (
+        SELECT m.month_start
+        FROM public.vw_tableau_monthly_patterns AS m
+        JOIN (
+            SELECT month_start,
+                   SUM(reported_incident_count)::bigint AS reported_incident_count,
+                   SUM(arrest_count)::bigint AS arrest_count,
+                   SUM(arrest_indicator_denominator)::bigint AS arrest_denominator,
+                   SUM(domestic_count)::bigint AS domestic_count,
+                   SUM(domestic_indicator_denominator)::bigint AS domestic_denominator
+            FROM public.vw_tableau_month_category
+            GROUP BY month_start
+        ) AS c USING (month_start)
+        WHERE c.reported_incident_count <> m.reported_incident_count
+           OR c.arrest_count <> m.arrest_count
+           OR c.arrest_denominator <> m.arrest_indicator_denominator
+           OR c.domestic_count <> m.domestic_count
+           OR c.domestic_denominator <> m.domestic_indicator_denominator
+    ) THEN
+        RAISE EXCEPTION 'Month/category rollups do not reconcile to monthly totals';
+    END IF;
+
+    IF EXISTS (
+        SELECT y.crime_year, y.primary_type
+        FROM public.vw_tableau_crime_arrest_year AS y
+        JOIN (
+            SELECT crime_year,
+                   primary_type,
+                   SUM(reported_incident_count)::bigint AS reported_incident_count,
+                   SUM(arrest_count)::bigint AS arrest_count,
+                   SUM(arrest_indicator_denominator)::bigint AS arrest_denominator,
+                   SUM(domestic_count)::bigint AS domestic_count,
+                   SUM(domestic_indicator_denominator)::bigint AS domestic_denominator
+            FROM public.vw_tableau_month_category
+            GROUP BY crime_year, primary_type
+        ) AS m USING (crime_year, primary_type)
+        WHERE m.reported_incident_count <> y.reported_incident_count
+           OR m.arrest_count <> y.arrest_count
+           OR m.arrest_denominator <> y.arrest_indicator_denominator
+           OR m.domestic_count <> y.domestic_count
+           OR m.domestic_denominator <> y.domestic_indicator_denominator
+    ) THEN
+        RAISE EXCEPTION 'Month/category rollups do not reconcile to category/year totals';
+    END IF;
+
     IF (SELECT SUM(reported_incident_count) FROM public.vw_tableau_time_patterns)
        <> (SELECT COUNT(*) FROM public.clean_chicago_crimes) THEN
         RAISE EXCEPTION 'Time-pattern totals do not reconcile';
@@ -498,6 +647,7 @@ FROM (
     UNION ALL SELECT 'vw_tableau_district_year', COUNT(*) FROM public.vw_tableau_district_year
     UNION ALL SELECT 'vw_tableau_area_category_year', COUNT(*) FROM public.vw_tableau_area_category_year
     UNION ALL SELECT 'vw_tableau_monthly_patterns', COUNT(*) FROM public.vw_tableau_monthly_patterns
+    UNION ALL SELECT 'vw_tableau_month_category', COUNT(*) FROM public.vw_tableau_month_category
     UNION ALL SELECT 'vw_tableau_time_patterns', COUNT(*) FROM public.vw_tableau_time_patterns
     UNION ALL SELECT 'vw_tableau_location_time', COUNT(*) FROM public.vw_tableau_location_time
     UNION ALL SELECT 'vw_tableau_crime_arrest_year', COUNT(*) FROM public.vw_tableau_crime_arrest_year

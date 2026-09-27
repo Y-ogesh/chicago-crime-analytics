@@ -216,15 +216,15 @@ Create an efficient, validated Tableau presentation layer; provide reproducible 
 
 ### Completion evidence
 
-[`sql/06_tableau_preparation.sql`](../sql/06_tableau_preparation.sql) created nine non-materialized views in a single successful transaction and executed fail-fast validation. The views contain 3 executive-year rows, 231 community-area/year rows, 72 district/year rows, 5,395 area/category/year rows, 36 monthly rows, 504 weekday/hour/year rows, 40 location/time rows, 93 crime-type/year rows, and 2,127 descriptive coordinate-density rows. Executive and temporal totals reconciled to 761,563 clean records; community-area views reconciled to 760,496 eligible records; coordinate density reconciled to 754,866 mappable records; crime-type arrest and domestic numerators also reconciled.
+[`sql/06_tableau_preparation.sql`](../sql/06_tableau_preparation.sql) originally created nine non-materialized views in a single successful transaction and executed fail-fast validation. Executive Overview preparation later added a tenth view: the complete 1,116-row month/category grid required for synchronized crime-type filtering. The presentation layer also contains 3 executive-year rows, 231 community-area/year rows, 72 district/year rows, 5,395 area/category/year rows, 36 citywide monthly rows, 504 weekday/hour/year rows, 40 location/time rows, 93 crime-type/year rows, and 2,127 descriptive coordinate-density rows. Executive, temporal, month/category, and indicator totals reconcile to 761,563 clean records; community-area views reconcile to 760,496 eligible records; coordinate density reconciles to 754,866 mappable records.
 
-[`scripts/export_tableau_data.py`](../scripts/export_tableau_data.py) executed through a read-only PostgreSQL connection and produced nine Git-ignored CSVs plus a checksum manifest under `data/processed/tableau/`. Every reloaded CSV row count matched its source view. The exact four-page visual and interaction specification, connection procedure, metric rules, and future manual validation gate are in [the Tableau dashboard plan](tableau_dashboard_plan.md).
+[`scripts/export_tableau_data.py`](../scripts/export_tableau_data.py) executes through a read-only PostgreSQL connection. Its full profile produces all ten Git-ignored presentation CSVs; its Page 1 profile produces exactly two CSVs plus a checksum manifest under `data/processed/tableau/page1/`. Every reloaded CSV row count must match its source view. The exact four-page visual and interaction specification, connection procedure, metric rules, and validation gates are in [the Tableau dashboard plan](tableau_dashboard_plan.md).
 
-One initial SQL execution encountered an existing-view column-name mismatch and rolled back before commit. The reference was corrected and the full script then completed successfully. No Tableau workbook, dashboard page, interaction, or screenshot was created or manually tested.
+One initial SQL execution encountered an existing-view column-name mismatch and rolled back before commit. The reference was corrected and the full script then completed successfully. Milestone 9A did not create a Tableau workbook; Executive Overview implementation began separately under Milestone 9B.
 
 ## Milestone 9B — Four-page interactive Tableau workbook
 
-### Status: Planned
+### Status: In Progress
 
 ### Scope
 
@@ -238,6 +238,14 @@ Build and document the four-page Tableau workbook from the Milestone 9A specific
 - Complete-year labels, counts versus percentages, data cutoff, and limitations are visible.
 - Missing-coordinate records are excluded only from coordinate maps and are disclosed through coverage metrics.
 - Dashboard completion is claimed only after the workbook is opened and tested in Tableau; screenshots reflect actual functionality.
+
+### Executive Overview implementation checkpoint — Tableau validation complete
+
+Executive Overview Page 1 is generated and validated in Tableau Desktop, but Milestone 9B remains **In Progress** because the other three planned pages are not implemented. [`sql/07_tableau_page1_validation.sql`](../sql/07_tableau_page1_validation.sql) provides read-only KPI, category, monthly/category, and filter-test benchmarks. `python scripts/export_tableau_data.py --profile page1` reproducibly creates exactly two Git-ignored CSV sources: 93 year/category rows and 1,116 month/category rows. Both sources contain `crime_year` and `primary_type`, reconcile to PostgreSQL, and remain independent to prevent double counting.
+
+[`scripts/generate_tableau_workbook.py`](../scripts/generate_tableau_workbook.py) writes [`tableau/chicago_crime_analytics.twb`](../tableau/chicago_crime_analytics.twb). The workbook defines the two independent text-file sources, workbook-wide Year and Crime Type parameters, six Executive Overview worksheets, and one fixed-size 1,360 × 850 dashboard. Generation validates XML well-formedness, relative file references, source row counts and checksums, parameter defaults, canonical filter and indicator calculations, sheet/dashboard membership, annual-versus-monthly reconciliation, and the documented 2025 citywide and Theft benchmarks.
+
+Tableau Desktop Free Edition 2026.2.3 on Apple silicon initially rejected unsupported workbook markup during development; each reported element was removed before acceptance. The final file completed Tableau's `workspace.open-workbook` path, dashboard layout, and worksheet model computation without workbook-scoped error or fatal log entries. Visual validation confirmed the enlarged KPI typography, ungrouped `2025` display, human-readable axes, labeled annual trend, parameter-aware top-10 category view, and readable limitation footer. At Year = 2025, All Crime Types rendered 238,086 incidents, 16.1% arrest, and 19.0% domestic; THEFT rendered 55,198, 9.0%, and 5.1%. The yearly trend retained 2023–2025, both independent sources were visible in Tableau's Data menu, and Tableau-exported PNG evidence is stored under `images/tableau/`. The other three dashboard pages remain planned, so full Milestone 9B completion is not claimed.
 
 ## Milestone 10 — Findings and resource-planning recommendations
 

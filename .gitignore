@@ -49,6 +49,7 @@ data/processed/*
 *.tfl
 *.tflx
 *.twbx
+*.twbr
 
 # Large exports and archives
 exports/
@@ -66,4 +67,3 @@ temp/
 *.tmp
 *.swp
 *~
-

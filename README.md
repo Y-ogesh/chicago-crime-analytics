@@ -1,6 +1,6 @@
 # Chicago Crime Analytics
 
-An end-to-end data analytics and business intelligence portfolio project built from official City of Chicago reported-crime data. The project uses reproducible PostgreSQL, SQL, and Python workflows to examine temporal, geographic, seasonal, crime-category, domestic-incident, and arrest patterns. The acquired source extract contains 761,563 records across the three complete calendar years 2023–2025. The validated Tableau presentation layer and four-page dashboard specification are complete; the Tableau workbook itself and evidence-backed resource-planning recommendations remain planned deliverables.
+An end-to-end data analytics and business intelligence portfolio project built from official City of Chicago reported-crime data. The project uses reproducible PostgreSQL, SQL, and Python workflows to examine temporal, geographic, seasonal, crime-category, domestic-incident, and arrest patterns. The acquired source extract contains 761,563 records across the three complete calendar years 2023–2025. The validated Tableau presentation layer and four-page dashboard specification are complete. Executive Overview Page 1 is generated and validated in Tableau Desktop; the other dashboard pages and evidence-backed resource-planning recommendations remain planned deliverables.
 
 ## Project objective
 
@@ -52,7 +52,7 @@ Python QA and EDA                         Tableau extracts/dashboard
               documented findings and metrics
 ```
 
-The repository foundation, data pipeline, SQL/Python analysis, descriptive geographic analysis, and Tableau data preparation are complete. The interactive Tableau workbook has not been created or manually tested. Resource-planning recommendations remain planned.
+The repository foundation, data pipeline, SQL/Python analysis, descriptive geographic analysis, and Tableau data preparation are complete. Executive Overview Page 1 has been generated as a Tableau workbook and passed XML, source-reference, PostgreSQL benchmark, Tableau load, visual-rendering, and filter-interaction checks. The remaining dashboard pages and resource-planning recommendations remain planned.
 
 ## Repository structure
 
@@ -89,7 +89,7 @@ Empty working directories are retained with `.gitkeep` placeholders. Raw and lar
 | 7 | Python exploratory analysis and static visuals | Complete |
 | 8 | Geographic and descriptive hotspot analysis | Complete |
 | 9A | Tableau data preparation and dashboard specification | Complete |
-| 9B | Four-page interactive Tableau workbook | Planned |
+| 9B | Four-page interactive Tableau workbook | In Progress |
 | 10 | Findings and resource-planning recommendations | Planned |
 | 11 | Final QA, portfolio packaging, and resume metrics | Planned |
 
@@ -180,14 +180,32 @@ psql -d chicago_crime -X -v ON_ERROR_STOP=1 -P pager=off \
   -f sql/06_tableau_preparation.sql
 ```
 
-The SQL creates nine page-oriented aggregate views and fails before commit if executive, geographic, temporal, category, arrest, domestic, or coordinate-density totals do not reconcile. Optional portable CSV extracts can then be generated with:
+The SQL creates ten page-oriented aggregate views and fails before commit if executive, geographic, temporal, category, arrest, domestic, month/category, or coordinate-density totals do not reconcile. Optional portable CSV extracts can then be generated with:
 
 ```bash
 python scripts/export_tableau_data.py
 ```
 
-The exporter uses a read-only environment-configured connection, deterministic ordering, CSV row-count reconciliation, and a local checksum manifest under Git-ignored `data/processed/tableau/`. The [Tableau dashboard plan](docs/tableau_dashboard_plan.md) provides the exact PostgreSQL and extract connection steps plus the specification and validation gate for every planned visual. No Tableau workbook has been created or tested.
+Generate only the two Executive Overview sources with:
+
+```bash
+python scripts/export_tableau_data.py --profile page1
+```
+
+Generate and validate the Executive Overview workbook with:
+
+```bash
+python scripts/generate_tableau_workbook.py
+```
+
+The exporter uses a read-only environment-configured connection, deterministic ordering, CSV row-count reconciliation, and local checksum manifests under Git-ignored `data/processed/tableau/`. The Page 1 profile creates independent year/category and month/category sources so shared Year and Crime Type parameters work without joins or duplicated measures. The generator writes `tableau/chicago_crime_analytics.twb`, verifies its XML structure, resolves both relative CSV references, checks worksheet/dashboard/filter/calculation definitions, and independently rechecks the documented 2025 citywide and Theft benchmarks. The [Tableau dashboard plan](docs/tableau_dashboard_plan.md) provides the overall four-page specification. The [Executive Overview build guide](docs/tableau_page1_build_guide.md) documents the generated workbook, data sources, controls, validated benchmarks, Tableau Desktop tests, and accepted screenshots.
 
 ## Current status
 
-**Status: Milestone 9A complete; Milestone 9B planned.** Nine non-materialized Tableau views were created and validated at grains ranging from three executive-year rows to 5,395 area/category/year rows. Their fail-fast checks reconciled the 761,563-record citywide scope, 760,496 community-area-eligible records, 754,866 coordinate-mappable records, all yearly and monthly totals, arrest/domestic numerators and denominators, and geographic partitions. The optional exporter produced nine Git-ignored CSVs and reconciled every file to its PostgreSQL view. The four planned pages—Executive Overview, Geographic Crime Patterns, Temporal and Seasonal Patterns, and Crime and Arrest Analysis—now have field-level build and validation specifications. No Tableau workbook, dashboard interaction, screenshot, causal conclusion, or resource-planning recommendation has been produced or claimed.
+**Status: Milestone 9A complete; Milestone 9B in progress.** Ten non-materialized Tableau views are available, including a 1,116-row complete month/category grid prepared for Page 1 filtering. Fail-fast checks reconcile the 761,563-record citywide scope, 760,496 community-area-eligible records, 754,866 coordinate-mappable records, yearly/monthly/category totals, arrest/domestic components, and geographic partitions. The Page 1 exporter generated exactly two Git-ignored CSVs—93 year/category rows and 1,116 month/category rows—and reconciled both to PostgreSQL. `tableau/chicago_crime_analytics.twb` defines two independent CSV data sources, two shared parameters, six worksheets, and the Executive Overview dashboard. Tableau Desktop 2026.2.3 rendered and validated Year = 2025 under All Crime Types and THEFT; exported evidence is stored in `images/tableau/`. Page 1 is validated, while the other three dashboard pages, causal conclusions, and resource-planning recommendations remain unclaimed.
+
+### Executive Overview preview
+
+![Chicago Crime Analytics Executive Overview filtered to 2025 and All Crime Types](images/tableau/executive_overview_2025_all_crime_types.png)
+
+The corresponding [2025 Theft validation view](images/tableau/executive_overview_2025_theft.png) confirms synchronized category filtering across the KPIs and trends.

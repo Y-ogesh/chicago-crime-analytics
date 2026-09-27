@@ -18,16 +18,22 @@ from sqlalchemy import URL, create_engine, text
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_OUTPUT_DIR = PROJECT_ROOT / "data" / "processed" / "tableau"
 
-EXPORTS = {
+ALL_EXPORTS = {
     "vw_tableau_executive_year": "crime_year",
     "vw_tableau_community_area_year": "crime_year, community_area",
     "vw_tableau_district_year": "crime_year, district",
     "vw_tableau_area_category_year": "crime_year, community_area, primary_type",
     "vw_tableau_monthly_patterns": "month_start",
+    "vw_tableau_month_category": "month_start, primary_type",
     "vw_tableau_time_patterns": "crime_year, day_of_week_num, hour_of_day",
     "vw_tableau_location_time": "full_period_location_rank, time_of_day_order",
     "vw_tableau_crime_arrest_year": "crime_year, primary_type",
     "vw_tableau_coordinate_density": "crime_year, cell_latitude, cell_longitude",
+}
+
+PAGE1_EXPORTS = {
+    "vw_tableau_crime_arrest_year": "crime_year, primary_type",
+    "vw_tableau_month_category": "month_start, primary_type",
 }
 
 
@@ -36,10 +42,19 @@ def parse_args() -> argparse.Namespace:
         description="Export the validated Tableau views as Git-ignored CSV extracts."
     )
     parser.add_argument(
+        "--profile",
+        choices=("all", "page1"),
+        default="all",
+        help="Export every Tableau view or only the two Executive Overview sources.",
+    )
+    parser.add_argument(
         "--output-dir",
         type=Path,
-        default=DEFAULT_OUTPUT_DIR,
-        help="Output directory (default: data/processed/tableau).",
+        default=None,
+        help=(
+            "Output directory. Defaults to data/processed/tableau for all views "
+            "or data/processed/tableau/page1 for the Page 1 profile."
+        ),
     )
     return parser.parse_args()
 
@@ -85,12 +100,21 @@ def resolve_output_dir(requested: Path) -> Path:
 
 def main() -> None:
     args = parse_args()
-    output_dir = resolve_output_dir(args.output_dir)
+    requested_output = args.output_dir
+    if requested_output is None:
+        requested_output = (
+            DEFAULT_OUTPUT_DIR / "page1"
+            if args.profile == "page1"
+            else DEFAULT_OUTPUT_DIR
+        )
+    output_dir = resolve_output_dir(requested_output)
     output_dir.mkdir(parents=True, exist_ok=True)
     engine, database = build_read_only_engine()
+    exports = PAGE1_EXPORTS if args.profile == "page1" else ALL_EXPORTS
 
     manifest = {
         "generated_at_utc": datetime.now(timezone.utc).isoformat(),
+        "profile": args.profile,
         "database": database,
         "source_dataset_id": "ijzp-q8t2",
         "source_extraction_date": "2026-09-25",
@@ -117,16 +141,16 @@ def main() -> None:
                 )
             )
         }
-        missing = set(EXPORTS) - available_views
+        missing = set(exports) - available_views
         if missing:
             raise RuntimeError(
                 "Missing Tableau views; run sql/06_tableau_preparation.sql first: "
                 + ", ".join(sorted(missing))
             )
 
-        for view_name, order_by in EXPORTS.items():
+        for view_name, order_by in exports.items():
             query = text(f"SELECT * FROM public.{view_name} ORDER BY {order_by}")
-            frame = pd.read_sql_query(query, connection)
+            frame = pd.read_sql_query(query, connection).convert_dtypes()
             destination = output_dir / f"{view_name}.csv"
             temporary = destination.with_suffix(".csv.tmp")
             frame.to_csv(temporary, index=False, lineterminator="\n")
