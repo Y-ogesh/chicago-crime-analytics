@@ -176,6 +176,16 @@ All objects below are non-materialized PostgreSQL views created by `sql/06_table
 
 The optional exporter writes one CSV per view plus a checksum manifest under Git-ignored `data/processed/tableau/`. Detailed visual assignments and aggregation rules are in [the Tableau dashboard plan](tableau_dashboard_plan.md).
 
+## Milestone 9C geographic Tableau view
+
+`sql/08_tableau_geographic_page.sql` creates one additional non-materialized view specifically for synchronized Page 2 filtering.
+
+| View | Grain / validated rows | Purpose and key fields |
+|---|---|---|
+| `vw_tableau_geographic_detail` | Year × source `primary_type` × community area × district × coordinate eligibility × 0.01-degree cell / 50,037 | Single Page 2 fact source. Fields include `crime_year`, `period_start`, `primary_type`, community-area number/name/eligibility, district code/label/reference flag, coordinate-mappable flag, cell-center latitude/longitude, cell ID, and `reported_incident_count`. Every clean incident contributes once. |
+
+The view exports to Git-ignored `data/processed/tableau/page2/vw_tableau_geographic_detail.csv`. Boolean eligibility flags are exported as integer `0`/`1` so Tableau's text-file reader preserves them reliably; the canonical clean-table booleans are unchanged. `UNKNOWN / UNASSIGNED` labels retain analytically usable incidents with missing or invalid administrative geography. Cell coordinates are null for nonmappable records. Valid cell centers are deterministically derived from source coordinates and are not invented locations or official polygons.
+
 ## Database-load validation completed
 
 - Every source timestamp and boolean value cast successfully.

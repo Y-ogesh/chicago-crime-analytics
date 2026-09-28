@@ -29,11 +29,22 @@ ALL_EXPORTS = {
     "vw_tableau_location_time": "full_period_location_rank, time_of_day_order",
     "vw_tableau_crime_arrest_year": "crime_year, primary_type",
     "vw_tableau_coordinate_density": "crime_year, cell_latitude, cell_longitude",
+    "vw_tableau_geographic_detail": (
+        "crime_year, primary_type, community_area_name, district, "
+        "coordinate_mappable_flag DESC, cell_latitude, cell_longitude"
+    ),
 }
 
 PAGE1_EXPORTS = {
     "vw_tableau_crime_arrest_year": "crime_year, primary_type",
     "vw_tableau_month_category": "month_start, primary_type",
+}
+
+PAGE2_EXPORTS = {
+    "vw_tableau_geographic_detail": (
+        "crime_year, primary_type, community_area_name, district, "
+        "coordinate_mappable_flag DESC, cell_latitude, cell_longitude"
+    ),
 }
 
 
@@ -43,7 +54,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--profile",
-        choices=("all", "page1"),
+        choices=("all", "page1", "page2"),
         default="all",
         help="Export every Tableau view or only the two Executive Overview sources.",
     )
@@ -53,7 +64,7 @@ def parse_args() -> argparse.Namespace:
         default=None,
         help=(
             "Output directory. Defaults to data/processed/tableau for all views "
-            "or data/processed/tableau/page1 for the Page 1 profile."
+            "or the matching data/processed/tableau/pageN directory for a page profile."
         ),
     )
     return parser.parse_args()
@@ -103,14 +114,18 @@ def main() -> None:
     requested_output = args.output_dir
     if requested_output is None:
         requested_output = (
-            DEFAULT_OUTPUT_DIR / "page1"
-            if args.profile == "page1"
-            else DEFAULT_OUTPUT_DIR
+            DEFAULT_OUTPUT_DIR
+            if args.profile == "all"
+            else DEFAULT_OUTPUT_DIR / args.profile
         )
     output_dir = resolve_output_dir(requested_output)
     output_dir.mkdir(parents=True, exist_ok=True)
     engine, database = build_read_only_engine()
-    exports = PAGE1_EXPORTS if args.profile == "page1" else ALL_EXPORTS
+    exports = {
+        "all": ALL_EXPORTS,
+        "page1": PAGE1_EXPORTS,
+        "page2": PAGE2_EXPORTS,
+    }[args.profile]
 
     manifest = {
         "generated_at_utc": datetime.now(timezone.utc).isoformat(),

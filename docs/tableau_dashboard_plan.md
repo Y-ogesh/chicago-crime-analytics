@@ -2,7 +2,7 @@
 
 ## Milestone 9A status and scope
 
-Tableau data preparation is complete. The PostgreSQL presentation layer and optional CSV extracts described below were created and validated on September 26, 2026. Executive Overview Page 1 is generated and validated in `tableau/chicago_crime_analytics.twb`; the other three pages remain planned. The generated workbook passed structural, Tableau load, visual-rendering, and filter-interaction checks. Dashboard behavior for the remaining pages is still a specification and acceptance checklist, not a completion claim.
+Tableau data preparation is complete. Executive Overview Page 1 and Geographic Crime Patterns Page 2 are generated and validated in `tableau/chicago_crime_analytics.twb`; Pages 3–4 remain planned. The implemented workbook passed structural, Tableau load, visual-rendering, and filter-interaction checks. Dashboard behavior for Pages 3–4 remains a specification and acceptance checklist, not a completion claim.
 
 The dashboard will use the official City of Chicago Crimes dataset (`ijzp-q8t2`) extract acquired September 25, 2026. Its analytical scope is 761,563 reported-incident records dated January 1, 2023 through December 31, 2025. All three years are complete calendar years. Counts are reported incidents, not population-normalized crime rates. Arrest percentages are source-indicator percentages, not clearance, prosecution, or conviction rates.
 
@@ -22,6 +22,7 @@ Run [`sql/06_tableau_preparation.sql`](../sql/06_tableau_preparation.sql) after 
 | `vw_tableau_time_patterns` | Year × ISO weekday × hour | 504 | Temporal and Seasonal Patterns |
 | `vw_tableau_location_time` | Fixed full-period top-ten location descriptions × time band | 40 | Temporal and Seasonal Patterns |
 | `vw_tableau_crime_arrest_year` | Year × source primary type | 93 | Crime and Arrest Analysis |
+| `vw_tableau_geographic_detail` | Year × primary type × area × district × coordinate eligibility × 0.01° cell | 50,037 | Implemented Geographic Crime Patterns |
 
 The existing `vw_geographic_crime_points` view remains available as an optional 754,866-row point layer. The planned dashboard should default to `vw_tableau_coordinate_density`, which is much smaller and makes its descriptive binning explicit. Point records are not required for the four planned pages.
 
@@ -87,7 +88,8 @@ PostgreSQL is the preferred development connection because it preserves data typ
        public.vw_tableau_month_category,
        public.vw_tableau_time_patterns,
        public.vw_tableau_location_time,
-       public.vw_tableau_crime_arrest_year TO tableau_reader;
+       public.vw_tableau_crime_arrest_year,
+       public.vw_tableau_geographic_detail TO tableau_reader;
    ```
 
    Role creation and password policy are environment-specific and intentionally not scripted here.
@@ -105,7 +107,7 @@ For a portable build without a live database connection:
 python scripts/export_tableau_data.py
 ```
 
-The script uses environment variables or a Git-ignored `.env`, forces PostgreSQL transactions to read-only mode, orders every export deterministically, rereads each CSV, reconciles its rows to the source view, and writes checksums and metadata to `data/processed/tableau/manifest.json`. The `--profile page1` option writes only the two Executive Overview sources and a dedicated manifest under `data/processed/tableau/page1/`. The entire directory is ignored by Git.
+The script uses environment variables or a Git-ignored `.env`, forces PostgreSQL transactions to read-only mode, orders every export deterministically, rereads each CSV, reconciles its rows to the source view, and writes checksums and metadata to `data/processed/tableau/manifest.json`. The `--profile page1` option writes the two Executive Overview sources under `data/processed/tableau/page1/`; `--profile page2` writes `vw_tableau_geographic_detail.csv` and its manifest under `data/processed/tableau/page2/`. The entire directory is ignored by Git.
 
 In Tableau, choose **Connect → To a File → Text file** and add each required CSV as a separate data source. Confirm that year/order fields are whole numbers, dates are dates, counts are whole numbers, percentages are decimal numbers, and latitude/longitude are geographic decimal numbers. Do not union or join files with different grains.
 
@@ -129,13 +131,13 @@ In Tableau, choose **Connect → To a File → Text file** and add each required
 3. Build worksheets E1–E6, G1–G5, T1–T5, and C1–C5 from the field specifications below. Add the required source/definition text to each caption before assembling dashboards.
 4. Create four dashboards at 1,360 × 850 and add the common header, year control, page navigation, filter rail, limitation footer, and reset control.
 5. Add a custom-field filter action from G2 to G3/G4 mapping `community_area` to `community_area`. Clearing the selection must show all values. Add a same-source filter action from T3 to T4 using weekday/hour, and from C1 to C2–C5 using `primary_type`.
-6. Add navigation objects targeting the other three dashboards. Test every destination and keep the current page visually selected.
+6. Add navigation objects as the remaining dashboards are implemented. Test every destination and keep the current page visually selected.
 7. Use **Revert** as the reset control during development. If the workbook is published later, test that the published reset behavior restores `pSelectedYear = 2025` and clears all mark selections.
 8. Run the dashboard-level validation checklist before saving screenshots or marking Milestone 9B complete.
 
 ## Page 1 — Executive Overview
 
-**Implementation status: Complete for Page 1; overall Milestone 9B remains In Progress.** The data sources, validation SQL, reproducible workbook generator, opening instructions, Tableau Desktop results, and exported screenshots are documented in [the Page 1 build guide](tableau_page1_build_guide.md). The other three planned dashboard pages are not implemented.
+**Implementation status: Complete for Page 1; overall Milestone 9B remains In Progress.** The data sources, validation SQL, reproducible workbook generator, opening instructions, Tableau Desktop results, and exported screenshots are documented in [the Page 1 build guide](tableau_page1_build_guide.md). Page 2 is complete under Milestone 9C; Pages 3–4 are not implemented.
 
 Generate the Page 1 bundle with `python scripts/export_tableau_data.py --profile page1`, then create or refresh the workbook with `python scripts/generate_tableau_workbook.py`. The generated workbook references `data/processed/tableau/page1/vw_tableau_crime_arrest_year.csv` as `Executive Category Year` and `data/processed/tableau/page1/vw_tableau_month_category.csv` as `Executive Month Category`. The paths are relative to the workbook. The sources are not joined, related, unioned, or blended; workbook parameters synchronize Year and Crime Type filters. `vw_tableau_executive_year` remains the PostgreSQL validation benchmark rather than a third Tableau source.
 
@@ -150,15 +152,18 @@ Generate the Page 1 bundle with `python scripts/export_tableau_data.py --profile
 
 ## Page 2 — Geographic Crime Patterns
 
-This page reports incident volume and descriptive density, not population-normalized rates or individual risk. The year filter defaults to 2025. A primary-type filter applies only to G4 unless a future category-aware density layer is explicitly prepared.
+**Implementation status: Complete and validated in Tableau Desktop.** Generate its source with `python scripts/export_tableau_data.py --profile page2`, then regenerate the workbook with `python scripts/generate_tableau_workbook.py`. The workbook references `data/processed/tableau/page2/vw_tableau_geographic_detail.csv` as `Geographic Detail`. This single 50,037-row source contains every clean incident exactly once at a filterable aggregate grain, so all four controls can update every Page 2 worksheet without joining differently aggregated sources.
+
+The page reports incident volume and descriptive coordinate concentration, not population-normalized rates, statistical hotspot significance, or individual risk. Year defaults to 2025; Crime Type, Community Area, and Police District default to their All values. Records without valid coordinates remain in the incident KPI and non-map rankings but are excluded from the map. Community-area ranking explicitly restricts to the 77 eligible official areas.
 
 | ID and visual | Data source | Dimensions and measures / calculation | Filters | Tooltip fields | Sorting | Expected interaction | Validation criterion |
 |---|---|---|---|---|---|---|---|
-| G1 symbol map — Descriptive coordinate density | Coordinate density | `cell_longitude`, `cell_latitude`, `SUM(reported_incident_count)` on size/color | Single year | Year, cell center, count, `0.01-degree descriptive cell` warning | Color/size by count; no rank label | Pan/zoom; selection highlights only the map unless an explicit density-cell action is added | Year totals equal 261,242 (2023), 257,525 (2024), and 236,099 (2025); title says not a statistical hotspot test |
-| G2 bars — Community-area volume | Community area year | `community_area_name`; `SUM(reported_incident_count)` | Single year; optional Top N parameter default 15 | Area number/name, count, share of area-eligible total, full-year rank | Count descending, name ascending for ties | Selecting an area filters G3 and G4; map is not filtered because cells are not assigned to areas | All 77 areas are present for each year; 2025 totals sum to 237,757 |
-| G3 diverging bars — Community-area YoY change | Community area year | `community_area_name`; `MIN(absolute_change)` with color by sign; label `MIN(percentage_change)` | Single year restricted to 2024 or 2025; optional rank method toggle | Prior/current values, absolute/percentage change, 500-count percentage-rank eligibility, both rank types | Absolute decrease ascending by default; explicit toggle may use percentage decrease among eligible rows | G2 selection highlights matching area; clear selection restores all | 2025 Austin is -1,152 absolute; Forest Glen is -24.9541% and percentage-decrease rank 1 among threshold-eligible areas |
-| G4 heatmap — Area/category composition | Area category year | Rows `community_area_name`; columns `primary_type`; color `percentage_of_area_year_total`; label/tooltip count | Single year; primary type; default top-ten full-period categories documented in the caption | Area, category, count, area-year total/share, category-year share, both ranks | Areas by total volume descending; categories by selected-year total descending | Area selection from G2 filters rows; clicking a cell highlights matching area/category only | Counts across all cells for 2025 sum to 237,757 before category filtering |
-| G5 bars — District-code volume and change | District year | `district_label`; `SUM(reported_incident_count)`; optional color `MIN(percentage_change)` | Single year | District code/reference flag, current/prior counts, absolute/percentage change, yearly share/rank | Count descending, code ascending for ties | Selecting a district highlights only G5; no spatial polygon inference | Each year's district counts sum to citywide total; unmatched code `061` remains visibly labeled |
+| G1 KPI — Incidents | Geographic Detail | `SUM(reported_incident_count)` | Shared Year, Crime Type, Community Area, Police District parameters | Definition available in worksheet metadata; dashboard shows exact count | Not applicable | Updates with every control | 2025 All = 238,086; THEFT = 55,198; Austin/THEFT = 1,967; District 008/THEFT = 3,112 |
+| G2 KPI — Coverage | Geographic Detail | `100 * SUM(IF coordinate_mappable_flag=1 THEN reported_incident_count END) / SUM(reported_incident_count)` | All four controls | Coverage definition and denominator warning | Not applicable | Updates with every control | 2025 All = 99.1654% (99.2% displayed); THEFT = 99.3677% (99.4% displayed) |
+| G3 symbol map — Descriptive incident density | Geographic Detail | Average cell latitude/longitude; cell ID on detail; incident count on color/size | All four controls plus `coordinate_mappable_flag=1` | Cell ID, exact count, descriptive-cell warning | Color/size by count | Pan/zoom; parameter controls update cells | 2025 All map sums to 236,099; THEFT map sums to 54,849; title identifies 0.01° cells |
+| G4 bars — Community-area ranking | Geographic Detail | `community_area_name`; `SUM(reported_incident_count)` | All four controls plus `community_area_eligible_flag=1` | Area and exact count | Count descending; area ascending for ties | Controls update the ranked population; vertical scroll exposes all eligible areas | All 77 areas are available; 2025 leader is Austin at 11,806; 2025 THEFT leader is Near North Side at 4,637 |
+| G5 bars — Police-district comparison | Geographic Detail | `district_label`; `SUM(reported_incident_count)` | All four controls | District label and exact count | Count descending; label ascending for ties | Controls update the ranked districts; scroll exposes all 24 labels | 2025 leader is District 008 at 15,278; THEFT leader is District 018 at 5,522 |
+| G6 bars — Crime categories in selected geography | Geographic Detail | `primary_type`; `SUM(reported_incident_count)` | All four controls | Crime type and exact count | Count descending; type ascending for ties | Area or district selection recomputes the category mix; a specific Crime Type produces one bar | 2025 All leader is THEFT at 55,198; selected-category total equals the incident KPI |
 
 ## Page 3 — Temporal and Seasonal Patterns
 
@@ -204,4 +209,6 @@ The SQL completed successfully with `ON_ERROR_STOP=1`. The original nine-view pr
 
 The extract script verifies every exported file's reloaded row count against PostgreSQL. The Page 1 profile generated exactly two CSVs—93 annual/category rows and 1,116 month/category rows—plus a local manifest recording row/column counts, byte sizes, deterministic ordering, and SHA-256 checksums. These extracts are derived data and remain excluded from Git.
 
-Milestone 9B has generated `tableau/chicago_crime_analytics.twb` with six Page 1 worksheets, a fixed-size Executive Overview dashboard, and Year/Crime Type parameter controls. XML and source-reference checks passed, PostgreSQL benchmarks reconciled, and Tableau Desktop 2026.2.3 completed load, layout, model-computation, visual-rendering, and filter-interaction checks. Page 1 displays the year without grouping, emphasizes KPI values, labels the annual trend, uses human-readable measure captions, and limits the all-crimes distribution to a parameter-aware top 10 while preserving any specifically selected crime type. Tableau-exported 2025 All Crime Types and THEFT screenshots are stored under `images/tableau/`. Both independent sources were visible in Tableau's Data menu. The other three dashboard pages remain outstanding, so Milestone 9B remains In Progress.
+Milestone 9B generated `tableau/chicago_crime_analytics.twb` with six Page 1 worksheets, a fixed-size Executive Overview dashboard, and Year/Crime Type parameter controls. XML and source-reference checks passed, PostgreSQL benchmarks reconciled, and Tableau Desktop 2026.2.3 completed load, layout, model-computation, visual-rendering, and filter-interaction checks. Page 1 displays the year without grouping, emphasizes KPI values, labels the annual trend, uses human-readable measure captions, and limits the all-crimes distribution to a parameter-aware top 10 while preserving any specifically selected crime type. Tableau-exported 2025 All Crime Types and THEFT screenshots are stored under `images/tableau/`.
+
+Milestone 9C extended the same workbook with six Page 2 worksheets, the `Geographic Detail` CSV source, four synchronized parameters, and the fixed-size Geographic Crime Patterns dashboard. SQL, export, XML, source-reference, and Tableau checks passed. Tableau verified 2025 All Crime Types, 2025 THEFT, Austin/THEFT, and District 008/THEFT; screenshots are stored under `images/tableau/`. Pages 3–4 remain outstanding, so the overall four-page Milestone 9B remains In Progress.

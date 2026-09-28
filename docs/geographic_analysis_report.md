@@ -128,7 +128,15 @@ The notebook generated five compact, reproducible CSV files under the Git-ignore
 | `coordinate_density_grid.csv` | Year × 0.01-degree display cell | 2,127 | Compact descriptive coordinate-density layer |
 | `location_time_of_day.csv` | Leading location description × time band | 40 | Location-specific temporal profiles |
 
-The existing `vw_geographic_crime_points` view remains the Tableau-ready record-level point layer with 754,866 rows. Tableau itself was not opened and no dashboard was built in this milestone.
+The existing `vw_geographic_crime_points` view remains the Tableau-ready record-level point layer with 754,866 rows. Milestone 8 did not build a Tableau dashboard; the later Milestone 9C implementation is documented below.
+
+## Milestone 9C Tableau geographic implementation
+
+Page 2 uses `vw_tableau_geographic_detail`, a 50,037-row aggregate view that preserves Year, source Crime Type, Community Area, Police District, coordinate eligibility, and 0.01-degree coordinate-cell dimensions in one source. This replaces a proposed multi-source Page 2 design for the implemented dashboard so all four controls can update the map, KPIs, and rankings without cross-source joins or double counting.
+
+The generated `Geographic Crime Patterns` dashboard contains an incident KPI, coordinate-coverage KPI, descriptive coordinate-cell map, community-area ranking, police-district comparison, and selected-geography crime-category ranking. Tableau Desktop 2026.2.3 rendered and validated 2025 All Crime Types, 2025 THEFT, Austin/THEFT, and District 008/THEFT. The dashboard retains nonmappable incidents in non-map totals and explicitly states that coordinate cells are descriptive, not statistically significant hotspots or measures of individual risk.
+
+Detailed source grain, reproduction commands, SQL reconciliation, filter tests, and screenshot evidence are in [the Tableau Page 2 build guide](tableau_page2_build_guide.md).
 
 ## Validation evidence
 
