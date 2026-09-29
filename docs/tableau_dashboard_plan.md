@@ -2,7 +2,7 @@
 
 ## Milestone 9A status and scope
 
-Tableau data preparation is complete. Executive Overview Page 1, Geographic Crime Patterns Page 2, and Temporal and Seasonal Patterns Page 3 are validated in `tableau/chicago_crime_analytics.twb`. Page 4 remains planned.
+Tableau data preparation and implementation are complete. All four dashboards are generated and validated in Tableau Desktop 2026.2.3 in `tableau/chicago_crime_analytics.twb`.
 
 The dashboard will use the official City of Chicago Crimes dataset (`ijzp-q8t2`) extract acquired September 25, 2026. Its analytical scope is 761,563 reported-incident records dated January 1, 2023 through December 31, 2025. All three years are complete calendar years. Counts are reported incidents, not population-normalized crime rates. Arrest percentages are source-indicator percentages, not clearance, prosecution, or conviction rates.
 
@@ -139,7 +139,7 @@ In Tableau, choose **Connect → To a File → Text file** and add each required
 
 ## Page 1 — Executive Overview
 
-**Implementation status: Complete for Page 1; overall Milestone 9B remains In Progress.** The data sources, validation SQL, reproducible workbook generator, opening instructions, Tableau Desktop results, and exported screenshots are documented in [the Page 1 build guide](tableau_page1_build_guide.md). Pages 2 and 3 are complete under Milestones 9C and 9D; Page 4 is not implemented.
+**Implementation status: Complete.** The data sources, validation SQL, reproducible workbook generator, opening instructions, Tableau Desktop results, and exported screenshots are documented in [the Page 1 build guide](tableau_page1_build_guide.md). Pages 2–4 are complete under Milestones 9C–9E.
 
 Generate the Page 1 bundle with `python scripts/export_tableau_data.py --profile page1`, then create or refresh the workbook with `python scripts/generate_tableau_workbook.py`. The generated workbook references `data/processed/tableau/page1/vw_tableau_crime_arrest_year.csv` as `Executive Category Year` and `data/processed/tableau/page1/vw_tableau_month_category.csv` as `Executive Month Category`. The paths are relative to the workbook. The sources are not joined, related, unioned, or blended; workbook parameters synchronize Year and Crime Type filters. `vw_tableau_executive_year` remains the PostgreSQL validation benchmark rather than a third Tableau source.
 
@@ -184,15 +184,32 @@ Page 3 uses `data/processed/tableau/page3/vw_tableau_temporal_detail.csv` for al
 
 ## Page 4 — Crime and Arrest Analysis
 
-This page retains the City's source `primary_type` categories; no broader grouping is introduced. The arrest field indicates only whether an arrest was recorded on the incident row.
+**Implementation status: Complete and validated in Tableau Desktop.** This page retains the City's source `primary_type` categories; no broader grouping is introduced. The arrest field indicates only whether an arrest was recorded on the incident row, not clearance or conviction. It reuses `data/processed/tableau/page1/vw_tableau_crime_arrest_year.csv` (`Executive Category Year`) at year × source primary-type grain. No additional CSV or cross-grain join is used.
+
+The Page 4 calculations intentionally use the user-specified incident-count denominator:
+
+```text
+Arrest Percentage
+IF SUM([reported_incident_count]) = 0 THEN NULL
+ELSE 100.0 * SUM([arrest_count]) / SUM([reported_incident_count])
+END
+
+Domestic Incident Percentage
+IF SUM([reported_incident_count]) = 0 THEN NULL
+ELSE 100.0 * SUM([domestic_count]) / SUM([reported_incident_count])
+END
+```
 
 | ID and visual | Data source | Dimensions and measures / calculation | Filters | Tooltip fields | Sorting | Expected interaction | Validation criterion |
 |---|---|---|---|---|---|---|---|
-| C1 bars — Category incident volume | Crime/arrest year | `primary_type`; `SUM(reported_incident_count)` | Single or multi-year; optional Top N default 10 | Category, year scope, count, annual share/rank | Count descending, category ascending for ties | Selecting categories filters/highlights C2–C5 | With all years selected, category counts sum to 761,563; Theft is 173,282 |
-| C2 diverging bars — Category YoY change | Crime/arrest year | `primary_type`; `MIN(absolute_change)`; label `MIN(percentage_change)` | Single year 2024 or 2025; category selection | Prior/current values, absolute and percentage change, denominator | Absolute change ascending by default | Responds to C1 selection; selecting a bar highlights the category trend in C3/C4 | 2025 Robbery is 9,120 to 5,817, -3,303 and -36.2171% |
-| C3 lines/dots — Arrest percentage by category | Crime/arrest year | `crime_year`; `primary_type`; `Weighted Arrest Percentage` | Category selection; complete years only | Arrest numerator/denominator, percentage, definition warning | Year ascending; categories by full-period volume | C1 category selection limits lines; hover highlights one category | Aggregating all categories by year reproduces 12.2114%, 13.8237%, and 16.1139% |
-| C4 lines/dots — Domestic incident percentage by category | Crime/arrest year | `crime_year`; `primary_type`; `Weighted Domestic Incident Percentage` | Category selection; complete years only | Domestic numerator/denominator, percentage, limitation | Year ascending; categories by full-period volume | C1 category selection limits lines; hover highlights one category | Aggregating all categories by year reproduces 17.8916%, 18.3790%, and 19.0347% |
-| C5 scatter — Volume versus arrest percentage | Crime/arrest year | Detail/label `primary_type`; x `SUM(reported_incident_count)`; y `Weighted Arrest Percentage`; size count or fixed; color latest year | Single year | Category, count/share/rank, arrest numerator/denominator/percentage | Not applicable; reference lines may show medians but not causal thresholds | C1 selection highlights marks; selecting a mark filters C2–C4 to that category | One mark per observed category in selected year; weighted roll-up matches executive arrest percentage |
+| C1 KPI — Reported incidents | Crime/arrest year | `SUM(reported_incident_count)` | Selected Year and Crime Type | Exact count and current scope | Not applicable | Both controls update the card | 2025 All = 238,086; THEFT = 55,198 |
+| C2 KPI — Arrest percentage | Crime/arrest year | Page 4 Arrest Percentage | Selected Year and Crime Type | Arrest count, incident denominator, percentage | Not applicable | Both controls update the card | 2025 All = 16.1139%; THEFT = 9.0420% |
+| C3 KPI — Domestic percentage | Crime/arrest year | Page 4 Domestic Incident Percentage | Selected Year and Crime Type | Domestic count, incident denominator, percentage | Not applicable | Both controls update the card | 2025 All = 19.0347%; THEFT = 5.1270% |
+| C4 bars — Category incident volume | Crime/arrest year | `primary_type`; `SUM(reported_incident_count)` | Selected Year and Crime Type; parameter-aware top 10 | Category and count | Count descending | All shows the selected year's top 10; a selected crime type shows one category | 2025 leader = THEFT at 55,198 |
+| C5 bars — Arrest percentage by category | Crime/arrest year | `primary_type`; Page 4 Arrest Percentage | Selected Year and Crime Type; parameter-aware top 10 | Category, arrest numerator, incident denominator, percentage | Percentage descending | Both controls recompute weighted category percentages | 2025 THEFT = 9.0420%; BATTERY = 19.2546% |
+| C6 line — Arrest percentage over time | Crime/arrest year | `crime_year`; Page 4 Arrest Percentage | Crime Type only; Year intentionally ignored | Year, arrest count, incident denominator, percentage | Year ascending | Crime Type switches the three-year trend | All = 12.2114%, 13.8237%, 16.1139%; THEFT = 4.9717%, 6.8150%, 9.0420% |
+| C7 scatter — Incident volume versus arrest percentage | Crime/arrest year | Detail `primary_type`; x `SUM(reported_incident_count)`; y/color Page 4 Arrest Percentage | Selected Year and Crime Type | Category, count, arrest count, percentage | Not applicable | All shows one mark per crime type; a selected type shows one mark | 2025 weighted roll-up matches 16.1139%; THEFT mark is 55,198 and 9.0420% |
+| C8 bars — Domestic percentage by category | Crime/arrest year | `primary_type`; Page 4 Domestic Incident Percentage | Selected Year and Crime Type; parameter-aware top 10 | Category, domestic numerator, incident denominator, percentage | Percentage descending | Both controls recompute weighted category percentages | 2025 THEFT = 5.1270%; BATTERY = 53.0755% |
 
 ## Dashboard-level validation checklist
 
@@ -216,8 +233,14 @@ The extract script verifies every exported file's reloaded row count against Pos
 
 Milestone 9B generated `tableau/chicago_crime_analytics.twb` with six Page 1 worksheets, a fixed-size Executive Overview dashboard, and Year/Crime Type parameter controls. XML and source-reference checks passed, PostgreSQL benchmarks reconciled, and Tableau Desktop 2026.2.3 completed load, layout, model-computation, visual-rendering, and filter-interaction checks. Page 1 displays the year without grouping, emphasizes KPI values, labels the annual trend, uses human-readable measure captions, and limits the all-crimes distribution to a parameter-aware top 10 while preserving any specifically selected crime type. Tableau-exported 2025 All Crime Types and THEFT screenshots are stored under `images/tableau/`.
 
-Milestone 9C extended the same workbook with six Page 2 worksheets, the `Geographic Detail` CSV source, four synchronized parameters, and the fixed-size Geographic Crime Patterns dashboard. SQL, export, XML, source-reference, and Tableau checks passed. Tableau verified 2025 All Crime Types, 2025 THEFT, Austin/THEFT, and District 008/THEFT; screenshots are stored under `images/tableau/`. Page 4 remains outstanding, so the overall four-page Milestone 9B remains In Progress.
+Milestone 9C extended the same workbook with six Page 2 worksheets, the `Geographic Detail` CSV source, four synchronized parameters, and the fixed-size Geographic Crime Patterns dashboard. SQL, export, XML, source-reference, and Tableau checks passed. Tableau verified 2025 All Crime Types, 2025 THEFT, Austin/THEFT, and District 008/THEFT; screenshots are stored under `images/tableau/`.
 
 Milestone 9D extends the generator and workbook with `Temporal Detail`, `Temporal KPI Scope`, nine Page 3 worksheets, shared Year and Crime Type parameters, and the fixed-size Temporal and Seasonal Patterns dashboard. `sql/10_tableau_temporal_page.sql` creates both temporal views, `sql/11_tableau_page3_validation.sql` supplies fail-fast checks and benchmarks, and `python scripts/export_tableau_data.py --profile page3` writes both Git-ignored CSVs and their checksum manifest. PostgreSQL and reloaded-CSV checks reconciled 87,809 detail rows, 96 KPI rows, and 761,563 represented incidents with exact annual, indicator, monthly, seasonal, weekday/hour, category, and peak-KPI totals.
 
 An initial 2025 / THEFT screenshot exposed three peak cards that did not recompute and a blank time-of-day chart. The generator now reads peak values from the materialized KPI source and uses a physical display field for the four time bands. The regenerated workbook passes PostgreSQL, CSV, XML, checksum, source-reference, worksheet, dashboard, formula, and benchmark checks. Tableau Desktop rendered both required filter states without errors; evidence is stored in [`temporal_seasonal_patterns_2025_all.png`](../images/tableau/temporal_seasonal_patterns_2025_all.png) and [`temporal_seasonal_patterns_2025_theft.png`](../images/tableau/temporal_seasonal_patterns_2025_theft.png).
+
+Milestone 9E extends the generator and workbook with six Page 4 worksheets and the fixed-size `Crime and Arrest Analysis` dashboard while reusing the existing reported-incidents KPI and category-volume worksheet. [`sql/12_tableau_page4_validation.sql`](../sql/12_tableau_page4_validation.sql) validates the 93-row annual/category source, complete-period totals, weighted calculations, 2025 filter states, leading categories, and THEFT trend. The generated workbook contains 27 worksheets, four dashboards, five CSV-backed data sources, and shared parameters. XML, relative file references, formulas, worksheet/dashboard membership, and embedded benchmark checks pass.
+
+After restarting the application, Tableau Desktop 2026.2.3 rendered Page 4 successfully. The 2025 All Crime Types state displayed 238,086 incidents, 16.1% arrest, and 19.0% domestic. The 2025 THEFT state displayed 55,198 incidents, 9.0% arrest, and 5.1% domestic; category bars, the three-year arrest trend, and the single-category scatter mark updated correctly. Tableau-exported evidence is stored in [`crime_arrest_analysis_2025_all.png`](../images/tableau/crime_arrest_analysis_2025_all.png) and [`crime_arrest_analysis_2025_theft.png`](../images/tableau/crime_arrest_analysis_2025_theft.png).
+
+The final cross-page review compared the four retained 2025 All Crime Types exports and confirmed consistent dashboard size, typography, blue palette, KPI treatment, filter placement, complete-year language, reported-incident terminology, readable labels, and caveat footers. Existing Page 1–3 screenshots, PostgreSQL benchmarks, and workbook structural checks remained valid. The four-page Milestone 9B and Page 4 Milestone 9E are complete.

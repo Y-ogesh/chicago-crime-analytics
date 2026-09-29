@@ -171,7 +171,22 @@ PAGE3_SHEETS = [
     "P3 Category Monthly Comparison",
 ]
 
-SHEETS = PAGE1_SHEETS + PAGE2_SHEETS + PAGE3_SHEETS
+PAGE4_SHEETS = [
+    "P4 Arrest Percentage KPI",
+    "P4 Domestic Percentage KPI",
+    "P4 Arrest Percentage by Category",
+    "P4 Arrest Percentage Trend",
+    "P4 Volume vs Arrest Percentage",
+    "P4 Domestic Percentage by Category",
+]
+
+PAGE4_DASHBOARD_SHEETS = [
+    "Total Reported Crimes",
+    "Crime Category Distribution",
+    *PAGE4_SHEETS,
+]
+
+SHEETS = PAGE1_SHEETS + PAGE2_SHEETS + PAGE3_SHEETS + PAGE4_SHEETS
 
 
 def parse_args() -> argparse.Namespace:
@@ -332,6 +347,20 @@ def add_textscan_datasource(
                     "Weighted Domestic Incident Percentage",
                     "real",
                     "IF SUM([domestic_indicator_denominator]) = 0 THEN NULL ELSE 100.0 * SUM([domestic_count]) / SUM([domestic_indicator_denominator]) END",
+                    'n#,##0.0"%";-#,##0.0"%"',
+                ),
+                (
+                    "Calculation_Page4ArrestPercentage",
+                    "Arrest Percentage",
+                    "real",
+                    "IF SUM([reported_incident_count]) = 0 THEN NULL ELSE 100.0 * SUM([arrest_count]) / SUM([reported_incident_count]) END",
+                    'n#,##0.0"%";-#,##0.0"%"',
+                ),
+                (
+                    "Calculation_Page4DomesticPercentage",
+                    "Domestic Incident Percentage",
+                    "real",
+                    "IF SUM([reported_incident_count]) = 0 THEN NULL ELSE 100.0 * SUM([domestic_count]) / SUM([reported_incident_count]) END",
                     'n#,##0.0"%";-#,##0.0"%"',
                 ),
             ]
@@ -516,6 +545,8 @@ def add_dependencies(view: ET.Element, datasource: str, fields: list[tuple[str, 
         "Calculation_CategoryDisplay": ("Show Category in Distribution", "boolean", "dimension", "nominal", '[Parameters].[pCrimeType] <> "All Crime Types" OR [incident_volume_rank] <= 10', None),
         "Calculation_ArrestPercentage": ("Weighted Arrest Percentage", "real", "measure", "quantitative", "IF SUM([arrest_indicator_denominator]) = 0 THEN NULL ELSE 100.0 * SUM([arrest_count]) / SUM([arrest_indicator_denominator]) END", 'n#,##0.0"%";-#,##0.0"%"'),
         "Calculation_DomesticPercentage": ("Weighted Domestic Incident Percentage", "real", "measure", "quantitative", "IF SUM([domestic_indicator_denominator]) = 0 THEN NULL ELSE 100.0 * SUM([domestic_count]) / SUM([domestic_indicator_denominator]) END", 'n#,##0.0"%";-#,##0.0"%"'),
+        "Calculation_Page4ArrestPercentage": ("Arrest Percentage", "real", "measure", "quantitative", "IF SUM([reported_incident_count]) = 0 THEN NULL ELSE 100.0 * SUM([arrest_count]) / SUM([reported_incident_count]) END", 'n#,##0.0"%";-#,##0.0"%"'),
+        "Calculation_Page4DomesticPercentage": ("Domestic Incident Percentage", "real", "measure", "quantitative", "IF SUM([reported_incident_count]) = 0 THEN NULL ELSE 100.0 * SUM([domestic_count]) / SUM([reported_incident_count]) END", 'n#,##0.0"%";-#,##0.0"%"'),
         "Calculation_SelectedCommunityArea": ("Selected Community Area Filter", "boolean", "dimension", "nominal", '[Parameters].[pCommunityArea] = "All Community Areas" OR [community_area_name] = [Parameters].[pCommunityArea]', None),
         "Calculation_SelectedDistrict": ("Selected Police District Filter", "boolean", "dimension", "nominal", '[Parameters].[pDistrict] = "All Police Districts" OR [district_label] = [Parameters].[pDistrict]', None),
         "Calculation_MapCoveragePercentage": ("Coordinate Coverage Percentage", "real", "measure", "quantitative", "IF SUM([reported_incident_count]) = 0 THEN NULL ELSE 100.0 * SUM(IF [coordinate_mappable_flag] = 1 THEN [reported_incident_count] ELSE 0 END) / SUM([reported_incident_count]) END", 'n#,##0.0"%";-#,##0.0"%"'),
@@ -632,9 +663,17 @@ def add_mark(
         add_format(label_rule, attr="color", value="#17324D")
 
 
-def add_kpi(worksheets: ET.Element, name: str, field_ref: str, calc_name: str | None, tooltip_text: str, percent: bool = False) -> None:
+def add_kpi(
+    worksheets: ET.Element,
+    name: str,
+    field_ref: str,
+    calc_name: str | None,
+    tooltip_text: str,
+    percent: bool = False,
+    title: str | None = None,
+) -> None:
     ws = ET.SubElement(worksheets, "worksheet", {"name": name})
-    add_title(ws, name)
+    add_title(ws, title or name)
     table = ET.SubElement(ws, "table")
     view = ET.SubElement(table, "view")
     sources = ET.SubElement(view, "datasources")
@@ -776,6 +815,196 @@ def add_monthly_trend(worksheets: ET.Element) -> None:
     )
     ET.SubElement(table, "rows").text = "[MonthlyDS].[sum:reported_incident_count:qk]"
     ET.SubElement(table, "cols").text = "[MonthlyDS].[tmn:month_start:ok]"
+
+
+def add_page4_category_percentage(
+    worksheets: ET.Element,
+    *,
+    name: str,
+    title: str,
+    calculation: str,
+    numerator_field: str,
+    denominator_field: str,
+    metric_label: str,
+) -> None:
+    ws = ET.SubElement(worksheets, "worksheet", {"name": name})
+    add_title(ws, title)
+    table = ET.SubElement(ws, "table")
+    view = ET.SubElement(table, "view")
+    sources = ET.SubElement(view, "datasources")
+    ET.SubElement(sources, "datasource", {"caption": "Executive Category Year", "name": "AnnualDS"})
+    ET.SubElement(sources, "datasource", {"name": "Parameters"})
+    add_dependencies(
+        view,
+        "AnnualDS",
+        [
+            ("crime_year", "integer"),
+            ("primary_type", "string"),
+            ("incident_volume_rank", "integer"),
+            (numerator_field, "integer"),
+            (denominator_field, "integer"),
+        ],
+        [
+            "Calculation_SelectedYear",
+            "Calculation_SelectedCrimeType",
+            "Calculation_CategoryDisplay",
+            calculation,
+        ],
+        [
+            ("primary_type", "None", "none:primary_type:nk", "nominal"),
+            (calculation, "User", f"usr:{calculation}:qk", "quantitative"),
+            (numerator_field, "Sum", f"sum:{numerator_field}:qk", "quantitative"),
+            (denominator_field, "Sum", f"sum:{denominator_field}:qk", "quantitative"),
+        ],
+    )
+    add_parameter_dependencies(view)
+    filter_names = [
+        "Calculation_SelectedYear",
+        "Calculation_SelectedCrimeType",
+        "Calculation_CategoryDisplay",
+    ]
+    for filter_name in filter_names:
+        add_true_filter(view, "AnnualDS", filter_name)
+    ET.SubElement(
+        view,
+        "sort",
+        {
+            "class": "computed",
+            "column": "[AnnualDS].[none:primary_type:nk]",
+            "direction": "DESC",
+            "using": f"[AnnualDS].[usr:{calculation}:qk]",
+        },
+    )
+    slices = ET.SubElement(view, "slices")
+    for filter_name in filter_names:
+        ET.SubElement(slices, "column").text = f"[AnnualDS].[{filter_name}]"
+    ET.SubElement(view, "aggregation", {"value": "true"})
+    add_sheet_style(table, percent=True)
+    add_mark(
+        table,
+        "Bar",
+        [("text", f"[AnnualDS].[usr:{calculation}:qk]")],
+        [
+            ("Crime type: ", {"fontcolor": "#666666"}),
+            ("<[AnnualDS].[none:primary_type:nk]>", {"bold": "true"}),
+            (f"\n{metric_label}: ", {"fontcolor": "#666666"}),
+            (f"<[AnnualDS].[usr:{calculation}:qk]>", {"bold": "true"}),
+            ("\nNumerator: ", {"fontcolor": "#666666"}),
+            (f"<[AnnualDS].[sum:{numerator_field}:qk]>", {"bold": "true"}),
+            ("\nDenominator: ", {"fontcolor": "#666666"}),
+            (f"<[AnnualDS].[sum:{denominator_field}:qk]>", {"bold": "true"}),
+        ],
+        labels=True,
+    )
+    ET.SubElement(table, "rows").text = "[AnnualDS].[none:primary_type:nk]"
+    ET.SubElement(table, "cols").text = f"[AnnualDS].[usr:{calculation}:qk]"
+
+
+def add_page4_arrest_trend(worksheets: ET.Element) -> None:
+    ws = ET.SubElement(worksheets, "worksheet", {"name": "P4 Arrest Percentage Trend"})
+    add_title(ws, "Arrest Percentage by Year")
+    table = ET.SubElement(ws, "table")
+    view = ET.SubElement(table, "view")
+    sources = ET.SubElement(view, "datasources")
+    ET.SubElement(sources, "datasource", {"caption": "Executive Category Year", "name": "AnnualDS"})
+    ET.SubElement(sources, "datasource", {"name": "Parameters"})
+    add_dependencies(
+        view,
+        "AnnualDS",
+        [
+            ("crime_year", "integer"),
+            ("primary_type", "string"),
+            ("arrest_count", "integer"),
+            ("reported_incident_count", "integer"),
+        ],
+        ["Calculation_SelectedCrimeType", "Calculation_Page4ArrestPercentage"],
+        [
+            ("crime_year", "None", "none:crime_year:ok", "ordinal"),
+            ("Calculation_Page4ArrestPercentage", "User", "usr:Calculation_Page4ArrestPercentage:qk", "quantitative"),
+            ("arrest_count", "Sum", "sum:arrest_count:qk", "quantitative"),
+            ("reported_incident_count", "Sum", "sum:reported_incident_count:qk", "quantitative"),
+        ],
+    )
+    add_parameter_dependencies(view)
+    add_true_filter(view, "AnnualDS", "Calculation_SelectedCrimeType")
+    slices = ET.SubElement(view, "slices")
+    ET.SubElement(slices, "column").text = "[AnnualDS].[Calculation_SelectedCrimeType]"
+    ET.SubElement(view, "aggregation", {"value": "true"})
+    add_sheet_style(table, percent=True)
+    add_mark(
+        table,
+        "Line",
+        [("text", "[AnnualDS].[usr:Calculation_Page4ArrestPercentage:qk]")],
+        [
+            ("Year: ", {"fontcolor": "#666666"}),
+            ("<[AnnualDS].[none:crime_year:ok]>", {"bold": "true"}),
+            ("\nArrest percentage: ", {"fontcolor": "#666666"}),
+            ("<[AnnualDS].[usr:Calculation_Page4ArrestPercentage:qk]>", {"bold": "true"}),
+            ("\nArrest count: ", {"fontcolor": "#666666"}),
+            ("<[AnnualDS].[sum:arrest_count:qk]>", {"bold": "true"}),
+            ("\nReported incidents: ", {"fontcolor": "#666666"}),
+            ("<[AnnualDS].[sum:reported_incident_count:qk]>", {"bold": "true"}),
+        ],
+        labels=True,
+        label_font_size=9,
+    )
+    ET.SubElement(table, "rows").text = "[AnnualDS].[usr:Calculation_Page4ArrestPercentage:qk]"
+    ET.SubElement(table, "cols").text = "[AnnualDS].[none:crime_year:ok]"
+
+
+def add_page4_volume_arrest_scatter(worksheets: ET.Element) -> None:
+    ws = ET.SubElement(worksheets, "worksheet", {"name": "P4 Volume vs Arrest Percentage"})
+    add_title(ws, "Incident Volume vs Arrest Percentage")
+    table = ET.SubElement(ws, "table")
+    view = ET.SubElement(table, "view")
+    sources = ET.SubElement(view, "datasources")
+    ET.SubElement(sources, "datasource", {"caption": "Executive Category Year", "name": "AnnualDS"})
+    ET.SubElement(sources, "datasource", {"name": "Parameters"})
+    add_dependencies(
+        view,
+        "AnnualDS",
+        [
+            ("crime_year", "integer"),
+            ("primary_type", "string"),
+            ("reported_incident_count", "integer"),
+            ("arrest_count", "integer"),
+        ],
+        ["Calculation_SelectedYear", "Calculation_SelectedCrimeType", "Calculation_Page4ArrestPercentage"],
+        [
+            ("primary_type", "None", "none:primary_type:nk", "nominal"),
+            ("reported_incident_count", "Sum", "sum:reported_incident_count:qk", "quantitative"),
+            ("Calculation_Page4ArrestPercentage", "User", "usr:Calculation_Page4ArrestPercentage:qk", "quantitative"),
+            ("arrest_count", "Sum", "sum:arrest_count:qk", "quantitative"),
+        ],
+    )
+    add_parameter_dependencies(view)
+    for filter_name in ("Calculation_SelectedYear", "Calculation_SelectedCrimeType"):
+        add_true_filter(view, "AnnualDS", filter_name)
+    slices = ET.SubElement(view, "slices")
+    ET.SubElement(slices, "column").text = "[AnnualDS].[Calculation_SelectedYear]"
+    ET.SubElement(slices, "column").text = "[AnnualDS].[Calculation_SelectedCrimeType]"
+    ET.SubElement(view, "aggregation", {"value": "true"})
+    add_sheet_style(table, percent=True)
+    add_mark(
+        table,
+        "Circle",
+        [
+            ("color", "[AnnualDS].[usr:Calculation_Page4ArrestPercentage:qk]"),
+            ("lod", "[AnnualDS].[none:primary_type:nk]"),
+        ],
+        [
+            ("Crime type: ", {"fontcolor": "#666666"}),
+            ("<[AnnualDS].[none:primary_type:nk]>", {"bold": "true"}),
+            ("\nReported incidents: ", {"fontcolor": "#666666"}),
+            ("<[AnnualDS].[sum:reported_incident_count:qk]>", {"bold": "true"}),
+            ("\nArrest percentage: ", {"fontcolor": "#666666"}),
+            ("<[AnnualDS].[usr:Calculation_Page4ArrestPercentage:qk]>", {"bold": "true"}),
+            ("\nArrest count: ", {"fontcolor": "#666666"}),
+            ("<[AnnualDS].[sum:arrest_count:qk]>", {"bold": "true"}),
+        ],
+    )
+    ET.SubElement(table, "rows").text = "[AnnualDS].[usr:Calculation_Page4ArrestPercentage:qk]"
+    ET.SubElement(table, "cols").text = "[AnnualDS].[sum:reported_incident_count:qk]"
 
 
 GEOGRAPHIC_FILTER_CALCULATIONS = [
@@ -1564,10 +1793,100 @@ def add_dashboard(root: ET.Element) -> None:
         "Seasonal and hourly patterns are descriptive and do not establish causation."
     )
 
+    crime_dashboard = ET.SubElement(dashboards, "dashboard", {"name": "Crime and Arrest Analysis"})
+    crime_layout = ET.SubElement(crime_dashboard, "layout-options")
+    crime_formatted = ET.SubElement(ET.SubElement(crime_layout, "title"), "formatted-text")
+    crime_title_run = ET.SubElement(
+        crime_formatted,
+        "run",
+        {"bold": "true", "fontcolor": "#17324D", "fontname": "Tableau Semibold", "fontsize": "22"},
+    )
+    crime_title_run.text = "Chicago Crime Analytics — Crime and Arrest Analysis"
+    crime_style = ET.SubElement(crime_dashboard, "style")
+    crime_rule = ET.SubElement(crime_style, "style-rule", {"element": "dashboard"})
+    add_format(crime_rule, attr="background-color", value="#F5F7FA")
+    ET.SubElement(
+        crime_dashboard,
+        "size",
+        {"maxheight": "850", "maxwidth": "1360", "minheight": "850", "minwidth": "1360", "sizing-mode": "fixed"},
+    )
+    crime_sources = ET.SubElement(crime_dashboard, "datasources")
+    ET.SubElement(crime_sources, "datasource", {"name": "Parameters"})
+    add_parameter_dependencies(crime_dashboard)
+    crime_zones = ET.SubElement(crime_dashboard, "zones")
+    crime_root = ET.SubElement(
+        crime_zones,
+        "zone",
+        {"h": "100000", "id": "301", "type-v2": "layout-basic", "w": "100000", "x": "0", "y": "0"},
+    )
+    ET.SubElement(crime_root, "zone", {"h": "7200", "id": "302", "type-v2": "title", "w": "72000", "x": "1800", "y": "1200"})
+    crime_subtitle = ET.SubElement(
+        crime_root,
+        "zone",
+        {"h": "3600", "id": "303", "type-v2": "text", "w": "72000", "x": "1800", "y": "7800"},
+    )
+    crime_sub_text = ET.SubElement(crime_subtitle, "formatted-text")
+    ET.SubElement(
+        crime_sub_text,
+        "run",
+        {"fontcolor": "#5B6B7C", "fontname": "Tableau Book", "fontsize": "10"},
+    ).text = "Complete calendar years 2023–2025 | Weighted source-indicator percentages"
+
+    crime_controls = [
+        (304, "[Parameters].[pSelectedYear]", "Year", 76000, 2200, 9000),
+        (305, "[Parameters].[pCrimeType]", "Crime Type", 86000, 2200, 12500),
+    ]
+    for zone_id, parameter, label, x, y, width in crime_controls:
+        control = ET.SubElement(
+            crime_root,
+            "zone",
+            {
+                "custom-title": "true", "h": "5200", "id": str(zone_id), "mode": "compact",
+                "param": parameter, "type-v2": "paramctrl", "w": str(width), "x": str(x), "y": str(y),
+            },
+        )
+        control_text = ET.SubElement(control, "formatted-text")
+        ET.SubElement(control_text, "run", {"bold": "true", "fontcolor": "#243447", "fontsize": "10"}).text = label
+
+    crime_sheet_zones = [
+        ("Total Reported Crimes", 306, 1800, 13000, 31200, 11000),
+        ("P4 Arrest Percentage KPI", 307, 34400, 13000, 31200, 11000),
+        ("P4 Domestic Percentage KPI", 308, 67000, 13000, 31200, 11000),
+        ("Crime Category Distribution", 309, 1800, 26000, 31000, 30000),
+        ("P4 Arrest Percentage by Category", 310, 34500, 26000, 31000, 30000),
+        ("P4 Domestic Percentage by Category", 311, 67000, 26000, 31500, 30000),
+        ("P4 Arrest Percentage Trend", 312, 1800, 58000, 47000, 30000),
+        ("P4 Volume vs Arrest Percentage", 313, 50400, 58000, 48200, 30000),
+    ]
+    for sheet_name, zone_id, x, y, width, height in crime_sheet_zones:
+        zone = ET.SubElement(
+            crime_root,
+            "zone",
+            {"h": str(height), "id": str(zone_id), "name": sheet_name, "show-title": "true", "w": str(width), "x": str(x), "y": str(y)},
+        )
+        zone_style = ET.SubElement(zone, "zone-style")
+        add_format(zone_style, attr="background-color", value="#FFFFFF")
+        add_format(zone_style, attr="border-color", value="#D9E1E8")
+        add_format(zone_style, attr="border-style", value="solid")
+        add_format(zone_style, attr="border-width", value="1")
+        add_format(zone_style, attr="margin", value="6")
+
+    crime_footer = ET.SubElement(
+        crime_root,
+        "zone",
+        {"h": "8500", "id": "314", "type-v2": "text", "w": "96800", "x": "1800", "y": "90000"},
+    )
+    crime_footer_text = ET.SubElement(crime_footer, "formatted-text")
+    ET.SubElement(crime_footer_text, "run", {"fontcolor": "#4D5F70", "fontsize": "9"}).text = (
+        "Source extract: Sep 25, 2026 | Incident dates: Jan 1, 2023–Dec 31, 2025 | Complete years\n"
+        "Counts are reported incidents, not population-normalized crime rates. Arrest percentage is the share marked arrest=true, not a clearance or conviction rate. "
+        "Domestic percentage is the share marked domestic=true. Percentages use summed numerators and denominators."
+    )
+
 
 def add_windows(root: ET.Element) -> None:
     windows = ET.SubElement(root, "windows", {"source-height": "32"})
-    window = ET.SubElement(windows, "window", {"class": "dashboard", "maximized": "true", "name": "Temporal and Seasonal Patterns"})
+    window = ET.SubElement(windows, "window", {"class": "dashboard", "maximized": "true", "name": "Crime and Arrest Analysis"})
     viewpoints = ET.SubElement(window, "viewpoints")
     for sheet in SHEETS:
         point = ET.SubElement(viewpoints, "viewpoint", {"name": sheet})
@@ -1971,6 +2290,44 @@ def build_workbook(crime_types: list[str], community_areas: list[str], districts
         horizontal=True,
     )
     add_temporal_category_comparison(worksheets)
+    add_kpi(
+        worksheets,
+        "P4 Arrest Percentage KPI",
+        "[AnnualDS].[usr:Calculation_Page4ArrestPercentage:qk]",
+        "Calculation_Page4ArrestPercentage",
+        "Arrest count divided by reported incidents for the selected scope. This is not a clearance or conviction rate.",
+        percent=True,
+        title="Arrest Percentage",
+    )
+    add_kpi(
+        worksheets,
+        "P4 Domestic Percentage KPI",
+        "[AnnualDS].[usr:Calculation_Page4DomesticPercentage:qk]",
+        "Calculation_Page4DomesticPercentage",
+        "Domestic incident count divided by reported incidents for the selected scope.",
+        percent=True,
+        title="Domestic Incident Percentage",
+    )
+    add_page4_category_percentage(
+        worksheets,
+        name="P4 Arrest Percentage by Category",
+        title="Arrest Percentage by Crime Category",
+        calculation="Calculation_Page4ArrestPercentage",
+        numerator_field="arrest_count",
+        denominator_field="reported_incident_count",
+        metric_label="Arrest percentage",
+    )
+    add_page4_arrest_trend(worksheets)
+    add_page4_volume_arrest_scatter(worksheets)
+    add_page4_category_percentage(
+        worksheets,
+        name="P4 Domestic Percentage by Category",
+        title="Domestic Incident Percentage by Crime Category",
+        calculation="Calculation_Page4DomesticPercentage",
+        numerator_field="domestic_count",
+        denominator_field="reported_incident_count",
+        metric_label="Domestic incident percentage",
+    )
     add_dashboard(root)
     add_windows(root)
     return ET.ElementTree(root)
@@ -1996,12 +2353,18 @@ def validate_workbook(
     if worksheet_names != SHEETS:
         raise ValueError(f"Worksheet definitions differ from specification: {worksheet_names}")
     dashboards = root.findall("./dashboards/dashboard")
-    if [item.attrib.get("name") for item in dashboards] != ["Executive Overview", "Geographic Crime Patterns", "Temporal and Seasonal Patterns"]:
+    if [item.attrib.get("name") for item in dashboards] != ["Executive Overview", "Geographic Crime Patterns", "Temporal and Seasonal Patterns", "Crime and Arrest Analysis"]:
         raise ValueError("Expected dashboard definitions are missing or out of order.")
     page1_zones = {zone.attrib.get("name") for zone in dashboards[0].findall(".//zone") if zone.attrib.get("name")}
     page2_zones = {zone.attrib.get("name") for zone in dashboards[1].findall(".//zone") if zone.attrib.get("name")}
     page3_zones = {zone.attrib.get("name") for zone in dashboards[2].findall(".//zone") if zone.attrib.get("name")}
-    if not set(PAGE1_SHEETS).issubset(page1_zones) or not set(PAGE2_SHEETS).issubset(page2_zones) or not set(PAGE3_SHEETS).issubset(page3_zones):
+    page4_zones = {zone.attrib.get("name") for zone in dashboards[3].findall(".//zone") if zone.attrib.get("name")}
+    if (
+        not set(PAGE1_SHEETS).issubset(page1_zones)
+        or not set(PAGE2_SHEETS).issubset(page2_zones)
+        or not set(PAGE3_SHEETS).issubset(page3_zones)
+        or not set(PAGE4_DASHBOARD_SHEETS).issubset(page4_zones)
+    ):
         raise ValueError("One or more worksheets are not placed on the correct dashboard.")
     params = {column.attrib.get("name"): column for column in sources["Parameters"].findall("column")}
     expected_defaults = {
@@ -2034,6 +2397,8 @@ def validate_workbook(
         '[Parameters].[pCrimeType] <> "All Crime Types" OR [incident_volume_rank] <= 10',
         "IF SUM([arrest_indicator_denominator]) = 0 THEN NULL ELSE 100.0 * SUM([arrest_count]) / SUM([arrest_indicator_denominator]) END",
         "IF SUM([domestic_indicator_denominator]) = 0 THEN NULL ELSE 100.0 * SUM([domestic_count]) / SUM([domestic_indicator_denominator]) END",
+        "IF SUM([reported_incident_count]) = 0 THEN NULL ELSE 100.0 * SUM([arrest_count]) / SUM([reported_incident_count]) END",
+        "IF SUM([reported_incident_count]) = 0 THEN NULL ELSE 100.0 * SUM([domestic_count]) / SUM([reported_incident_count]) END",
         '[Parameters].[pCommunityArea] = "All Community Areas" OR [community_area_name] = [Parameters].[pCommunityArea]',
         '[Parameters].[pDistrict] = "All Police Districts" OR [district_label] = [Parameters].[pDistrict]',
         "IF SUM([reported_incident_count]) = 0 THEN NULL ELSE 100.0 * SUM(IF [coordinate_mappable_flag] = 1 THEN [reported_incident_count] ELSE 0 END) / SUM([reported_incident_count]) END",
@@ -2083,6 +2448,28 @@ def validate_workbook(
             for item in sheet_view.findall("./datasources/datasource")
         ):
             raise ValueError(f"{sheet_name} is not backed by the materialized temporal KPI source.")
+    page4_arrest_trend = root.find("./worksheets/worksheet[@name='P4 Arrest Percentage Trend']/table/view")
+    page4_trend_filters = {item.attrib.get("column") for item in page4_arrest_trend.findall("filter")}
+    if (
+        "[AnnualDS].[Calculation_SelectedCrimeType]" not in page4_trend_filters
+        or "[AnnualDS].[Calculation_SelectedYear]" in page4_trend_filters
+    ):
+        raise ValueError("Page 4 arrest trend must retain all years while responding to Crime Type.")
+    for sheet_name in (
+        "P4 Arrest Percentage by Category",
+        "P4 Domestic Percentage by Category",
+    ):
+        sheet_view = root.find(f"./worksheets/worksheet[@name='{sheet_name}']/table/view")
+        sheet_filters = {item.attrib.get("column") for item in sheet_view.findall("filter")}
+        if "[AnnualDS].[Calculation_CategoryDisplay]" not in sheet_filters:
+            raise ValueError(f"{sheet_name} is missing the parameter-aware top-category filter.")
+    scatter = root.find("./worksheets/worksheet[@name='P4 Volume vs Arrest Percentage']/table")
+    if (
+        scatter is None
+        or scatter.findtext("rows") != "[AnnualDS].[usr:Calculation_Page4ArrestPercentage:qk]"
+        or scatter.findtext("cols") != "[AnnualDS].[sum:reported_incident_count:qk]"
+    ):
+        raise ValueError("Page 4 volume-versus-arrest scatter shelves are missing.")
 
 
 def main() -> None:
@@ -2107,7 +2494,7 @@ def main() -> None:
         raise FileNotFoundError(f"Workbook does not exist: {output}")
     validate_workbook(output, page1_csv_dir, page2_csv_dir, page3_csv_dir, page1_evidence, page2_evidence, page3_evidence)
     print(f"Validated workbook XML: {output.relative_to(PROJECT_ROOT)}")
-    print(f"Worksheets: {len(SHEETS)}; dashboards: 3; data sources: 5 plus Parameters")
+    print(f"Worksheets: {len(SHEETS)}; dashboards: 4; data sources: 5 plus Parameters")
     print(f"Page 1 CSV rows: annual/category={page1_evidence['annual_rows']:,}; month/category={page1_evidence['monthly_rows']:,}")
     print(
         f"Page 2 CSV rows: {page2_evidence['rows']:,}; community areas={page2_evidence['community_areas']}; "
