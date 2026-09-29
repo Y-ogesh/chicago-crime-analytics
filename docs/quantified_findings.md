@@ -106,7 +106,7 @@ The following wording stays within the executed evidence:
 - Distinguished proportional from operational-volume change: Forest Glen ranked first for percentage decrease (-24.9541%; -136 records), while Austin ranked first for absolute decrease (-1,152 records; -8.8903%).
 - Validated geographic coverage and created five reproducible Tableau-ready datasets after reconciling all 77 community-area totals and 754,866 coordinate-mappable records to SQL with zero differences.
 
-These statements describe completed SQL and independently reconciled Python/geographic work. Tableau validation, resource-planning recommendations, and final resume packaging remain future milestones.
+These statements describe completed SQL and independently reconciled Python/geographic work. All four Tableau pages and the final findings/recommendations report are now validated; final portfolio QA and resume packaging remain under Milestone 11. The consolidated evidence, interpretations, planning hypotheses, and limitations are in the [final analysis report](final_analysis_report.md).
 
 ## Limitations
 

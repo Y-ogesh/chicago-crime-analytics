@@ -330,7 +330,7 @@ A focused cross-page review compared the retained 2025 All Crime Types exports f
 
 ## Milestone 10 — Findings and resource-planning recommendations
 
-### Status: Planned
+### Status: Complete
 
 ### Scope
 
@@ -344,6 +344,14 @@ Synthesize verified evidence into findings and cautious resource-planning recomm
 - Reported-crime undercoverage, record revisions, approximate geography, missing data, and population-rate limitations are explicit.
 - Citywide and community-area statements use the correct comparison eligibility rules.
 - README and technical reports agree on findings, definitions, and date coverage.
+
+### Completion evidence
+
+[`docs/final_analysis_report.md`](final_analysis_report.md) synthesizes seven quantified findings across citywide, category, community-area, temporal, geographic, arrest, and domestic analyses. Every finding states its period, metric definition, supporting SQL or notebook, numerical result, interpretation, and caveats. The report rejects the unsupported candidate values: the verified 2024–2025 citywide decline is 259,633 to 238,086 (-8.2990%), and Forest Glen's verified eligible percentage decline is 545 to 409 (-24.9541%).
+
+[`sql/13_final_findings_validation.sql`](../sql/13_final_findings_validation.sql) completed with stop-on-error behavior in a read-only transaction after one initial run identified a text-versus-integer district comparison. The comparison was corrected to the stored text code `'008'`, and the full rerun completed successfully. It reconciled annual counts, six selected category changes, both community-area change leaders, all 77 area directions, all 12 monthly comparisons, seasonal and time-band values, geographic coverage, Austin and District 008 totals, and annual arrest/domestic components.
+
+The recommendations are framed as testable operational hypotheses and explicitly prohibit causal claims, partial-year/full-year comparisons, count-as-rate language, arrest-as-clearance language, and silent coordinate exclusions. The README links the final report, summarizes six core findings, retains all four validated Tableau previews, and marks Milestone 10 complete.
 
 ## Milestone 11 — Final QA, portfolio packaging, and resume metrics
 

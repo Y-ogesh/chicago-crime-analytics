@@ -93,7 +93,7 @@ Empty working directories are retained with `.gitkeep` placeholders. Raw and lar
 | 9C | Geographic Crime Patterns dashboard | Complete |
 | 9D | Temporal and Seasonal Patterns dashboard | Complete |
 | 9E | Crime and Arrest Analysis dashboard | Complete |
-| 10 | Findings and resource-planning recommendations | Planned |
+| 10 | Findings and resource-planning recommendations | Complete |
 | 11 | Final QA, portfolio packaging, and resume metrics | Planned |
 
 Detailed gates and acceptance criteria are in the [project plan](docs/project_plan.md). The executed extraction evidence is in [dataset acquisition](docs/dataset_acquisition.md), the PostgreSQL workflow and import validation are in [database setup](docs/database_setup.md), observed quality issues are in the [data-quality report](docs/data_quality_report.md), implemented record-level transformations are in the [cleaning report](docs/cleaning_report.md), and verified descriptive SQL findings are in the [core SQL analysis report](docs/sql_analysis_report.md). Independent Pandas validation, exploratory findings, and the visualization inventory are in the [Python EDA report](docs/python_eda_report.md); geographic methods and density limitations are in the [geographic analysis report](docs/geographic_analysis_report.md). Exact data sources, fields, calculations, filters, tooltips, sorting, interactions, and validation criteria are in the [Tableau dashboard plan](docs/tableau_dashboard_plan.md). Implemented Page 2 behavior is in the [Geographic Crime Patterns build guide](docs/tableau_page2_build_guide.md); Page 3 definitions and validation benchmarks are in the [Temporal and Seasonal Patterns build guide](docs/tableau_page3_build_guide.md). Claim-level calculations and candidate resume evidence are in [quantified findings](docs/quantified_findings.md). Metric formulas and comparison rules are in [metric definitions](docs/metric_definitions.md), and raw, clean, and analytical-view fields are described in the [data dictionary](docs/data_dictionary.md).
@@ -223,9 +223,28 @@ python scripts/generate_tableau_workbook.py
 
 The exporter uses a read-only environment-configured connection, deterministic ordering, CSV row-count reconciliation, and local checksum manifests under Git-ignored `data/processed/tableau/`. Page 1 uses independent year/category and month/category sources; Page 2 uses one 50,037-row geographic source; and Page 3 uses an 87,809-row additive detail source plus a 96-row year/crime-type KPI source. Page 4 reuses Page 1's validated 93-row year/category source, so no additional extract or cross-grain join is introduced. The generator writes 27 worksheets, four fixed-size dashboards, five CSV-backed data sources, and shared workbook parameters. See the [Tableau dashboard plan](docs/tableau_dashboard_plan.md), [Executive Overview build guide](docs/tableau_page1_build_guide.md), [Geographic Crime Patterns build guide](docs/tableau_page2_build_guide.md), and [Temporal and Seasonal Patterns build guide](docs/tableau_page3_build_guide.md).
 
+The final published values can be reconciled without changing database state by running:
+
+```bash
+psql --no-psqlrc --dbname "${PGDATABASE:-chicago_crime}" \
+  -v ON_ERROR_STOP=1 -P pager=off \
+  --file sql/13_final_findings_validation.sql
+```
+
+## Key validated findings
+
+- Reported incidents decreased from 259,633 in 2024 to 238,086 in 2025: -21,547 records and -8.2990%.
+- Seventy-one of 77 community areas decreased in 2025. Forest Glen led eligible percentage decline (-24.9541%; -136), while Austin led absolute decline (-1,152; -8.8903%).
+- Category movement was uneven: Robbery decreased 36.2171%, while Narcotics increased 23.6912% and Burglary increased 15.4439%.
+- Every month in 2025 was below its 2024 counterpart; Summer remained the largest season with 65,283 records in 2025.
+- The arrest-indicator percentage increased from 13.8237% to 16.1139% between 2024 and 2025; this is not a clearance or conviction rate.
+- Coordinate mapping covered 754,866 records (99.1206%); the remaining 6,697 records stayed in applicable non-map analyses.
+
+The complete evidence register, analytical interpretations, recommendations, limitations, and future-work priorities are in the [final analysis report](docs/final_analysis_report.md).
+
 ## Current status
 
-**Status: Tableau Milestones 9A–9E are complete.** The generated workbook contains 27 worksheets, four fixed-size dashboards, five CSV-backed data sources, and shared filter parameters. Tableau Desktop 2026.2.3 rendered Page 4 at the required 2025 All Crime Types and 2025 THEFT states, and the displayed KPIs reconciled to PostgreSQL. A focused review of all four retained dashboard exports confirmed consistent typography, color, metric terminology, complete-year labeling, filter placement, readable labels, and limitation footers.
+**Status: Milestones 0–10 are complete; final portfolio QA remains planned.** The generated workbook contains 27 worksheets, four fixed-size dashboards, five CSV-backed data sources, and shared filter parameters. Tableau Desktop 2026.2.3 rendered Page 4 at the required 2025 All Crime Types and 2025 THEFT states, and the displayed KPIs reconciled to PostgreSQL. The final analysis report documents seven verified findings, evidence-based planning hypotheses, limitations, and future work without presenting observational patterns as causal results.
 
 ### Executive Overview preview
 
