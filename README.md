@@ -237,3 +237,9 @@ The corresponding [2025 Theft validation view](images/tableau/executive_overview
 ![Chicago Crime Analytics Geographic Crime Patterns filtered to 2025 and All Crime Types](images/tableau/geographic_crime_patterns_2025_all.png)
 
 The corresponding [2025 Theft validation view](images/tableau/geographic_crime_patterns_2025_theft.png) confirms synchronized category filtering across the incident KPI, coverage KPI, descriptive coordinate map, community-area ranking, district comparison, and geographic category analysis.
+
+### Temporal and Seasonal Patterns preview
+
+![Chicago Crime Analytics Temporal and Seasonal Patterns filtered to 2025 and All Crime Types](images/tableau/temporal_seasonal_patterns_2025_all.png)
+
+The corresponding [2025 Theft validation view](images/tableau/temporal_seasonal_patterns_2025_theft.png) confirms synchronized filtering across the temporal KPIs, weekday-hour heatmap, monthly trend, seasonal comparison, time-of-day distribution, and category trend.
