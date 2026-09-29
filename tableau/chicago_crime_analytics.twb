@@ -946,6 +946,500 @@
         <calculation class="tableau" formula="[community_area_eligible_flag] = 1" />
       </column>
     </datasource>
+    <datasource caption="Temporal Detail" inline="true" name="TemporalDS" version="18.1">
+      <connection class="federated">
+        <named-connections>
+          <named-connection caption="Temporal Detail" name="TemporalDSLeaf">
+            <connection character-set="UTF-8" class="textscan" directory="../data/processed/tableau/page3" filename="vw_tableau_temporal_detail.csv" force-character-set="no" force-header="no" force-separator="no" header="yes" password="" separator="," server="" text-qualifier="&quot;" />
+          </named-connection>
+        </named-connections>
+        <relation connection="TemporalDSLeaf" name="vw_tableau_temporal_detail.csv" table="[vw_tableau_temporal_detail#csv]" type="table">
+          <columns character-set="UTF-8" header="yes" locale="en_US" separator="," text-qualifier="&quot;">
+            <column datatype="date" name="month_start" ordinal="0" />
+            <column datatype="integer" name="crime_year" ordinal="1" />
+            <column datatype="integer" name="crime_month" ordinal="2" />
+            <column datatype="string" name="month_name" ordinal="3" />
+            <column datatype="integer" name="crime_quarter" ordinal="4" />
+            <column datatype="string" name="season" ordinal="5" />
+            <column datatype="integer" name="season_order" ordinal="6" />
+            <column datatype="string" name="primary_type" ordinal="7" />
+            <column datatype="integer" name="annual_category_rank" ordinal="8" />
+            <column datatype="integer" name="day_of_week_num" ordinal="9" />
+            <column datatype="string" name="day_of_week" ordinal="10" />
+            <column datatype="integer" name="hour_of_day" ordinal="11" />
+            <column datatype="string" name="time_of_day" ordinal="12" />
+            <column datatype="string" name="time_of_day_display" ordinal="13" />
+            <column datatype="integer" name="time_of_day_order" ordinal="14" />
+            <column datatype="integer" name="weekend_flag" ordinal="15" />
+            <column datatype="integer" name="reported_incident_count" ordinal="16" />
+            <column datatype="integer" name="arrest_count" ordinal="17" />
+            <column datatype="integer" name="arrest_indicator_denominator" ordinal="18" />
+            <column datatype="integer" name="domestic_count" ordinal="19" />
+            <column datatype="integer" name="domestic_indicator_denominator" ordinal="20" />
+          </columns>
+        </relation>
+        <metadata-records>
+          <metadata-record class="column">
+            <remote-name>month_start</remote-name>
+            <remote-type>7</remote-type>
+            <local-name>[month_start]</local-name>
+            <parent-name>[vw_tableau_temporal_detail#csv]</parent-name>
+            <remote-alias>month_start</remote-alias>
+            <ordinal>0</ordinal>
+            <local-type>date</local-type>
+            <aggregation>Year</aggregation>
+            <contains-null>true</contains-null>
+          </metadata-record>
+          <metadata-record class="column">
+            <remote-name>crime_year</remote-name>
+            <remote-type>20</remote-type>
+            <local-name>[crime_year]</local-name>
+            <parent-name>[vw_tableau_temporal_detail#csv]</parent-name>
+            <remote-alias>crime_year</remote-alias>
+            <ordinal>1</ordinal>
+            <local-type>integer</local-type>
+            <aggregation>Sum</aggregation>
+            <contains-null>true</contains-null>
+          </metadata-record>
+          <metadata-record class="column">
+            <remote-name>crime_month</remote-name>
+            <remote-type>20</remote-type>
+            <local-name>[crime_month]</local-name>
+            <parent-name>[vw_tableau_temporal_detail#csv]</parent-name>
+            <remote-alias>crime_month</remote-alias>
+            <ordinal>2</ordinal>
+            <local-type>integer</local-type>
+            <aggregation>Sum</aggregation>
+            <contains-null>true</contains-null>
+          </metadata-record>
+          <metadata-record class="column">
+            <remote-name>month_name</remote-name>
+            <remote-type>129</remote-type>
+            <local-name>[month_name]</local-name>
+            <parent-name>[vw_tableau_temporal_detail#csv]</parent-name>
+            <remote-alias>month_name</remote-alias>
+            <ordinal>3</ordinal>
+            <local-type>string</local-type>
+            <aggregation>Count</aggregation>
+            <contains-null>true</contains-null>
+          </metadata-record>
+          <metadata-record class="column">
+            <remote-name>crime_quarter</remote-name>
+            <remote-type>20</remote-type>
+            <local-name>[crime_quarter]</local-name>
+            <parent-name>[vw_tableau_temporal_detail#csv]</parent-name>
+            <remote-alias>crime_quarter</remote-alias>
+            <ordinal>4</ordinal>
+            <local-type>integer</local-type>
+            <aggregation>Sum</aggregation>
+            <contains-null>true</contains-null>
+          </metadata-record>
+          <metadata-record class="column">
+            <remote-name>season</remote-name>
+            <remote-type>129</remote-type>
+            <local-name>[season]</local-name>
+            <parent-name>[vw_tableau_temporal_detail#csv]</parent-name>
+            <remote-alias>season</remote-alias>
+            <ordinal>5</ordinal>
+            <local-type>string</local-type>
+            <aggregation>Count</aggregation>
+            <contains-null>true</contains-null>
+          </metadata-record>
+          <metadata-record class="column">
+            <remote-name>season_order</remote-name>
+            <remote-type>20</remote-type>
+            <local-name>[season_order]</local-name>
+            <parent-name>[vw_tableau_temporal_detail#csv]</parent-name>
+            <remote-alias>season_order</remote-alias>
+            <ordinal>6</ordinal>
+            <local-type>integer</local-type>
+            <aggregation>Sum</aggregation>
+            <contains-null>true</contains-null>
+          </metadata-record>
+          <metadata-record class="column">
+            <remote-name>primary_type</remote-name>
+            <remote-type>129</remote-type>
+            <local-name>[primary_type]</local-name>
+            <parent-name>[vw_tableau_temporal_detail#csv]</parent-name>
+            <remote-alias>primary_type</remote-alias>
+            <ordinal>7</ordinal>
+            <local-type>string</local-type>
+            <aggregation>Count</aggregation>
+            <contains-null>true</contains-null>
+          </metadata-record>
+          <metadata-record class="column">
+            <remote-name>annual_category_rank</remote-name>
+            <remote-type>20</remote-type>
+            <local-name>[annual_category_rank]</local-name>
+            <parent-name>[vw_tableau_temporal_detail#csv]</parent-name>
+            <remote-alias>annual_category_rank</remote-alias>
+            <ordinal>8</ordinal>
+            <local-type>integer</local-type>
+            <aggregation>Sum</aggregation>
+            <contains-null>true</contains-null>
+          </metadata-record>
+          <metadata-record class="column">
+            <remote-name>day_of_week_num</remote-name>
+            <remote-type>20</remote-type>
+            <local-name>[day_of_week_num]</local-name>
+            <parent-name>[vw_tableau_temporal_detail#csv]</parent-name>
+            <remote-alias>day_of_week_num</remote-alias>
+            <ordinal>9</ordinal>
+            <local-type>integer</local-type>
+            <aggregation>Sum</aggregation>
+            <contains-null>true</contains-null>
+          </metadata-record>
+          <metadata-record class="column">
+            <remote-name>day_of_week</remote-name>
+            <remote-type>129</remote-type>
+            <local-name>[day_of_week]</local-name>
+            <parent-name>[vw_tableau_temporal_detail#csv]</parent-name>
+            <remote-alias>day_of_week</remote-alias>
+            <ordinal>10</ordinal>
+            <local-type>string</local-type>
+            <aggregation>Count</aggregation>
+            <contains-null>true</contains-null>
+          </metadata-record>
+          <metadata-record class="column">
+            <remote-name>hour_of_day</remote-name>
+            <remote-type>20</remote-type>
+            <local-name>[hour_of_day]</local-name>
+            <parent-name>[vw_tableau_temporal_detail#csv]</parent-name>
+            <remote-alias>hour_of_day</remote-alias>
+            <ordinal>11</ordinal>
+            <local-type>integer</local-type>
+            <aggregation>Sum</aggregation>
+            <contains-null>true</contains-null>
+          </metadata-record>
+          <metadata-record class="column">
+            <remote-name>time_of_day</remote-name>
+            <remote-type>129</remote-type>
+            <local-name>[time_of_day]</local-name>
+            <parent-name>[vw_tableau_temporal_detail#csv]</parent-name>
+            <remote-alias>time_of_day</remote-alias>
+            <ordinal>12</ordinal>
+            <local-type>string</local-type>
+            <aggregation>Count</aggregation>
+            <contains-null>true</contains-null>
+          </metadata-record>
+          <metadata-record class="column">
+            <remote-name>time_of_day_display</remote-name>
+            <remote-type>129</remote-type>
+            <local-name>[time_of_day_display]</local-name>
+            <parent-name>[vw_tableau_temporal_detail#csv]</parent-name>
+            <remote-alias>time_of_day_display</remote-alias>
+            <ordinal>13</ordinal>
+            <local-type>string</local-type>
+            <aggregation>Count</aggregation>
+            <contains-null>true</contains-null>
+          </metadata-record>
+          <metadata-record class="column">
+            <remote-name>time_of_day_order</remote-name>
+            <remote-type>20</remote-type>
+            <local-name>[time_of_day_order]</local-name>
+            <parent-name>[vw_tableau_temporal_detail#csv]</parent-name>
+            <remote-alias>time_of_day_order</remote-alias>
+            <ordinal>14</ordinal>
+            <local-type>integer</local-type>
+            <aggregation>Sum</aggregation>
+            <contains-null>true</contains-null>
+          </metadata-record>
+          <metadata-record class="column">
+            <remote-name>weekend_flag</remote-name>
+            <remote-type>20</remote-type>
+            <local-name>[weekend_flag]</local-name>
+            <parent-name>[vw_tableau_temporal_detail#csv]</parent-name>
+            <remote-alias>weekend_flag</remote-alias>
+            <ordinal>15</ordinal>
+            <local-type>integer</local-type>
+            <aggregation>Sum</aggregation>
+            <contains-null>true</contains-null>
+          </metadata-record>
+          <metadata-record class="column">
+            <remote-name>reported_incident_count</remote-name>
+            <remote-type>20</remote-type>
+            <local-name>[reported_incident_count]</local-name>
+            <parent-name>[vw_tableau_temporal_detail#csv]</parent-name>
+            <remote-alias>reported_incident_count</remote-alias>
+            <ordinal>16</ordinal>
+            <local-type>integer</local-type>
+            <aggregation>Sum</aggregation>
+            <contains-null>true</contains-null>
+          </metadata-record>
+          <metadata-record class="column">
+            <remote-name>arrest_count</remote-name>
+            <remote-type>20</remote-type>
+            <local-name>[arrest_count]</local-name>
+            <parent-name>[vw_tableau_temporal_detail#csv]</parent-name>
+            <remote-alias>arrest_count</remote-alias>
+            <ordinal>17</ordinal>
+            <local-type>integer</local-type>
+            <aggregation>Sum</aggregation>
+            <contains-null>true</contains-null>
+          </metadata-record>
+          <metadata-record class="column">
+            <remote-name>arrest_indicator_denominator</remote-name>
+            <remote-type>20</remote-type>
+            <local-name>[arrest_indicator_denominator]</local-name>
+            <parent-name>[vw_tableau_temporal_detail#csv]</parent-name>
+            <remote-alias>arrest_indicator_denominator</remote-alias>
+            <ordinal>18</ordinal>
+            <local-type>integer</local-type>
+            <aggregation>Sum</aggregation>
+            <contains-null>true</contains-null>
+          </metadata-record>
+          <metadata-record class="column">
+            <remote-name>domestic_count</remote-name>
+            <remote-type>20</remote-type>
+            <local-name>[domestic_count]</local-name>
+            <parent-name>[vw_tableau_temporal_detail#csv]</parent-name>
+            <remote-alias>domestic_count</remote-alias>
+            <ordinal>19</ordinal>
+            <local-type>integer</local-type>
+            <aggregation>Sum</aggregation>
+            <contains-null>true</contains-null>
+          </metadata-record>
+          <metadata-record class="column">
+            <remote-name>domestic_indicator_denominator</remote-name>
+            <remote-type>20</remote-type>
+            <local-name>[domestic_indicator_denominator]</local-name>
+            <parent-name>[vw_tableau_temporal_detail#csv]</parent-name>
+            <remote-alias>domestic_indicator_denominator</remote-alias>
+            <ordinal>20</ordinal>
+            <local-type>integer</local-type>
+            <aggregation>Sum</aggregation>
+            <contains-null>true</contains-null>
+          </metadata-record>
+        </metadata-records>
+      </connection>
+      <aliases enabled="yes" />
+      <column datatype="date" name="[month_start]" role="dimension" type="ordinal" />
+      <column datatype="integer" name="[crime_year]" role="measure" type="quantitative" />
+      <column datatype="integer" name="[crime_month]" role="measure" type="quantitative" />
+      <column datatype="string" name="[month_name]" role="dimension" type="nominal" />
+      <column datatype="integer" name="[crime_quarter]" role="measure" type="quantitative" />
+      <column datatype="string" name="[season]" role="dimension" type="nominal" />
+      <column datatype="integer" name="[season_order]" role="measure" type="quantitative" />
+      <column datatype="string" name="[primary_type]" role="dimension" type="nominal" />
+      <column datatype="integer" name="[annual_category_rank]" role="measure" type="quantitative" />
+      <column datatype="integer" name="[day_of_week_num]" role="measure" type="quantitative" />
+      <column datatype="string" name="[day_of_week]" role="dimension" type="nominal" />
+      <column datatype="integer" name="[hour_of_day]" role="measure" type="quantitative" />
+      <column datatype="string" name="[time_of_day]" role="dimension" type="nominal" />
+      <column datatype="string" name="[time_of_day_display]" role="dimension" type="nominal" />
+      <column datatype="integer" name="[time_of_day_order]" role="measure" type="quantitative" />
+      <column datatype="integer" name="[weekend_flag]" role="measure" type="quantitative" />
+      <column datatype="integer" name="[reported_incident_count]" role="measure" type="quantitative" caption="Reported Incidents" />
+      <column datatype="integer" name="[arrest_count]" role="measure" type="quantitative" />
+      <column datatype="integer" name="[arrest_indicator_denominator]" role="measure" type="quantitative" />
+      <column datatype="integer" name="[domestic_count]" role="measure" type="quantitative" />
+      <column datatype="integer" name="[domestic_indicator_denominator]" role="measure" type="quantitative" />
+      <column caption="Selected Year Filter" datatype="boolean" name="[Calculation_SelectedYear]" role="dimension" type="nominal">
+        <calculation class="tableau" formula="STR([crime_year]) = [Parameters].[pSelectedYear]" />
+      </column>
+      <column caption="Selected Crime Type Filter" datatype="boolean" name="[Calculation_SelectedCrimeType]" role="dimension" type="nominal">
+        <calculation class="tableau" formula="[Parameters].[pCrimeType] = &quot;All Crime Types&quot; OR [primary_type] = [Parameters].[pCrimeType]" />
+      </column>
+      <column caption="Show Leading Categories" datatype="boolean" name="[Calculation_TemporalCategoryDisplay]" role="dimension" type="nominal">
+        <calculation class="tableau" formula="[Parameters].[pCrimeType] &lt;&gt; &quot;All Crime Types&quot; OR [annual_category_rank] &lt;= 5" />
+      </column>
+      <column caption="Time of Day Display" datatype="string" name="[Calculation_TimeOfDayDisplay]" role="dimension" type="nominal">
+        <calculation class="tableau" formula="IF [time_of_day] = &quot;Overnight&quot; THEN &quot;Night&quot; ELSE [time_of_day] END" />
+      </column>
+      <column caption="Hour Label" datatype="string" name="[Calculation_HourLabel]" role="dimension" type="nominal">
+        <calculation class="tableau" formula="RIGHT(&quot;0&quot; + STR([hour_of_day]), 2) + &quot;:00&quot;" />
+      </column>
+      <column caption="Arrest Percentage" datatype="real" name="[Calculation_TemporalArrestPercentage]" role="measure" type="quantitative" default-format="n#,##0.0&quot;%&quot;;-#,##0.0&quot;%&quot;">
+        <calculation class="tableau" formula="IF SUM([arrest_indicator_denominator]) = 0 THEN NULL ELSE 100.0 * SUM([arrest_count]) / SUM([arrest_indicator_denominator]) END" />
+      </column>
+      <column caption="Domestic Incident Percentage" datatype="real" name="[Calculation_TemporalDomesticPercentage]" role="measure" type="quantitative" default-format="n#,##0.0&quot;%&quot;;-#,##0.0&quot;%&quot;">
+        <calculation class="tableau" formula="IF SUM([domestic_indicator_denominator]) = 0 THEN NULL ELSE 100.0 * SUM([domestic_count]) / SUM([domestic_indicator_denominator]) END" />
+      </column>
+      <column caption="Peak Hour Label" datatype="string" name="[Calculation_PeakHourLabel]" role="measure" type="nominal">
+        <calculation class="tableau" formula="IF RANK_UNIQUE(SUM([reported_incident_count]), &quot;desc&quot;) = 1 THEN MIN([Calculation_HourLabel]) + CHAR(10) + STR(SUM([reported_incident_count])) + &quot; incidents&quot; END" />
+      </column>
+      <column caption="Peak Day Label" datatype="string" name="[Calculation_PeakDayLabel]" role="measure" type="nominal">
+        <calculation class="tableau" formula="IF RANK_UNIQUE(SUM([reported_incident_count]), &quot;desc&quot;) = 1 THEN MIN([day_of_week]) + CHAR(10) + STR(SUM([reported_incident_count])) + &quot; incidents&quot; END" />
+      </column>
+      <column caption="Peak Month Label" datatype="string" name="[Calculation_PeakMonthLabel]" role="measure" type="nominal">
+        <calculation class="tableau" formula="IF RANK_UNIQUE(SUM([reported_incident_count]), &quot;desc&quot;) = 1 THEN MIN([month_name]) + CHAR(10) + STR(SUM([reported_incident_count])) + &quot; incidents&quot; END" />
+      </column>
+    </datasource>
+    <datasource caption="Temporal KPI Scope" inline="true" name="TemporalKpiDS" version="18.1">
+      <connection class="federated">
+        <named-connections>
+          <named-connection caption="Temporal KPI Scope" name="TemporalKpiDSLeaf">
+            <connection character-set="UTF-8" class="textscan" directory="../data/processed/tableau/page3" filename="vw_tableau_temporal_kpis.csv" force-character-set="no" force-header="no" force-separator="no" header="yes" password="" separator="," server="" text-qualifier="&quot;" />
+          </named-connection>
+        </named-connections>
+        <relation connection="TemporalKpiDSLeaf" name="vw_tableau_temporal_kpis.csv" table="[vw_tableau_temporal_kpis#csv]" type="table">
+          <columns character-set="UTF-8" header="yes" locale="en_US" separator="," text-qualifier="&quot;">
+            <column datatype="integer" name="crime_year" ordinal="0" />
+            <column datatype="string" name="primary_type_scope" ordinal="1" />
+            <column datatype="integer" name="reported_incident_count" ordinal="2" />
+            <column datatype="integer" name="peak_hour" ordinal="3" />
+            <column datatype="string" name="peak_hour_label" ordinal="4" />
+            <column datatype="integer" name="peak_hour_incident_count" ordinal="5" />
+            <column datatype="integer" name="peak_day_num" ordinal="6" />
+            <column datatype="string" name="peak_day" ordinal="7" />
+            <column datatype="integer" name="peak_day_incident_count" ordinal="8" />
+            <column datatype="integer" name="peak_month_num" ordinal="9" />
+            <column datatype="string" name="peak_month" ordinal="10" />
+            <column datatype="integer" name="peak_month_incident_count" ordinal="11" />
+          </columns>
+        </relation>
+        <metadata-records>
+          <metadata-record class="column">
+            <remote-name>crime_year</remote-name>
+            <remote-type>20</remote-type>
+            <local-name>[crime_year]</local-name>
+            <parent-name>[vw_tableau_temporal_kpis#csv]</parent-name>
+            <remote-alias>crime_year</remote-alias>
+            <ordinal>0</ordinal>
+            <local-type>integer</local-type>
+            <aggregation>Sum</aggregation>
+            <contains-null>true</contains-null>
+          </metadata-record>
+          <metadata-record class="column">
+            <remote-name>primary_type_scope</remote-name>
+            <remote-type>129</remote-type>
+            <local-name>[primary_type_scope]</local-name>
+            <parent-name>[vw_tableau_temporal_kpis#csv]</parent-name>
+            <remote-alias>primary_type_scope</remote-alias>
+            <ordinal>1</ordinal>
+            <local-type>string</local-type>
+            <aggregation>Count</aggregation>
+            <contains-null>true</contains-null>
+          </metadata-record>
+          <metadata-record class="column">
+            <remote-name>reported_incident_count</remote-name>
+            <remote-type>20</remote-type>
+            <local-name>[reported_incident_count]</local-name>
+            <parent-name>[vw_tableau_temporal_kpis#csv]</parent-name>
+            <remote-alias>reported_incident_count</remote-alias>
+            <ordinal>2</ordinal>
+            <local-type>integer</local-type>
+            <aggregation>Sum</aggregation>
+            <contains-null>true</contains-null>
+          </metadata-record>
+          <metadata-record class="column">
+            <remote-name>peak_hour</remote-name>
+            <remote-type>20</remote-type>
+            <local-name>[peak_hour]</local-name>
+            <parent-name>[vw_tableau_temporal_kpis#csv]</parent-name>
+            <remote-alias>peak_hour</remote-alias>
+            <ordinal>3</ordinal>
+            <local-type>integer</local-type>
+            <aggregation>Sum</aggregation>
+            <contains-null>true</contains-null>
+          </metadata-record>
+          <metadata-record class="column">
+            <remote-name>peak_hour_label</remote-name>
+            <remote-type>129</remote-type>
+            <local-name>[peak_hour_label]</local-name>
+            <parent-name>[vw_tableau_temporal_kpis#csv]</parent-name>
+            <remote-alias>peak_hour_label</remote-alias>
+            <ordinal>4</ordinal>
+            <local-type>string</local-type>
+            <aggregation>Count</aggregation>
+            <contains-null>true</contains-null>
+          </metadata-record>
+          <metadata-record class="column">
+            <remote-name>peak_hour_incident_count</remote-name>
+            <remote-type>20</remote-type>
+            <local-name>[peak_hour_incident_count]</local-name>
+            <parent-name>[vw_tableau_temporal_kpis#csv]</parent-name>
+            <remote-alias>peak_hour_incident_count</remote-alias>
+            <ordinal>5</ordinal>
+            <local-type>integer</local-type>
+            <aggregation>Sum</aggregation>
+            <contains-null>true</contains-null>
+          </metadata-record>
+          <metadata-record class="column">
+            <remote-name>peak_day_num</remote-name>
+            <remote-type>20</remote-type>
+            <local-name>[peak_day_num]</local-name>
+            <parent-name>[vw_tableau_temporal_kpis#csv]</parent-name>
+            <remote-alias>peak_day_num</remote-alias>
+            <ordinal>6</ordinal>
+            <local-type>integer</local-type>
+            <aggregation>Sum</aggregation>
+            <contains-null>true</contains-null>
+          </metadata-record>
+          <metadata-record class="column">
+            <remote-name>peak_day</remote-name>
+            <remote-type>129</remote-type>
+            <local-name>[peak_day]</local-name>
+            <parent-name>[vw_tableau_temporal_kpis#csv]</parent-name>
+            <remote-alias>peak_day</remote-alias>
+            <ordinal>7</ordinal>
+            <local-type>string</local-type>
+            <aggregation>Count</aggregation>
+            <contains-null>true</contains-null>
+          </metadata-record>
+          <metadata-record class="column">
+            <remote-name>peak_day_incident_count</remote-name>
+            <remote-type>20</remote-type>
+            <local-name>[peak_day_incident_count]</local-name>
+            <parent-name>[vw_tableau_temporal_kpis#csv]</parent-name>
+            <remote-alias>peak_day_incident_count</remote-alias>
+            <ordinal>8</ordinal>
+            <local-type>integer</local-type>
+            <aggregation>Sum</aggregation>
+            <contains-null>true</contains-null>
+          </metadata-record>
+          <metadata-record class="column">
+            <remote-name>peak_month_num</remote-name>
+            <remote-type>20</remote-type>
+            <local-name>[peak_month_num]</local-name>
+            <parent-name>[vw_tableau_temporal_kpis#csv]</parent-name>
+            <remote-alias>peak_month_num</remote-alias>
+            <ordinal>9</ordinal>
+            <local-type>integer</local-type>
+            <aggregation>Sum</aggregation>
+            <contains-null>true</contains-null>
+          </metadata-record>
+          <metadata-record class="column">
+            <remote-name>peak_month</remote-name>
+            <remote-type>129</remote-type>
+            <local-name>[peak_month]</local-name>
+            <parent-name>[vw_tableau_temporal_kpis#csv]</parent-name>
+            <remote-alias>peak_month</remote-alias>
+            <ordinal>10</ordinal>
+            <local-type>string</local-type>
+            <aggregation>Count</aggregation>
+            <contains-null>true</contains-null>
+          </metadata-record>
+          <metadata-record class="column">
+            <remote-name>peak_month_incident_count</remote-name>
+            <remote-type>20</remote-type>
+            <local-name>[peak_month_incident_count]</local-name>
+            <parent-name>[vw_tableau_temporal_kpis#csv]</parent-name>
+            <remote-alias>peak_month_incident_count</remote-alias>
+            <ordinal>11</ordinal>
+            <local-type>integer</local-type>
+            <aggregation>Sum</aggregation>
+            <contains-null>true</contains-null>
+          </metadata-record>
+        </metadata-records>
+      </connection>
+      <aliases enabled="yes" />
+      <column datatype="integer" name="[crime_year]" role="measure" type="quantitative" />
+      <column datatype="string" name="[primary_type_scope]" role="dimension" type="nominal" />
+      <column datatype="integer" name="[reported_incident_count]" role="measure" type="quantitative" caption="Reported Incidents" />
+      <column datatype="integer" name="[peak_hour]" role="measure" type="quantitative" />
+      <column datatype="string" name="[peak_hour_label]" role="dimension" type="nominal" />
+      <column datatype="integer" name="[peak_hour_incident_count]" role="measure" type="quantitative" />
+      <column datatype="integer" name="[peak_day_num]" role="measure" type="quantitative" />
+      <column datatype="string" name="[peak_day]" role="dimension" type="nominal" />
+      <column datatype="integer" name="[peak_day_incident_count]" role="measure" type="quantitative" />
+      <column datatype="integer" name="[peak_month_num]" role="measure" type="quantitative" />
+      <column datatype="string" name="[peak_month]" role="dimension" type="nominal" />
+      <column datatype="integer" name="[peak_month_incident_count]" role="measure" type="quantitative" />
+      <column caption="Selected Temporal KPI Scope" datatype="boolean" name="[Calculation_SelectedTemporalKpiScope]" role="dimension" type="nominal">
+        <calculation class="tableau" formula="STR([crime_year]) = [Parameters].[pSelectedYear] AND [primary_type_scope] = [Parameters].[pCrimeType]" />
+      </column>
+    </datasource>
   </datasources>
   <worksheets>
     <worksheet name="Total Reported Crimes">
@@ -2299,6 +2793,930 @@ Reported incidents: </run>
         <cols>[GeographicDS].[sum:reported_incident_count:qk]</cols>
       </table>
     </worksheet>
+    <worksheet name="P3 KPI Total Incidents">
+      <layout-options>
+        <title>
+          <formatted-text>
+            <run bold="true" fontcolor="#243447" fontname="Tableau Semibold" fontsize="12">Reported Incidents</run>
+          </formatted-text>
+        </title>
+      </layout-options>
+      <table>
+        <view>
+          <datasources>
+            <datasource caption="Temporal Detail" name="TemporalDS" />
+            <datasource name="Parameters" />
+          </datasources>
+          <datasource-dependencies datasource="TemporalDS">
+            <column datatype="integer" name="[crime_year]" role="measure" type="quantitative" />
+            <column datatype="string" name="[primary_type]" role="dimension" type="nominal" />
+            <column datatype="integer" name="[reported_incident_count]" role="measure" type="quantitative" caption="Reported Incidents" />
+            <column caption="Selected Year Filter" datatype="boolean" name="[Calculation_SelectedYear]" role="dimension" type="nominal">
+              <calculation class="tableau" formula="STR([crime_year]) = [Parameters].[pSelectedYear]" />
+            </column>
+            <column caption="Selected Crime Type Filter" datatype="boolean" name="[Calculation_SelectedCrimeType]" role="dimension" type="nominal">
+              <calculation class="tableau" formula="[Parameters].[pCrimeType] = &quot;All Crime Types&quot; OR [primary_type] = [Parameters].[pCrimeType]" />
+            </column>
+            <column-instance column="[reported_incident_count]" derivation="Sum" name="[sum:reported_incident_count:qk]" pivot="key" type="quantitative" />
+          </datasource-dependencies>
+          <datasource-dependencies datasource="Parameters">
+            <column caption="Year" datatype="string" name="[pSelectedYear]" param-domain-type="list" role="measure" type="nominal" value="&quot;2025&quot;">
+              <calculation class="tableau" formula="&quot;2025&quot;" />
+            </column>
+            <column caption="Crime Type" datatype="string" name="[pCrimeType]" param-domain-type="list" role="measure" type="nominal" value="&quot;All Crime Types&quot;">
+              <calculation class="tableau" formula="&quot;All Crime Types&quot;" />
+            </column>
+            <column caption="Community Area" datatype="string" name="[pCommunityArea]" param-domain-type="list" role="measure" type="nominal" value="&quot;All Community Areas&quot;">
+              <calculation class="tableau" formula="&quot;All Community Areas&quot;" />
+            </column>
+            <column caption="Police District" datatype="string" name="[pDistrict]" param-domain-type="list" role="measure" type="nominal" value="&quot;All Police Districts&quot;">
+              <calculation class="tableau" formula="&quot;All Police Districts&quot;" />
+            </column>
+          </datasource-dependencies>
+          <filter class="categorical" column="[TemporalDS].[Calculation_SelectedYear]">
+            <groupfilter function="member" level="[Calculation_SelectedYear]" member="true" user:ui-domain="database" user:ui-enumeration="inclusive" user:ui-marker="enumerate" />
+          </filter>
+          <filter class="categorical" column="[TemporalDS].[Calculation_SelectedCrimeType]">
+            <groupfilter function="member" level="[Calculation_SelectedCrimeType]" member="true" user:ui-domain="database" user:ui-enumeration="inclusive" user:ui-marker="enumerate" />
+          </filter>
+          <slices>
+            <column>[TemporalDS].[Calculation_SelectedYear]</column>
+            <column>[TemporalDS].[Calculation_SelectedCrimeType]</column>
+          </slices>
+          <aggregation value="true" />
+        </view>
+        <style>
+          <style-rule element="worksheet">
+            <format attr="font-family" value="Tableau Book" />
+            <format attr="color" value="#243447" />
+            <format attr="display-field-labels" scope="rows" value="false" />
+            <format attr="display-field-labels" scope="cols" value="false" />
+          </style-rule>
+          <style-rule element="gridline">
+            <format attr="line-visibility" scope="rows" value="off" />
+            <format attr="line-visibility" scope="cols" value="off" />
+          </style-rule>
+          <style-rule element="axis">
+            <format attr="line-visibility" scope="rows" value="off" />
+            <format attr="line-visibility" scope="cols" value="off" />
+          </style-rule>
+          <style-rule element="cell">
+            <format attr="font-family" value="Tableau Semibold" />
+            <format attr="font-size" value="26" />
+            <format attr="font-weight" value="bold" />
+            <format attr="color" value="#17324D" />
+            <format attr="text-align" value="center" />
+            <format attr="vertical-align" value="middle" />
+          </style-rule>
+        </style>
+        <panes>
+          <pane selection-relaxation-option="selection-relaxation-disallow">
+            <view>
+              <breakdown value="auto" />
+            </view>
+            <mark class="Text" />
+            <encodings>
+              <text column="[TemporalDS].[sum:reported_incident_count:qk]" />
+            </encodings>
+            <style>
+              <style-rule element="mark">
+                <format attr="mark-labels-show" value="true" />
+                <format attr="mark-labels-cull" value="true" />
+              </style-rule>
+              <style-rule element="datalabel">
+                <format attr="font-family" value="Tableau Semibold" />
+                <format attr="font-size" value="26" />
+                <format attr="color" value="#17324D" />
+              </style-rule>
+            </style>
+          </pane>
+        </panes>
+        <rows />
+        <cols />
+      </table>
+    </worksheet>
+    <worksheet name="P3 KPI Peak Hour">
+      <layout-options>
+        <title>
+          <formatted-text>
+            <run bold="true" fontcolor="#243447" fontname="Tableau Semibold" fontsize="12">Peak Recorded Hour</run>
+          </formatted-text>
+        </title>
+      </layout-options>
+      <table>
+        <view>
+          <datasources>
+            <datasource caption="Temporal KPI Scope" name="TemporalKpiDS" />
+            <datasource name="Parameters" />
+          </datasources>
+          <datasource-dependencies datasource="TemporalKpiDS">
+            <column datatype="integer" name="[crime_year]" role="measure" type="quantitative" />
+            <column datatype="string" name="[primary_type_scope]" role="dimension" type="nominal" />
+            <column datatype="string" name="[peak_hour_label]" role="dimension" type="nominal" />
+            <column datatype="integer" name="[peak_hour_incident_count]" role="measure" type="quantitative" />
+            <column caption="Selected Temporal KPI Scope" datatype="boolean" name="[Calculation_SelectedTemporalKpiScope]" role="dimension" type="nominal">
+              <calculation class="tableau" formula="STR([crime_year]) = [Parameters].[pSelectedYear] AND [primary_type_scope] = [Parameters].[pCrimeType]" />
+            </column>
+            <column-instance column="[peak_hour_label]" derivation="Min" name="[min:peak_hour_label:nk]" pivot="key" type="nominal" />
+            <column-instance column="[peak_hour_incident_count]" derivation="Min" name="[min:peak_hour_incident_count:qk]" pivot="key" type="quantitative" />
+          </datasource-dependencies>
+          <datasource-dependencies datasource="Parameters">
+            <column caption="Year" datatype="string" name="[pSelectedYear]" param-domain-type="list" role="measure" type="nominal" value="&quot;2025&quot;">
+              <calculation class="tableau" formula="&quot;2025&quot;" />
+            </column>
+            <column caption="Crime Type" datatype="string" name="[pCrimeType]" param-domain-type="list" role="measure" type="nominal" value="&quot;All Crime Types&quot;">
+              <calculation class="tableau" formula="&quot;All Crime Types&quot;" />
+            </column>
+            <column caption="Community Area" datatype="string" name="[pCommunityArea]" param-domain-type="list" role="measure" type="nominal" value="&quot;All Community Areas&quot;">
+              <calculation class="tableau" formula="&quot;All Community Areas&quot;" />
+            </column>
+            <column caption="Police District" datatype="string" name="[pDistrict]" param-domain-type="list" role="measure" type="nominal" value="&quot;All Police Districts&quot;">
+              <calculation class="tableau" formula="&quot;All Police Districts&quot;" />
+            </column>
+          </datasource-dependencies>
+          <filter class="categorical" column="[TemporalKpiDS].[Calculation_SelectedTemporalKpiScope]">
+            <groupfilter function="member" level="[Calculation_SelectedTemporalKpiScope]" member="true" user:ui-domain="database" user:ui-enumeration="inclusive" user:ui-marker="enumerate" />
+          </filter>
+          <slices>
+            <column>[TemporalKpiDS].[Calculation_SelectedTemporalKpiScope]</column>
+          </slices>
+          <aggregation value="true" />
+        </view>
+        <style>
+          <style-rule element="worksheet">
+            <format attr="font-family" value="Tableau Book" />
+            <format attr="color" value="#243447" />
+            <format attr="display-field-labels" scope="rows" value="false" />
+            <format attr="display-field-labels" scope="cols" value="false" />
+          </style-rule>
+          <style-rule element="gridline">
+            <format attr="line-visibility" scope="rows" value="off" />
+            <format attr="line-visibility" scope="cols" value="off" />
+          </style-rule>
+          <style-rule element="axis">
+            <format attr="line-visibility" scope="rows" value="off" />
+            <format attr="line-visibility" scope="cols" value="off" />
+          </style-rule>
+          <style-rule element="cell">
+            <format attr="font-family" value="Tableau Semibold" />
+            <format attr="font-size" value="26" />
+            <format attr="font-weight" value="bold" />
+            <format attr="color" value="#17324D" />
+            <format attr="text-align" value="center" />
+            <format attr="vertical-align" value="middle" />
+          </style-rule>
+        </style>
+        <panes>
+          <pane selection-relaxation-option="selection-relaxation-disallow">
+            <view>
+              <breakdown value="auto" />
+            </view>
+            <mark class="Text" />
+            <encodings>
+              <text column="[TemporalKpiDS].[min:peak_hour_label:nk]" />
+            </encodings>
+            <customized-tooltip>
+              <formatted-text>
+                <run fontcolor="#666666">Peak Recorded Hour: </run>
+                <run bold="true">&lt;[TemporalKpiDS].[min:peak_hour_label:nk]&gt;</run>
+                <run fontcolor="#666666">
+Reported incidents: </run>
+                <run bold="true">&lt;[TemporalKpiDS].[min:peak_hour_incident_count:qk]&gt;</run>
+              </formatted-text>
+            </customized-tooltip>
+            <style>
+              <style-rule element="mark">
+                <format attr="mark-labels-show" value="true" />
+                <format attr="mark-labels-cull" value="true" />
+              </style-rule>
+              <style-rule element="datalabel">
+                <format attr="font-family" value="Tableau Semibold" />
+                <format attr="font-size" value="22" />
+                <format attr="color" value="#17324D" />
+              </style-rule>
+            </style>
+          </pane>
+        </panes>
+        <rows />
+        <cols />
+      </table>
+    </worksheet>
+    <worksheet name="P3 KPI Peak Day">
+      <layout-options>
+        <title>
+          <formatted-text>
+            <run bold="true" fontcolor="#243447" fontname="Tableau Semibold" fontsize="12">Peak Day</run>
+          </formatted-text>
+        </title>
+      </layout-options>
+      <table>
+        <view>
+          <datasources>
+            <datasource caption="Temporal KPI Scope" name="TemporalKpiDS" />
+            <datasource name="Parameters" />
+          </datasources>
+          <datasource-dependencies datasource="TemporalKpiDS">
+            <column datatype="integer" name="[crime_year]" role="measure" type="quantitative" />
+            <column datatype="string" name="[primary_type_scope]" role="dimension" type="nominal" />
+            <column datatype="string" name="[peak_day]" role="dimension" type="nominal" />
+            <column datatype="integer" name="[peak_day_incident_count]" role="measure" type="quantitative" />
+            <column caption="Selected Temporal KPI Scope" datatype="boolean" name="[Calculation_SelectedTemporalKpiScope]" role="dimension" type="nominal">
+              <calculation class="tableau" formula="STR([crime_year]) = [Parameters].[pSelectedYear] AND [primary_type_scope] = [Parameters].[pCrimeType]" />
+            </column>
+            <column-instance column="[peak_day]" derivation="Min" name="[min:peak_day:nk]" pivot="key" type="nominal" />
+            <column-instance column="[peak_day_incident_count]" derivation="Min" name="[min:peak_day_incident_count:qk]" pivot="key" type="quantitative" />
+          </datasource-dependencies>
+          <datasource-dependencies datasource="Parameters">
+            <column caption="Year" datatype="string" name="[pSelectedYear]" param-domain-type="list" role="measure" type="nominal" value="&quot;2025&quot;">
+              <calculation class="tableau" formula="&quot;2025&quot;" />
+            </column>
+            <column caption="Crime Type" datatype="string" name="[pCrimeType]" param-domain-type="list" role="measure" type="nominal" value="&quot;All Crime Types&quot;">
+              <calculation class="tableau" formula="&quot;All Crime Types&quot;" />
+            </column>
+            <column caption="Community Area" datatype="string" name="[pCommunityArea]" param-domain-type="list" role="measure" type="nominal" value="&quot;All Community Areas&quot;">
+              <calculation class="tableau" formula="&quot;All Community Areas&quot;" />
+            </column>
+            <column caption="Police District" datatype="string" name="[pDistrict]" param-domain-type="list" role="measure" type="nominal" value="&quot;All Police Districts&quot;">
+              <calculation class="tableau" formula="&quot;All Police Districts&quot;" />
+            </column>
+          </datasource-dependencies>
+          <filter class="categorical" column="[TemporalKpiDS].[Calculation_SelectedTemporalKpiScope]">
+            <groupfilter function="member" level="[Calculation_SelectedTemporalKpiScope]" member="true" user:ui-domain="database" user:ui-enumeration="inclusive" user:ui-marker="enumerate" />
+          </filter>
+          <slices>
+            <column>[TemporalKpiDS].[Calculation_SelectedTemporalKpiScope]</column>
+          </slices>
+          <aggregation value="true" />
+        </view>
+        <style>
+          <style-rule element="worksheet">
+            <format attr="font-family" value="Tableau Book" />
+            <format attr="color" value="#243447" />
+            <format attr="display-field-labels" scope="rows" value="false" />
+            <format attr="display-field-labels" scope="cols" value="false" />
+          </style-rule>
+          <style-rule element="gridline">
+            <format attr="line-visibility" scope="rows" value="off" />
+            <format attr="line-visibility" scope="cols" value="off" />
+          </style-rule>
+          <style-rule element="axis">
+            <format attr="line-visibility" scope="rows" value="off" />
+            <format attr="line-visibility" scope="cols" value="off" />
+          </style-rule>
+          <style-rule element="cell">
+            <format attr="font-family" value="Tableau Semibold" />
+            <format attr="font-size" value="26" />
+            <format attr="font-weight" value="bold" />
+            <format attr="color" value="#17324D" />
+            <format attr="text-align" value="center" />
+            <format attr="vertical-align" value="middle" />
+          </style-rule>
+        </style>
+        <panes>
+          <pane selection-relaxation-option="selection-relaxation-disallow">
+            <view>
+              <breakdown value="auto" />
+            </view>
+            <mark class="Text" />
+            <encodings>
+              <text column="[TemporalKpiDS].[min:peak_day:nk]" />
+            </encodings>
+            <customized-tooltip>
+              <formatted-text>
+                <run fontcolor="#666666">Peak Day: </run>
+                <run bold="true">&lt;[TemporalKpiDS].[min:peak_day:nk]&gt;</run>
+                <run fontcolor="#666666">
+Reported incidents: </run>
+                <run bold="true">&lt;[TemporalKpiDS].[min:peak_day_incident_count:qk]&gt;</run>
+              </formatted-text>
+            </customized-tooltip>
+            <style>
+              <style-rule element="mark">
+                <format attr="mark-labels-show" value="true" />
+                <format attr="mark-labels-cull" value="true" />
+              </style-rule>
+              <style-rule element="datalabel">
+                <format attr="font-family" value="Tableau Semibold" />
+                <format attr="font-size" value="22" />
+                <format attr="color" value="#17324D" />
+              </style-rule>
+            </style>
+          </pane>
+        </panes>
+        <rows />
+        <cols />
+      </table>
+    </worksheet>
+    <worksheet name="P3 KPI Peak Month">
+      <layout-options>
+        <title>
+          <formatted-text>
+            <run bold="true" fontcolor="#243447" fontname="Tableau Semibold" fontsize="12">Peak Month</run>
+          </formatted-text>
+        </title>
+      </layout-options>
+      <table>
+        <view>
+          <datasources>
+            <datasource caption="Temporal KPI Scope" name="TemporalKpiDS" />
+            <datasource name="Parameters" />
+          </datasources>
+          <datasource-dependencies datasource="TemporalKpiDS">
+            <column datatype="integer" name="[crime_year]" role="measure" type="quantitative" />
+            <column datatype="string" name="[primary_type_scope]" role="dimension" type="nominal" />
+            <column datatype="string" name="[peak_month]" role="dimension" type="nominal" />
+            <column datatype="integer" name="[peak_month_incident_count]" role="measure" type="quantitative" />
+            <column caption="Selected Temporal KPI Scope" datatype="boolean" name="[Calculation_SelectedTemporalKpiScope]" role="dimension" type="nominal">
+              <calculation class="tableau" formula="STR([crime_year]) = [Parameters].[pSelectedYear] AND [primary_type_scope] = [Parameters].[pCrimeType]" />
+            </column>
+            <column-instance column="[peak_month]" derivation="Min" name="[min:peak_month:nk]" pivot="key" type="nominal" />
+            <column-instance column="[peak_month_incident_count]" derivation="Min" name="[min:peak_month_incident_count:qk]" pivot="key" type="quantitative" />
+          </datasource-dependencies>
+          <datasource-dependencies datasource="Parameters">
+            <column caption="Year" datatype="string" name="[pSelectedYear]" param-domain-type="list" role="measure" type="nominal" value="&quot;2025&quot;">
+              <calculation class="tableau" formula="&quot;2025&quot;" />
+            </column>
+            <column caption="Crime Type" datatype="string" name="[pCrimeType]" param-domain-type="list" role="measure" type="nominal" value="&quot;All Crime Types&quot;">
+              <calculation class="tableau" formula="&quot;All Crime Types&quot;" />
+            </column>
+            <column caption="Community Area" datatype="string" name="[pCommunityArea]" param-domain-type="list" role="measure" type="nominal" value="&quot;All Community Areas&quot;">
+              <calculation class="tableau" formula="&quot;All Community Areas&quot;" />
+            </column>
+            <column caption="Police District" datatype="string" name="[pDistrict]" param-domain-type="list" role="measure" type="nominal" value="&quot;All Police Districts&quot;">
+              <calculation class="tableau" formula="&quot;All Police Districts&quot;" />
+            </column>
+          </datasource-dependencies>
+          <filter class="categorical" column="[TemporalKpiDS].[Calculation_SelectedTemporalKpiScope]">
+            <groupfilter function="member" level="[Calculation_SelectedTemporalKpiScope]" member="true" user:ui-domain="database" user:ui-enumeration="inclusive" user:ui-marker="enumerate" />
+          </filter>
+          <slices>
+            <column>[TemporalKpiDS].[Calculation_SelectedTemporalKpiScope]</column>
+          </slices>
+          <aggregation value="true" />
+        </view>
+        <style>
+          <style-rule element="worksheet">
+            <format attr="font-family" value="Tableau Book" />
+            <format attr="color" value="#243447" />
+            <format attr="display-field-labels" scope="rows" value="false" />
+            <format attr="display-field-labels" scope="cols" value="false" />
+          </style-rule>
+          <style-rule element="gridline">
+            <format attr="line-visibility" scope="rows" value="off" />
+            <format attr="line-visibility" scope="cols" value="off" />
+          </style-rule>
+          <style-rule element="axis">
+            <format attr="line-visibility" scope="rows" value="off" />
+            <format attr="line-visibility" scope="cols" value="off" />
+          </style-rule>
+          <style-rule element="cell">
+            <format attr="font-family" value="Tableau Semibold" />
+            <format attr="font-size" value="26" />
+            <format attr="font-weight" value="bold" />
+            <format attr="color" value="#17324D" />
+            <format attr="text-align" value="center" />
+            <format attr="vertical-align" value="middle" />
+          </style-rule>
+        </style>
+        <panes>
+          <pane selection-relaxation-option="selection-relaxation-disallow">
+            <view>
+              <breakdown value="auto" />
+            </view>
+            <mark class="Text" />
+            <encodings>
+              <text column="[TemporalKpiDS].[min:peak_month:nk]" />
+            </encodings>
+            <customized-tooltip>
+              <formatted-text>
+                <run fontcolor="#666666">Peak Month: </run>
+                <run bold="true">&lt;[TemporalKpiDS].[min:peak_month:nk]&gt;</run>
+                <run fontcolor="#666666">
+Reported incidents: </run>
+                <run bold="true">&lt;[TemporalKpiDS].[min:peak_month_incident_count:qk]&gt;</run>
+              </formatted-text>
+            </customized-tooltip>
+            <style>
+              <style-rule element="mark">
+                <format attr="mark-labels-show" value="true" />
+                <format attr="mark-labels-cull" value="true" />
+              </style-rule>
+              <style-rule element="datalabel">
+                <format attr="font-family" value="Tableau Semibold" />
+                <format attr="font-size" value="22" />
+                <format attr="color" value="#17324D" />
+              </style-rule>
+            </style>
+          </pane>
+        </panes>
+        <rows />
+        <cols />
+      </table>
+    </worksheet>
+    <worksheet name="P3 Day-Hour Heatmap">
+      <layout-options>
+        <title>
+          <formatted-text>
+            <run bold="true" fontcolor="#243447" fontname="Tableau Semibold" fontsize="12">Reported Incidents by Day and Hour</run>
+          </formatted-text>
+        </title>
+      </layout-options>
+      <table>
+        <view>
+          <datasources>
+            <datasource caption="Temporal Detail" name="TemporalDS" />
+            <datasource name="Parameters" />
+          </datasources>
+          <datasource-dependencies datasource="TemporalDS">
+            <column datatype="integer" name="[crime_year]" role="measure" type="quantitative" />
+            <column datatype="string" name="[primary_type]" role="dimension" type="nominal" />
+            <column datatype="string" name="[day_of_week]" role="dimension" type="nominal" />
+            <column datatype="integer" name="[day_of_week_num]" role="measure" type="quantitative" />
+            <column datatype="integer" name="[hour_of_day]" role="measure" type="quantitative" />
+            <column datatype="integer" name="[reported_incident_count]" role="measure" type="quantitative" caption="Reported Incidents" />
+            <column datatype="integer" name="[arrest_count]" role="measure" type="quantitative" />
+            <column datatype="integer" name="[arrest_indicator_denominator]" role="measure" type="quantitative" />
+            <column datatype="integer" name="[domestic_count]" role="measure" type="quantitative" />
+            <column datatype="integer" name="[domestic_indicator_denominator]" role="measure" type="quantitative" />
+            <column caption="Selected Year Filter" datatype="boolean" name="[Calculation_SelectedYear]" role="dimension" type="nominal">
+              <calculation class="tableau" formula="STR([crime_year]) = [Parameters].[pSelectedYear]" />
+            </column>
+            <column caption="Selected Crime Type Filter" datatype="boolean" name="[Calculation_SelectedCrimeType]" role="dimension" type="nominal">
+              <calculation class="tableau" formula="[Parameters].[pCrimeType] = &quot;All Crime Types&quot; OR [primary_type] = [Parameters].[pCrimeType]" />
+            </column>
+            <column caption="Hour Label" datatype="string" name="[Calculation_HourLabel]" role="dimension" type="nominal">
+              <calculation class="tableau" formula="RIGHT(&quot;0&quot; + STR([hour_of_day]), 2) + &quot;:00&quot;" />
+            </column>
+            <column caption="Arrest Percentage" datatype="real" name="[Calculation_TemporalArrestPercentage]" role="measure" type="quantitative" default-format="n#,##0.0&quot;%&quot;;-#,##0.0&quot;%&quot;">
+              <calculation class="tableau" formula="IF SUM([arrest_indicator_denominator]) = 0 THEN NULL ELSE 100.0 * SUM([arrest_count]) / SUM([arrest_indicator_denominator]) END" />
+            </column>
+            <column caption="Domestic Incident Percentage" datatype="real" name="[Calculation_TemporalDomesticPercentage]" role="measure" type="quantitative" default-format="n#,##0.0&quot;%&quot;;-#,##0.0&quot;%&quot;">
+              <calculation class="tableau" formula="IF SUM([domestic_indicator_denominator]) = 0 THEN NULL ELSE 100.0 * SUM([domestic_count]) / SUM([domestic_indicator_denominator]) END" />
+            </column>
+            <column-instance column="[day_of_week]" derivation="None" name="[none:day_of_week:nk]" pivot="key" type="nominal" />
+            <column-instance column="[day_of_week_num]" derivation="Min" name="[min:day_of_week_num:qk]" pivot="key" type="quantitative" />
+            <column-instance column="[hour_of_day]" derivation="None" name="[none:hour_of_day:ok]" pivot="key" type="ordinal" />
+            <column-instance column="[reported_incident_count]" derivation="Sum" name="[sum:reported_incident_count:qk]" pivot="key" type="quantitative" />
+            <column-instance column="[Calculation_TemporalArrestPercentage]" derivation="User" name="[usr:Calculation_TemporalArrestPercentage:qk]" pivot="key" type="quantitative" />
+            <column-instance column="[Calculation_TemporalDomesticPercentage]" derivation="User" name="[usr:Calculation_TemporalDomesticPercentage:qk]" pivot="key" type="quantitative" />
+          </datasource-dependencies>
+          <datasource-dependencies datasource="Parameters">
+            <column caption="Year" datatype="string" name="[pSelectedYear]" param-domain-type="list" role="measure" type="nominal" value="&quot;2025&quot;">
+              <calculation class="tableau" formula="&quot;2025&quot;" />
+            </column>
+            <column caption="Crime Type" datatype="string" name="[pCrimeType]" param-domain-type="list" role="measure" type="nominal" value="&quot;All Crime Types&quot;">
+              <calculation class="tableau" formula="&quot;All Crime Types&quot;" />
+            </column>
+            <column caption="Community Area" datatype="string" name="[pCommunityArea]" param-domain-type="list" role="measure" type="nominal" value="&quot;All Community Areas&quot;">
+              <calculation class="tableau" formula="&quot;All Community Areas&quot;" />
+            </column>
+            <column caption="Police District" datatype="string" name="[pDistrict]" param-domain-type="list" role="measure" type="nominal" value="&quot;All Police Districts&quot;">
+              <calculation class="tableau" formula="&quot;All Police Districts&quot;" />
+            </column>
+          </datasource-dependencies>
+          <filter class="categorical" column="[TemporalDS].[Calculation_SelectedYear]">
+            <groupfilter function="member" level="[Calculation_SelectedYear]" member="true" user:ui-domain="database" user:ui-enumeration="inclusive" user:ui-marker="enumerate" />
+          </filter>
+          <filter class="categorical" column="[TemporalDS].[Calculation_SelectedCrimeType]">
+            <groupfilter function="member" level="[Calculation_SelectedCrimeType]" member="true" user:ui-domain="database" user:ui-enumeration="inclusive" user:ui-marker="enumerate" />
+          </filter>
+          <sort class="computed" column="[TemporalDS].[none:day_of_week:nk]" direction="ASC" using="[TemporalDS].[min:day_of_week_num:qk]" />
+          <slices>
+            <column>[TemporalDS].[Calculation_SelectedYear]</column>
+            <column>[TemporalDS].[Calculation_SelectedCrimeType]</column>
+          </slices>
+          <aggregation value="true" />
+        </view>
+        <style>
+          <style-rule element="worksheet">
+            <format attr="font-family" value="Tableau Book" />
+            <format attr="color" value="#243447" />
+            <format attr="display-field-labels" scope="rows" value="false" />
+            <format attr="display-field-labels" scope="cols" value="false" />
+          </style-rule>
+          <style-rule element="gridline">
+            <format attr="line-visibility" scope="rows" value="off" />
+            <format attr="line-visibility" scope="cols" value="off" />
+          </style-rule>
+        </style>
+        <panes>
+          <pane selection-relaxation-option="selection-relaxation-disallow">
+            <view>
+              <breakdown value="auto" />
+            </view>
+            <mark class="Square" />
+            <encodings>
+              <color column="[TemporalDS].[sum:reported_incident_count:qk]" />
+            </encodings>
+            <customized-tooltip>
+              <formatted-text>
+                <run fontcolor="#666666">Day: </run>
+                <run bold="true">&lt;[TemporalDS].[none:day_of_week:nk]&gt;</run>
+                <run fontcolor="#666666">
+Hour: </run>
+                <run bold="true">&lt;[TemporalDS].[none:hour_of_day:ok]&gt;:00</run>
+                <run fontcolor="#666666">
+Reported incidents: </run>
+                <run bold="true">&lt;[TemporalDS].[sum:reported_incident_count:qk]&gt;</run>
+                <run fontcolor="#666666">
+Recorded times may be estimated.</run>
+              </formatted-text>
+            </customized-tooltip>
+            <style>
+              <style-rule element="mark">
+                <format attr="mark-labels-show" value="false" />
+                <format attr="mark-labels-cull" value="true" />
+              </style-rule>
+            </style>
+          </pane>
+        </panes>
+        <rows>[TemporalDS].[none:day_of_week:nk]</rows>
+        <cols>[TemporalDS].[none:hour_of_day:ok]</cols>
+      </table>
+    </worksheet>
+    <worksheet name="P3 Monthly Crime Trend">
+      <layout-options>
+        <title>
+          <formatted-text>
+            <run bold="true" fontcolor="#243447" fontname="Tableau Semibold" fontsize="12">Monthly Reported-Incident Trend</run>
+          </formatted-text>
+        </title>
+      </layout-options>
+      <table>
+        <view>
+          <datasources>
+            <datasource caption="Temporal Detail" name="TemporalDS" />
+            <datasource name="Parameters" />
+          </datasources>
+          <datasource-dependencies datasource="TemporalDS">
+            <column datatype="date" name="[month_start]" role="dimension" type="ordinal" />
+            <column datatype="integer" name="[crime_year]" role="measure" type="quantitative" />
+            <column datatype="string" name="[primary_type]" role="dimension" type="nominal" />
+            <column datatype="integer" name="[reported_incident_count]" role="measure" type="quantitative" caption="Reported Incidents" />
+            <column caption="Selected Year Filter" datatype="boolean" name="[Calculation_SelectedYear]" role="dimension" type="nominal">
+              <calculation class="tableau" formula="STR([crime_year]) = [Parameters].[pSelectedYear]" />
+            </column>
+            <column caption="Selected Crime Type Filter" datatype="boolean" name="[Calculation_SelectedCrimeType]" role="dimension" type="nominal">
+              <calculation class="tableau" formula="[Parameters].[pCrimeType] = &quot;All Crime Types&quot; OR [primary_type] = [Parameters].[pCrimeType]" />
+            </column>
+            <column-instance column="[month_start]" derivation="Month-Trunc" name="[tmn:month_start:ok]" pivot="key" type="ordinal" />
+            <column-instance column="[reported_incident_count]" derivation="Sum" name="[sum:reported_incident_count:qk]" pivot="key" type="quantitative" />
+          </datasource-dependencies>
+          <datasource-dependencies datasource="Parameters">
+            <column caption="Year" datatype="string" name="[pSelectedYear]" param-domain-type="list" role="measure" type="nominal" value="&quot;2025&quot;">
+              <calculation class="tableau" formula="&quot;2025&quot;" />
+            </column>
+            <column caption="Crime Type" datatype="string" name="[pCrimeType]" param-domain-type="list" role="measure" type="nominal" value="&quot;All Crime Types&quot;">
+              <calculation class="tableau" formula="&quot;All Crime Types&quot;" />
+            </column>
+            <column caption="Community Area" datatype="string" name="[pCommunityArea]" param-domain-type="list" role="measure" type="nominal" value="&quot;All Community Areas&quot;">
+              <calculation class="tableau" formula="&quot;All Community Areas&quot;" />
+            </column>
+            <column caption="Police District" datatype="string" name="[pDistrict]" param-domain-type="list" role="measure" type="nominal" value="&quot;All Police Districts&quot;">
+              <calculation class="tableau" formula="&quot;All Police Districts&quot;" />
+            </column>
+          </datasource-dependencies>
+          <filter class="categorical" column="[TemporalDS].[Calculation_SelectedYear]">
+            <groupfilter function="member" level="[Calculation_SelectedYear]" member="true" user:ui-domain="database" user:ui-enumeration="inclusive" user:ui-marker="enumerate" />
+          </filter>
+          <filter class="categorical" column="[TemporalDS].[Calculation_SelectedCrimeType]">
+            <groupfilter function="member" level="[Calculation_SelectedCrimeType]" member="true" user:ui-domain="database" user:ui-enumeration="inclusive" user:ui-marker="enumerate" />
+          </filter>
+          <slices>
+            <column>[TemporalDS].[Calculation_SelectedYear]</column>
+            <column>[TemporalDS].[Calculation_SelectedCrimeType]</column>
+          </slices>
+          <aggregation value="true" />
+        </view>
+        <style>
+          <style-rule element="worksheet">
+            <format attr="font-family" value="Tableau Book" />
+            <format attr="color" value="#243447" />
+            <format attr="display-field-labels" scope="rows" value="false" />
+            <format attr="display-field-labels" scope="cols" value="false" />
+          </style-rule>
+          <style-rule element="gridline">
+            <format attr="line-visibility" scope="rows" value="off" />
+            <format attr="line-visibility" scope="cols" value="off" />
+          </style-rule>
+        </style>
+        <panes>
+          <pane selection-relaxation-option="selection-relaxation-disallow">
+            <view>
+              <breakdown value="auto" />
+            </view>
+            <mark class="Line" />
+            <encodings />
+            <customized-tooltip>
+              <formatted-text>
+                <run fontcolor="#666666">Month: </run>
+                <run bold="true">&lt;[TemporalDS].[tmn:month_start:ok]&gt;</run>
+                <run fontcolor="#666666">
+Reported incidents: </run>
+                <run bold="true">&lt;[TemporalDS].[sum:reported_incident_count:qk]&gt;</run>
+              </formatted-text>
+            </customized-tooltip>
+            <style>
+              <style-rule element="mark">
+                <format attr="mark-labels-show" value="false" />
+                <format attr="mark-labels-cull" value="true" />
+              </style-rule>
+            </style>
+          </pane>
+        </panes>
+        <rows>[TemporalDS].[sum:reported_incident_count:qk]</rows>
+        <cols>[TemporalDS].[tmn:month_start:ok]</cols>
+      </table>
+    </worksheet>
+    <worksheet name="P3 Seasonal Comparison">
+      <layout-options>
+        <title>
+          <formatted-text>
+            <run bold="true" fontcolor="#243447" fontname="Tableau Semibold" fontsize="12">Reported Incidents by Season</run>
+          </formatted-text>
+        </title>
+      </layout-options>
+      <table>
+        <view>
+          <datasources>
+            <datasource caption="Temporal Detail" name="TemporalDS" />
+            <datasource name="Parameters" />
+          </datasources>
+          <datasource-dependencies datasource="TemporalDS">
+            <column datatype="integer" name="[crime_year]" role="measure" type="quantitative" />
+            <column datatype="string" name="[primary_type]" role="dimension" type="nominal" />
+            <column datatype="integer" name="[season_order]" role="measure" type="quantitative" />
+            <column datatype="integer" name="[reported_incident_count]" role="measure" type="quantitative" caption="Reported Incidents" />
+            <column datatype="string" name="[season]" role="dimension" type="nominal" />
+            <column caption="Selected Year Filter" datatype="boolean" name="[Calculation_SelectedYear]" role="dimension" type="nominal">
+              <calculation class="tableau" formula="STR([crime_year]) = [Parameters].[pSelectedYear]" />
+            </column>
+            <column caption="Selected Crime Type Filter" datatype="boolean" name="[Calculation_SelectedCrimeType]" role="dimension" type="nominal">
+              <calculation class="tableau" formula="[Parameters].[pCrimeType] = &quot;All Crime Types&quot; OR [primary_type] = [Parameters].[pCrimeType]" />
+            </column>
+            <column-instance column="[season]" derivation="None" name="[none:season:nk]" pivot="key" type="nominal" />
+            <column-instance column="[season_order]" derivation="Min" name="[min:season_order:qk]" pivot="key" type="quantitative" />
+            <column-instance column="[reported_incident_count]" derivation="Sum" name="[sum:reported_incident_count:qk]" pivot="key" type="quantitative" />
+          </datasource-dependencies>
+          <datasource-dependencies datasource="Parameters">
+            <column caption="Year" datatype="string" name="[pSelectedYear]" param-domain-type="list" role="measure" type="nominal" value="&quot;2025&quot;">
+              <calculation class="tableau" formula="&quot;2025&quot;" />
+            </column>
+            <column caption="Crime Type" datatype="string" name="[pCrimeType]" param-domain-type="list" role="measure" type="nominal" value="&quot;All Crime Types&quot;">
+              <calculation class="tableau" formula="&quot;All Crime Types&quot;" />
+            </column>
+            <column caption="Community Area" datatype="string" name="[pCommunityArea]" param-domain-type="list" role="measure" type="nominal" value="&quot;All Community Areas&quot;">
+              <calculation class="tableau" formula="&quot;All Community Areas&quot;" />
+            </column>
+            <column caption="Police District" datatype="string" name="[pDistrict]" param-domain-type="list" role="measure" type="nominal" value="&quot;All Police Districts&quot;">
+              <calculation class="tableau" formula="&quot;All Police Districts&quot;" />
+            </column>
+          </datasource-dependencies>
+          <filter class="categorical" column="[TemporalDS].[Calculation_SelectedYear]">
+            <groupfilter function="member" level="[Calculation_SelectedYear]" member="true" user:ui-domain="database" user:ui-enumeration="inclusive" user:ui-marker="enumerate" />
+          </filter>
+          <filter class="categorical" column="[TemporalDS].[Calculation_SelectedCrimeType]">
+            <groupfilter function="member" level="[Calculation_SelectedCrimeType]" member="true" user:ui-domain="database" user:ui-enumeration="inclusive" user:ui-marker="enumerate" />
+          </filter>
+          <sort class="computed" column="[TemporalDS].[none:season:nk]" direction="ASC" using="[TemporalDS].[min:season_order:qk]" />
+          <slices>
+            <column>[TemporalDS].[Calculation_SelectedYear]</column>
+            <column>[TemporalDS].[Calculation_SelectedCrimeType]</column>
+          </slices>
+          <aggregation value="true" />
+        </view>
+        <style>
+          <style-rule element="worksheet">
+            <format attr="font-family" value="Tableau Book" />
+            <format attr="color" value="#243447" />
+            <format attr="display-field-labels" scope="rows" value="false" />
+            <format attr="display-field-labels" scope="cols" value="false" />
+          </style-rule>
+          <style-rule element="gridline">
+            <format attr="line-visibility" scope="rows" value="off" />
+            <format attr="line-visibility" scope="cols" value="off" />
+          </style-rule>
+        </style>
+        <panes>
+          <pane selection-relaxation-option="selection-relaxation-disallow">
+            <view>
+              <breakdown value="auto" />
+            </view>
+            <mark class="Bar" />
+            <encodings>
+              <text column="[TemporalDS].[sum:reported_incident_count:qk]" />
+            </encodings>
+            <style>
+              <style-rule element="mark">
+                <format attr="mark-labels-show" value="true" />
+                <format attr="mark-labels-cull" value="true" />
+              </style-rule>
+            </style>
+          </pane>
+        </panes>
+        <rows>[TemporalDS].[sum:reported_incident_count:qk]</rows>
+        <cols>[TemporalDS].[none:season:nk]</cols>
+      </table>
+    </worksheet>
+    <worksheet name="P3 Time-of-Day Distribution">
+      <layout-options>
+        <title>
+          <formatted-text>
+            <run bold="true" fontcolor="#243447" fontname="Tableau Semibold" fontsize="12">Reported Incidents by Time of Day</run>
+          </formatted-text>
+        </title>
+      </layout-options>
+      <table>
+        <view>
+          <datasources>
+            <datasource caption="Temporal Detail" name="TemporalDS" />
+            <datasource name="Parameters" />
+          </datasources>
+          <datasource-dependencies datasource="TemporalDS">
+            <column datatype="integer" name="[crime_year]" role="measure" type="quantitative" />
+            <column datatype="string" name="[primary_type]" role="dimension" type="nominal" />
+            <column datatype="integer" name="[time_of_day_order]" role="measure" type="quantitative" />
+            <column datatype="integer" name="[reported_incident_count]" role="measure" type="quantitative" caption="Reported Incidents" />
+            <column datatype="string" name="[time_of_day_display]" role="dimension" type="nominal" />
+            <column caption="Selected Year Filter" datatype="boolean" name="[Calculation_SelectedYear]" role="dimension" type="nominal">
+              <calculation class="tableau" formula="STR([crime_year]) = [Parameters].[pSelectedYear]" />
+            </column>
+            <column caption="Selected Crime Type Filter" datatype="boolean" name="[Calculation_SelectedCrimeType]" role="dimension" type="nominal">
+              <calculation class="tableau" formula="[Parameters].[pCrimeType] = &quot;All Crime Types&quot; OR [primary_type] = [Parameters].[pCrimeType]" />
+            </column>
+            <column-instance column="[time_of_day_display]" derivation="None" name="[none:time_of_day_display:nk]" pivot="key" type="nominal" />
+            <column-instance column="[time_of_day_order]" derivation="Min" name="[min:time_of_day_order:qk]" pivot="key" type="quantitative" />
+            <column-instance column="[reported_incident_count]" derivation="Sum" name="[sum:reported_incident_count:qk]" pivot="key" type="quantitative" />
+          </datasource-dependencies>
+          <datasource-dependencies datasource="Parameters">
+            <column caption="Year" datatype="string" name="[pSelectedYear]" param-domain-type="list" role="measure" type="nominal" value="&quot;2025&quot;">
+              <calculation class="tableau" formula="&quot;2025&quot;" />
+            </column>
+            <column caption="Crime Type" datatype="string" name="[pCrimeType]" param-domain-type="list" role="measure" type="nominal" value="&quot;All Crime Types&quot;">
+              <calculation class="tableau" formula="&quot;All Crime Types&quot;" />
+            </column>
+            <column caption="Community Area" datatype="string" name="[pCommunityArea]" param-domain-type="list" role="measure" type="nominal" value="&quot;All Community Areas&quot;">
+              <calculation class="tableau" formula="&quot;All Community Areas&quot;" />
+            </column>
+            <column caption="Police District" datatype="string" name="[pDistrict]" param-domain-type="list" role="measure" type="nominal" value="&quot;All Police Districts&quot;">
+              <calculation class="tableau" formula="&quot;All Police Districts&quot;" />
+            </column>
+          </datasource-dependencies>
+          <filter class="categorical" column="[TemporalDS].[Calculation_SelectedYear]">
+            <groupfilter function="member" level="[Calculation_SelectedYear]" member="true" user:ui-domain="database" user:ui-enumeration="inclusive" user:ui-marker="enumerate" />
+          </filter>
+          <filter class="categorical" column="[TemporalDS].[Calculation_SelectedCrimeType]">
+            <groupfilter function="member" level="[Calculation_SelectedCrimeType]" member="true" user:ui-domain="database" user:ui-enumeration="inclusive" user:ui-marker="enumerate" />
+          </filter>
+          <sort class="computed" column="[TemporalDS].[none:time_of_day_display:nk]" direction="ASC" using="[TemporalDS].[min:time_of_day_order:qk]" />
+          <slices>
+            <column>[TemporalDS].[Calculation_SelectedYear]</column>
+            <column>[TemporalDS].[Calculation_SelectedCrimeType]</column>
+          </slices>
+          <aggregation value="true" />
+        </view>
+        <style>
+          <style-rule element="worksheet">
+            <format attr="font-family" value="Tableau Book" />
+            <format attr="color" value="#243447" />
+            <format attr="display-field-labels" scope="rows" value="false" />
+            <format attr="display-field-labels" scope="cols" value="false" />
+          </style-rule>
+          <style-rule element="gridline">
+            <format attr="line-visibility" scope="rows" value="off" />
+            <format attr="line-visibility" scope="cols" value="off" />
+          </style-rule>
+        </style>
+        <panes>
+          <pane selection-relaxation-option="selection-relaxation-disallow">
+            <view>
+              <breakdown value="auto" />
+            </view>
+            <mark class="Bar" />
+            <encodings>
+              <text column="[TemporalDS].[sum:reported_incident_count:qk]" />
+            </encodings>
+            <style>
+              <style-rule element="mark">
+                <format attr="mark-labels-show" value="true" />
+                <format attr="mark-labels-cull" value="true" />
+              </style-rule>
+            </style>
+          </pane>
+        </panes>
+        <rows>[TemporalDS].[none:time_of_day_display:nk]</rows>
+        <cols>[TemporalDS].[sum:reported_incident_count:qk]</cols>
+      </table>
+    </worksheet>
+    <worksheet name="P3 Category Monthly Comparison">
+      <layout-options>
+        <title>
+          <formatted-text>
+            <run bold="true" fontcolor="#243447" fontname="Tableau Semibold" fontsize="12">Monthly Patterns for Leading Crime Types</run>
+          </formatted-text>
+        </title>
+      </layout-options>
+      <table>
+        <view>
+          <datasources>
+            <datasource caption="Temporal Detail" name="TemporalDS" />
+            <datasource name="Parameters" />
+          </datasources>
+          <datasource-dependencies datasource="TemporalDS">
+            <column datatype="date" name="[month_start]" role="dimension" type="ordinal" />
+            <column datatype="integer" name="[crime_year]" role="measure" type="quantitative" />
+            <column datatype="string" name="[primary_type]" role="dimension" type="nominal" />
+            <column datatype="integer" name="[annual_category_rank]" role="measure" type="quantitative" />
+            <column datatype="integer" name="[reported_incident_count]" role="measure" type="quantitative" caption="Reported Incidents" />
+            <column caption="Selected Year Filter" datatype="boolean" name="[Calculation_SelectedYear]" role="dimension" type="nominal">
+              <calculation class="tableau" formula="STR([crime_year]) = [Parameters].[pSelectedYear]" />
+            </column>
+            <column caption="Selected Crime Type Filter" datatype="boolean" name="[Calculation_SelectedCrimeType]" role="dimension" type="nominal">
+              <calculation class="tableau" formula="[Parameters].[pCrimeType] = &quot;All Crime Types&quot; OR [primary_type] = [Parameters].[pCrimeType]" />
+            </column>
+            <column caption="Show Leading Categories" datatype="boolean" name="[Calculation_TemporalCategoryDisplay]" role="dimension" type="nominal">
+              <calculation class="tableau" formula="[Parameters].[pCrimeType] &lt;&gt; &quot;All Crime Types&quot; OR [annual_category_rank] &lt;= 5" />
+            </column>
+            <column-instance column="[month_start]" derivation="Month-Trunc" name="[tmn:month_start:ok]" pivot="key" type="ordinal" />
+            <column-instance column="[primary_type]" derivation="None" name="[none:primary_type:nk]" pivot="key" type="nominal" />
+            <column-instance column="[reported_incident_count]" derivation="Sum" name="[sum:reported_incident_count:qk]" pivot="key" type="quantitative" />
+          </datasource-dependencies>
+          <datasource-dependencies datasource="Parameters">
+            <column caption="Year" datatype="string" name="[pSelectedYear]" param-domain-type="list" role="measure" type="nominal" value="&quot;2025&quot;">
+              <calculation class="tableau" formula="&quot;2025&quot;" />
+            </column>
+            <column caption="Crime Type" datatype="string" name="[pCrimeType]" param-domain-type="list" role="measure" type="nominal" value="&quot;All Crime Types&quot;">
+              <calculation class="tableau" formula="&quot;All Crime Types&quot;" />
+            </column>
+            <column caption="Community Area" datatype="string" name="[pCommunityArea]" param-domain-type="list" role="measure" type="nominal" value="&quot;All Community Areas&quot;">
+              <calculation class="tableau" formula="&quot;All Community Areas&quot;" />
+            </column>
+            <column caption="Police District" datatype="string" name="[pDistrict]" param-domain-type="list" role="measure" type="nominal" value="&quot;All Police Districts&quot;">
+              <calculation class="tableau" formula="&quot;All Police Districts&quot;" />
+            </column>
+          </datasource-dependencies>
+          <filter class="categorical" column="[TemporalDS].[Calculation_SelectedYear]">
+            <groupfilter function="member" level="[Calculation_SelectedYear]" member="true" user:ui-domain="database" user:ui-enumeration="inclusive" user:ui-marker="enumerate" />
+          </filter>
+          <filter class="categorical" column="[TemporalDS].[Calculation_SelectedCrimeType]">
+            <groupfilter function="member" level="[Calculation_SelectedCrimeType]" member="true" user:ui-domain="database" user:ui-enumeration="inclusive" user:ui-marker="enumerate" />
+          </filter>
+          <filter class="categorical" column="[TemporalDS].[Calculation_TemporalCategoryDisplay]">
+            <groupfilter function="member" level="[Calculation_TemporalCategoryDisplay]" member="true" user:ui-domain="database" user:ui-enumeration="inclusive" user:ui-marker="enumerate" />
+          </filter>
+          <slices>
+            <column>[TemporalDS].[Calculation_SelectedYear]</column>
+            <column>[TemporalDS].[Calculation_SelectedCrimeType]</column>
+            <column>[TemporalDS].[Calculation_TemporalCategoryDisplay]</column>
+          </slices>
+          <aggregation value="true" />
+        </view>
+        <style>
+          <style-rule element="worksheet">
+            <format attr="font-family" value="Tableau Book" />
+            <format attr="color" value="#243447" />
+            <format attr="display-field-labels" scope="rows" value="false" />
+            <format attr="display-field-labels" scope="cols" value="false" />
+          </style-rule>
+          <style-rule element="gridline">
+            <format attr="line-visibility" scope="rows" value="off" />
+            <format attr="line-visibility" scope="cols" value="off" />
+          </style-rule>
+        </style>
+        <panes>
+          <pane selection-relaxation-option="selection-relaxation-disallow">
+            <view>
+              <breakdown value="auto" />
+            </view>
+            <mark class="Line" />
+            <encodings>
+              <color column="[TemporalDS].[none:primary_type:nk]" />
+              <lod column="[TemporalDS].[none:primary_type:nk]" />
+            </encodings>
+            <customized-tooltip>
+              <formatted-text>
+                <run fontcolor="#666666">Crime type: </run>
+                <run bold="true">&lt;[TemporalDS].[none:primary_type:nk]&gt;</run>
+                <run fontcolor="#666666">
+Month: </run>
+                <run bold="true">&lt;[TemporalDS].[tmn:month_start:ok]&gt;</run>
+                <run fontcolor="#666666">
+Reported incidents: </run>
+                <run bold="true">&lt;[TemporalDS].[sum:reported_incident_count:qk]&gt;</run>
+              </formatted-text>
+            </customized-tooltip>
+            <style>
+              <style-rule element="mark">
+                <format attr="mark-labels-show" value="false" />
+                <format attr="mark-labels-cull" value="true" />
+              </style-rule>
+            </style>
+          </pane>
+        </panes>
+        <rows>[TemporalDS].[sum:reported_incident_count:qk]</rows>
+        <cols>[TemporalDS].[tmn:month_start:ok]</cols>
+      </table>
+    </worksheet>
   </worksheets>
   <dashboards>
     <dashboard name="Executive Overview">
@@ -2535,9 +3953,148 @@ Counts are reported incidents, not population-normalized crime rates or individu
         </zone>
       </zones>
     </dashboard>
+    <dashboard name="Temporal and Seasonal Patterns">
+      <layout-options>
+        <title>
+          <formatted-text>
+            <run bold="true" fontcolor="#17324D" fontname="Tableau Semibold" fontsize="22">Chicago Crime Analytics — Temporal and Seasonal Patterns</run>
+          </formatted-text>
+        </title>
+      </layout-options>
+      <style>
+        <style-rule element="dashboard">
+          <format attr="background-color" value="#F5F7FA" />
+        </style-rule>
+      </style>
+      <size maxheight="850" maxwidth="1360" minheight="850" minwidth="1360" sizing-mode="fixed" />
+      <datasources>
+        <datasource name="Parameters" />
+      </datasources>
+      <datasource-dependencies datasource="Parameters">
+        <column caption="Year" datatype="string" name="[pSelectedYear]" param-domain-type="list" role="measure" type="nominal" value="&quot;2025&quot;">
+          <calculation class="tableau" formula="&quot;2025&quot;" />
+        </column>
+        <column caption="Crime Type" datatype="string" name="[pCrimeType]" param-domain-type="list" role="measure" type="nominal" value="&quot;All Crime Types&quot;">
+          <calculation class="tableau" formula="&quot;All Crime Types&quot;" />
+        </column>
+        <column caption="Community Area" datatype="string" name="[pCommunityArea]" param-domain-type="list" role="measure" type="nominal" value="&quot;All Community Areas&quot;">
+          <calculation class="tableau" formula="&quot;All Community Areas&quot;" />
+        </column>
+        <column caption="Police District" datatype="string" name="[pDistrict]" param-domain-type="list" role="measure" type="nominal" value="&quot;All Police Districts&quot;">
+          <calculation class="tableau" formula="&quot;All Police Districts&quot;" />
+        </column>
+      </datasource-dependencies>
+      <zones>
+        <zone h="100000" id="201" type-v2="layout-basic" w="100000" x="0" y="0">
+          <zone h="7200" id="202" type-v2="title" w="72000" x="1800" y="1200" />
+          <zone h="3600" id="203" type-v2="text" w="72000" x="1800" y="7800">
+            <formatted-text>
+              <run fontcolor="#5B6B7C" fontname="Tableau Book" fontsize="10">Complete calendar years 2023–2025 | Recorded incident times may be estimated</run>
+            </formatted-text>
+          </zone>
+          <zone custom-title="true" h="5200" id="204" mode="compact" param="[Parameters].[pSelectedYear]" type-v2="paramctrl" w="9000" x="76000" y="2200">
+            <formatted-text>
+              <run bold="true" fontcolor="#243447" fontsize="10">Year</run>
+            </formatted-text>
+          </zone>
+          <zone custom-title="true" h="5200" id="205" mode="compact" param="[Parameters].[pCrimeType]" type-v2="paramctrl" w="12500" x="86000" y="2200">
+            <formatted-text>
+              <run bold="true" fontcolor="#243447" fontsize="10">Crime Type</run>
+            </formatted-text>
+          </zone>
+          <zone h="11000" id="206" name="P3 KPI Total Incidents" show-title="true" w="23300" x="1800" y="13000">
+            <zone-style>
+              <format attr="background-color" value="#FFFFFF" />
+              <format attr="border-color" value="#D9E1E8" />
+              <format attr="border-style" value="solid" />
+              <format attr="border-width" value="1" />
+              <format attr="margin" value="6" />
+            </zone-style>
+          </zone>
+          <zone h="11000" id="207" name="P3 KPI Peak Hour" show-title="true" w="23300" x="25800" y="13000">
+            <zone-style>
+              <format attr="background-color" value="#FFFFFF" />
+              <format attr="border-color" value="#D9E1E8" />
+              <format attr="border-style" value="solid" />
+              <format attr="border-width" value="1" />
+              <format attr="margin" value="6" />
+            </zone-style>
+          </zone>
+          <zone h="11000" id="208" name="P3 KPI Peak Day" show-title="true" w="23300" x="49800" y="13000">
+            <zone-style>
+              <format attr="background-color" value="#FFFFFF" />
+              <format attr="border-color" value="#D9E1E8" />
+              <format attr="border-style" value="solid" />
+              <format attr="border-width" value="1" />
+              <format attr="margin" value="6" />
+            </zone-style>
+          </zone>
+          <zone h="11000" id="209" name="P3 KPI Peak Month" show-title="true" w="24800" x="73800" y="13000">
+            <zone-style>
+              <format attr="background-color" value="#FFFFFF" />
+              <format attr="border-color" value="#D9E1E8" />
+              <format attr="border-style" value="solid" />
+              <format attr="border-width" value="1" />
+              <format attr="margin" value="6" />
+            </zone-style>
+          </zone>
+          <zone h="31000" id="210" name="P3 Day-Hour Heatmap" show-title="true" w="59000" x="1800" y="26000">
+            <zone-style>
+              <format attr="background-color" value="#FFFFFF" />
+              <format attr="border-color" value="#D9E1E8" />
+              <format attr="border-style" value="solid" />
+              <format attr="border-width" value="1" />
+              <format attr="margin" value="6" />
+            </zone-style>
+          </zone>
+          <zone h="31000" id="211" name="P3 Monthly Crime Trend" show-title="true" w="36100" x="62500" y="26000">
+            <zone-style>
+              <format attr="background-color" value="#FFFFFF" />
+              <format attr="border-color" value="#D9E1E8" />
+              <format attr="border-style" value="solid" />
+              <format attr="border-width" value="1" />
+              <format attr="margin" value="6" />
+            </zone-style>
+          </zone>
+          <zone h="29000" id="212" name="P3 Seasonal Comparison" show-title="true" w="28500" x="1800" y="59000">
+            <zone-style>
+              <format attr="background-color" value="#FFFFFF" />
+              <format attr="border-color" value="#D9E1E8" />
+              <format attr="border-style" value="solid" />
+              <format attr="border-width" value="1" />
+              <format attr="margin" value="6" />
+            </zone-style>
+          </zone>
+          <zone h="29000" id="213" name="P3 Time-of-Day Distribution" show-title="true" w="28500" x="31500" y="59000">
+            <zone-style>
+              <format attr="background-color" value="#FFFFFF" />
+              <format attr="border-color" value="#D9E1E8" />
+              <format attr="border-style" value="solid" />
+              <format attr="border-width" value="1" />
+              <format attr="margin" value="6" />
+            </zone-style>
+          </zone>
+          <zone h="29000" id="214" name="P3 Category Monthly Comparison" show-title="true" w="36100" x="62500" y="59000">
+            <zone-style>
+              <format attr="background-color" value="#FFFFFF" />
+              <format attr="border-color" value="#D9E1E8" />
+              <format attr="border-style" value="solid" />
+              <format attr="border-width" value="1" />
+              <format attr="margin" value="6" />
+            </zone-style>
+          </zone>
+          <zone h="8500" id="215" type-v2="text" w="96800" x="1800" y="90000">
+            <formatted-text>
+              <run fontcolor="#4D5F70" fontsize="9">Source extract: Sep 25, 2026 | Incident dates: Jan 1, 2023–Dec 31, 2025 | Complete years
+Counts are reported incidents, not population-normalized crime rates. Recorded incident times may be estimated. Seasonal and hourly patterns are descriptive and do not establish causation.</run>
+            </formatted-text>
+          </zone>
+        </zone>
+      </zones>
+    </dashboard>
   </dashboards>
   <windows source-height="32">
-    <window class="dashboard" maximized="true" name="Executive Overview">
+    <window class="dashboard" maximized="true" name="Temporal and Seasonal Patterns">
       <viewpoints>
         <viewpoint name="Total Reported Crimes">
           <zoom type="entire-view" />
@@ -2573,6 +4130,33 @@ Counts are reported incidents, not population-normalized crime rates or individu
           <zoom type="entire-view" />
         </viewpoint>
         <viewpoint name="Geographic Crime Category Analysis">
+          <zoom type="entire-view" />
+        </viewpoint>
+        <viewpoint name="P3 KPI Total Incidents">
+          <zoom type="entire-view" />
+        </viewpoint>
+        <viewpoint name="P3 KPI Peak Hour">
+          <zoom type="entire-view" />
+        </viewpoint>
+        <viewpoint name="P3 KPI Peak Day">
+          <zoom type="entire-view" />
+        </viewpoint>
+        <viewpoint name="P3 KPI Peak Month">
+          <zoom type="entire-view" />
+        </viewpoint>
+        <viewpoint name="P3 Day-Hour Heatmap">
+          <zoom type="entire-view" />
+        </viewpoint>
+        <viewpoint name="P3 Monthly Crime Trend">
+          <zoom type="entire-view" />
+        </viewpoint>
+        <viewpoint name="P3 Seasonal Comparison">
+          <zoom type="entire-view" />
+        </viewpoint>
+        <viewpoint name="P3 Time-of-Day Distribution">
+          <zoom type="entire-view" />
+        </viewpoint>
+        <viewpoint name="P3 Category Monthly Comparison">
           <zoom type="entire-view" />
         </viewpoint>
       </viewpoints>

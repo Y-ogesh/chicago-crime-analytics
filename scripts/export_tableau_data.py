@@ -33,6 +33,10 @@ ALL_EXPORTS = {
         "crime_year, primary_type, community_area_name, district, "
         "coordinate_mappable_flag DESC, cell_latitude, cell_longitude"
     ),
+    "vw_tableau_temporal_detail": (
+        "month_start, primary_type, day_of_week_num, hour_of_day"
+    ),
+    "vw_tableau_temporal_kpis": "crime_year, primary_type_scope",
 }
 
 PAGE1_EXPORTS = {
@@ -47,6 +51,13 @@ PAGE2_EXPORTS = {
     ),
 }
 
+PAGE3_EXPORTS = {
+    "vw_tableau_temporal_detail": (
+        "month_start, primary_type, day_of_week_num, hour_of_day"
+    ),
+    "vw_tableau_temporal_kpis": "crime_year, primary_type_scope",
+}
+
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
@@ -54,9 +65,12 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--profile",
-        choices=("all", "page1", "page2"),
+        choices=("all", "page1", "page2", "page3"),
         default="all",
-        help="Export every Tableau view or only the two Executive Overview sources.",
+        help=(
+            "Export every Tableau view or only the sources required by one "
+            "implemented/prepared dashboard page."
+        ),
     )
     parser.add_argument(
         "--output-dir",
@@ -125,6 +139,7 @@ def main() -> None:
         "all": ALL_EXPORTS,
         "page1": PAGE1_EXPORTS,
         "page2": PAGE2_EXPORTS,
+        "page3": PAGE3_EXPORTS,
     }[args.profile]
 
     manifest = {
@@ -159,7 +174,7 @@ def main() -> None:
         missing = set(exports) - available_views
         if missing:
             raise RuntimeError(
-                "Missing Tableau views; run sql/06_tableau_preparation.sql first: "
+                "Missing Tableau views; run the required Tableau preparation SQL first: "
                 + ", ".join(sorted(missing))
             )
 

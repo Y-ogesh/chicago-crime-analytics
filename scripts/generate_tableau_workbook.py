@@ -19,10 +19,13 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_PAGE1_CSV_DIR = PROJECT_ROOT / "data" / "processed" / "tableau" / "page1"
 DEFAULT_PAGE2_CSV_DIR = PROJECT_ROOT / "data" / "processed" / "tableau" / "page2"
+DEFAULT_PAGE3_CSV_DIR = PROJECT_ROOT / "data" / "processed" / "tableau" / "page3"
 DEFAULT_OUTPUT = PROJECT_ROOT / "tableau" / "chicago_crime_analytics.twb"
 ANNUAL_FILE = "vw_tableau_crime_arrest_year.csv"
 MONTHLY_FILE = "vw_tableau_month_category.csv"
 GEOGRAPHIC_FILE = "vw_tableau_geographic_detail.csv"
+TEMPORAL_FILE = "vw_tableau_temporal_detail.csv"
+TEMPORAL_KPI_FILE = "vw_tableau_temporal_kpis.csv"
 TABLEAU_VERSION = "18.1"
 TABLEAU_SOURCE_BUILD = "20262.26.0912.1023"
 
@@ -99,6 +102,45 @@ GEOGRAPHIC_FIELDS = [
     ("reported_incident_count", "integer"),
 ]
 
+TEMPORAL_FIELDS = [
+    ("month_start", "date"),
+    ("crime_year", "integer"),
+    ("crime_month", "integer"),
+    ("month_name", "string"),
+    ("crime_quarter", "integer"),
+    ("season", "string"),
+    ("season_order", "integer"),
+    ("primary_type", "string"),
+    ("annual_category_rank", "integer"),
+    ("day_of_week_num", "integer"),
+    ("day_of_week", "string"),
+    ("hour_of_day", "integer"),
+    ("time_of_day", "string"),
+    ("time_of_day_display", "string"),
+    ("time_of_day_order", "integer"),
+    ("weekend_flag", "integer"),
+    ("reported_incident_count", "integer"),
+    ("arrest_count", "integer"),
+    ("arrest_indicator_denominator", "integer"),
+    ("domestic_count", "integer"),
+    ("domestic_indicator_denominator", "integer"),
+]
+
+TEMPORAL_KPI_FIELDS = [
+    ("crime_year", "integer"),
+    ("primary_type_scope", "string"),
+    ("reported_incident_count", "integer"),
+    ("peak_hour", "integer"),
+    ("peak_hour_label", "string"),
+    ("peak_hour_incident_count", "integer"),
+    ("peak_day_num", "integer"),
+    ("peak_day", "string"),
+    ("peak_day_incident_count", "integer"),
+    ("peak_month_num", "integer"),
+    ("peak_month", "string"),
+    ("peak_month_incident_count", "integer"),
+]
+
 PAGE1_SHEETS = [
     "Total Reported Crimes",
     "Arrest Percentage",
@@ -117,13 +159,26 @@ PAGE2_SHEETS = [
     "Geographic Crime Category Analysis",
 ]
 
-SHEETS = PAGE1_SHEETS + PAGE2_SHEETS
+PAGE3_SHEETS = [
+    "P3 KPI Total Incidents",
+    "P3 KPI Peak Hour",
+    "P3 KPI Peak Day",
+    "P3 KPI Peak Month",
+    "P3 Day-Hour Heatmap",
+    "P3 Monthly Crime Trend",
+    "P3 Seasonal Comparison",
+    "P3 Time-of-Day Distribution",
+    "P3 Category Monthly Comparison",
+]
+
+SHEETS = PAGE1_SHEETS + PAGE2_SHEETS + PAGE3_SHEETS
 
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--page1-csv-dir", type=Path, default=DEFAULT_PAGE1_CSV_DIR)
     parser.add_argument("--page2-csv-dir", type=Path, default=DEFAULT_PAGE2_CSV_DIR)
+    parser.add_argument("--page3-csv-dir", type=Path, default=DEFAULT_PAGE3_CSV_DIR)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument(
         "--validate-only",
@@ -225,22 +280,36 @@ def add_textscan_datasource(
     for field_name, datatype in fields:
         add_column(ds, field_name, datatype)
 
-    calculated = [
-        (
-            "Calculation_SelectedYear",
-            "Selected Year Filter",
-            "boolean",
-            "STR([crime_year]) = [Parameters].[pSelectedYear]",
-            None,
-        ),
-        (
-            "Calculation_SelectedCrimeType",
-            "Selected Crime Type Filter",
-            "boolean",
-            '[Parameters].[pCrimeType] = "All Crime Types" OR [primary_type] = [Parameters].[pCrimeType]',
-            None,
-        ),
-    ]
+    calculated = []
+    if name != "TemporalKpiDS":
+        calculated.extend(
+            [
+                (
+                    "Calculation_SelectedYear",
+                    "Selected Year Filter",
+                    "boolean",
+                    "STR([crime_year]) = [Parameters].[pSelectedYear]",
+                    None,
+                ),
+                (
+                    "Calculation_SelectedCrimeType",
+                    "Selected Crime Type Filter",
+                    "boolean",
+                    '[Parameters].[pCrimeType] = "All Crime Types" OR [primary_type] = [Parameters].[pCrimeType]',
+                    None,
+                ),
+            ]
+        )
+    else:
+        calculated.append(
+            (
+                "Calculation_SelectedTemporalKpiScope",
+                "Selected Temporal KPI Scope",
+                "boolean",
+                "STR([crime_year]) = [Parameters].[pSelectedYear] AND [primary_type_scope] = [Parameters].[pCrimeType]",
+                None,
+            )
+        )
     if name == "AnnualDS":
         calculated.extend(
             [
@@ -307,13 +376,79 @@ def add_textscan_datasource(
                 ),
             ]
         )
+    if name == "TemporalDS":
+        calculated.extend(
+            [
+                (
+                    "Calculation_TemporalCategoryDisplay",
+                    "Show Leading Categories",
+                    "boolean",
+                    '[Parameters].[pCrimeType] <> "All Crime Types" OR [annual_category_rank] <= 5',
+                    None,
+                ),
+                (
+                    "Calculation_TimeOfDayDisplay",
+                    "Time of Day Display",
+                    "string",
+                    'IF [time_of_day] = "Overnight" THEN "Night" ELSE [time_of_day] END',
+                    None,
+                ),
+                (
+                    "Calculation_HourLabel",
+                    "Hour Label",
+                    "string",
+                    'RIGHT("0" + STR([hour_of_day]), 2) + ":00"',
+                    None,
+                ),
+                (
+                    "Calculation_TemporalArrestPercentage",
+                    "Arrest Percentage",
+                    "real",
+                    "IF SUM([arrest_indicator_denominator]) = 0 THEN NULL ELSE 100.0 * SUM([arrest_count]) / SUM([arrest_indicator_denominator]) END",
+                    'n#,##0.0"%";-#,##0.0"%"',
+                ),
+                (
+                    "Calculation_TemporalDomesticPercentage",
+                    "Domestic Incident Percentage",
+                    "real",
+                    "IF SUM([domestic_indicator_denominator]) = 0 THEN NULL ELSE 100.0 * SUM([domestic_count]) / SUM([domestic_indicator_denominator]) END",
+                    'n#,##0.0"%";-#,##0.0"%"',
+                ),
+                (
+                    "Calculation_PeakHourLabel",
+                    "Peak Hour Label",
+                    "string",
+                    'IF RANK_UNIQUE(SUM([reported_incident_count]), "desc") = 1 THEN MIN([Calculation_HourLabel]) + CHAR(10) + STR(SUM([reported_incident_count])) + " incidents" END',
+                    None,
+                ),
+                (
+                    "Calculation_PeakDayLabel",
+                    "Peak Day Label",
+                    "string",
+                    'IF RANK_UNIQUE(SUM([reported_incident_count]), "desc") = 1 THEN MIN([day_of_week]) + CHAR(10) + STR(SUM([reported_incident_count])) + " incidents" END',
+                    None,
+                ),
+                (
+                    "Calculation_PeakMonthLabel",
+                    "Peak Month Label",
+                    "string",
+                    'IF RANK_UNIQUE(SUM([reported_incident_count]), "desc") = 1 THEN MIN([month_name]) + CHAR(10) + STR(SUM([reported_incident_count])) + " incidents" END',
+                    None,
+                ),
+            ]
+        )
     for calc_name, caption_value, datatype, formula, default_format in calculated:
+        is_aggregate_text = calc_name in {
+            "Calculation_PeakHourLabel",
+            "Calculation_PeakDayLabel",
+            "Calculation_PeakMonthLabel",
+        }
         attrs = {
             "caption": caption_value,
             "datatype": datatype,
             "name": f"[{calc_name}]",
-            "role": "dimension" if datatype == "boolean" else "measure",
-            "type": "nominal" if datatype == "boolean" else "quantitative",
+            "role": "measure" if is_aggregate_text else ("dimension" if datatype in {"boolean", "string"} else "measure"),
+            "type": "nominal" if datatype in {"boolean", "string"} else "quantitative",
         }
         if default_format:
             attrs["default-format"] = default_format
@@ -377,6 +512,7 @@ def add_dependencies(view: ET.Element, datasource: str, fields: list[tuple[str, 
     calc_specs = {
         "Calculation_SelectedYear": ("Selected Year Filter", "boolean", "dimension", "nominal", "STR([crime_year]) = [Parameters].[pSelectedYear]", None),
         "Calculation_SelectedCrimeType": ("Selected Crime Type Filter", "boolean", "dimension", "nominal", '[Parameters].[pCrimeType] = "All Crime Types" OR [primary_type] = [Parameters].[pCrimeType]', None),
+        "Calculation_SelectedTemporalKpiScope": ("Selected Temporal KPI Scope", "boolean", "dimension", "nominal", "STR([crime_year]) = [Parameters].[pSelectedYear] AND [primary_type_scope] = [Parameters].[pCrimeType]", None),
         "Calculation_CategoryDisplay": ("Show Category in Distribution", "boolean", "dimension", "nominal", '[Parameters].[pCrimeType] <> "All Crime Types" OR [incident_volume_rank] <= 10', None),
         "Calculation_ArrestPercentage": ("Weighted Arrest Percentage", "real", "measure", "quantitative", "IF SUM([arrest_indicator_denominator]) = 0 THEN NULL ELSE 100.0 * SUM([arrest_count]) / SUM([arrest_indicator_denominator]) END", 'n#,##0.0"%";-#,##0.0"%"'),
         "Calculation_DomesticPercentage": ("Weighted Domestic Incident Percentage", "real", "measure", "quantitative", "IF SUM([domestic_indicator_denominator]) = 0 THEN NULL ELSE 100.0 * SUM([domestic_count]) / SUM([domestic_indicator_denominator]) END", 'n#,##0.0"%";-#,##0.0"%"'),
@@ -385,6 +521,14 @@ def add_dependencies(view: ET.Element, datasource: str, fields: list[tuple[str, 
         "Calculation_MapCoveragePercentage": ("Coordinate Coverage Percentage", "real", "measure", "quantitative", "IF SUM([reported_incident_count]) = 0 THEN NULL ELSE 100.0 * SUM(IF [coordinate_mappable_flag] = 1 THEN [reported_incident_count] ELSE 0 END) / SUM([reported_incident_count]) END", 'n#,##0.0"%";-#,##0.0"%"'),
         "Calculation_MappableRecord": ("Coordinate-Mappable Record", "boolean", "dimension", "nominal", "[coordinate_mappable_flag] = 1", None),
         "Calculation_CommunityAreaEligible": ("Community-Area Eligible Record", "boolean", "dimension", "nominal", "[community_area_eligible_flag] = 1", None),
+        "Calculation_TemporalCategoryDisplay": ("Show Leading Categories", "boolean", "dimension", "nominal", '[Parameters].[pCrimeType] <> "All Crime Types" OR [annual_category_rank] <= 5', None),
+        "Calculation_TimeOfDayDisplay": ("Time of Day Display", "string", "dimension", "nominal", 'IF [time_of_day] = "Overnight" THEN "Night" ELSE [time_of_day] END', None),
+        "Calculation_HourLabel": ("Hour Label", "string", "dimension", "nominal", 'RIGHT("0" + STR([hour_of_day]), 2) + ":00"', None),
+        "Calculation_TemporalArrestPercentage": ("Arrest Percentage", "real", "measure", "quantitative", "IF SUM([arrest_indicator_denominator]) = 0 THEN NULL ELSE 100.0 * SUM([arrest_count]) / SUM([arrest_indicator_denominator]) END", 'n#,##0.0"%";-#,##0.0"%"'),
+        "Calculation_TemporalDomesticPercentage": ("Domestic Incident Percentage", "real", "measure", "quantitative", "IF SUM([domestic_indicator_denominator]) = 0 THEN NULL ELSE 100.0 * SUM([domestic_count]) / SUM([domestic_indicator_denominator]) END", 'n#,##0.0"%";-#,##0.0"%"'),
+        "Calculation_PeakHourLabel": ("Peak Hour Label", "string", "measure", "nominal", 'IF RANK_UNIQUE(SUM([reported_incident_count]), "desc") = 1 THEN MIN([Calculation_HourLabel]) + CHAR(10) + STR(SUM([reported_incident_count])) + " incidents" END', None),
+        "Calculation_PeakDayLabel": ("Peak Day Label", "string", "measure", "nominal", 'IF RANK_UNIQUE(SUM([reported_incident_count]), "desc") = 1 THEN MIN([day_of_week]) + CHAR(10) + STR(SUM([reported_incident_count])) + " incidents" END', None),
+        "Calculation_PeakMonthLabel": ("Peak Month Label", "string", "measure", "nominal", 'IF RANK_UNIQUE(SUM([reported_incident_count]), "desc") = 1 THEN MIN([month_name]) + CHAR(10) + STR(SUM([reported_incident_count])) + " incidents" END', None),
     }
     for calc_name in calculations:
         caption, datatype, role, kind, formula, default_format = calc_specs[calc_name]
@@ -912,6 +1056,259 @@ def add_geographic_category_analysis(worksheets: ET.Element) -> None:
     ET.SubElement(table, "cols").text = "[GeographicDS].[sum:reported_incident_count:qk]"
 
 
+TEMPORAL_FILTER_CALCULATIONS = ["Calculation_SelectedYear", "Calculation_SelectedCrimeType"]
+
+
+def add_temporal_filter_state(
+    view: ET.Element,
+    extra_filters: list[str] | None = None,
+    *,
+    include_slices: bool = True,
+) -> list[str]:
+    filter_names = [*TEMPORAL_FILTER_CALCULATIONS, *(extra_filters or [])]
+    for filter_name in filter_names:
+        add_true_filter(view, "TemporalDS", filter_name)
+    if include_slices:
+        add_temporal_slices(view, filter_names)
+    return filter_names
+
+
+def add_temporal_slices(view: ET.Element, filter_names: list[str]) -> None:
+    slices = ET.SubElement(view, "slices")
+    for filter_name in filter_names:
+        ET.SubElement(slices, "column").text = f"[TemporalDS].[{filter_name}]"
+
+
+def add_temporal_total_kpi(worksheets: ET.Element) -> None:
+    ws = ET.SubElement(worksheets, "worksheet", {"name": "P3 KPI Total Incidents"})
+    add_title(ws, "Reported Incidents")
+    table = ET.SubElement(ws, "table")
+    view = ET.SubElement(table, "view")
+    sources = ET.SubElement(view, "datasources")
+    ET.SubElement(sources, "datasource", {"caption": "Temporal Detail", "name": "TemporalDS"})
+    ET.SubElement(sources, "datasource", {"name": "Parameters"})
+    add_dependencies(
+        view,
+        "TemporalDS",
+        [("crime_year", "integer"), ("primary_type", "string"), ("reported_incident_count", "integer")],
+        TEMPORAL_FILTER_CALCULATIONS,
+        [("reported_incident_count", "Sum", "sum:reported_incident_count:qk", "quantitative")],
+    )
+    add_parameter_dependencies(view)
+    add_temporal_filter_state(view)
+    ET.SubElement(view, "aggregation", {"value": "true"})
+    add_sheet_style(table, hide_headers=True, kpi=True)
+    add_mark(table, "Text", [("text", "[TemporalDS].[sum:reported_incident_count:qk]")], labels=True, label_font_size=26)
+    ET.SubElement(table, "rows")
+    ET.SubElement(table, "cols")
+
+
+def add_temporal_peak_kpi(
+    worksheets: ET.Element,
+    *,
+    name: str,
+    title: str,
+    value_field: str,
+    value_type: str,
+    count_field: str,
+) -> None:
+    ws = ET.SubElement(worksheets, "worksheet", {"name": name})
+    add_title(ws, title)
+    table = ET.SubElement(ws, "table")
+    view = ET.SubElement(table, "view")
+    sources = ET.SubElement(view, "datasources")
+    ET.SubElement(sources, "datasource", {"caption": "Temporal KPI Scope", "name": "TemporalKpiDS"})
+    ET.SubElement(sources, "datasource", {"name": "Parameters"})
+    add_dependencies(
+        view,
+        "TemporalKpiDS",
+        [
+            ("crime_year", "integer"),
+            ("primary_type_scope", "string"),
+            (value_field, value_type),
+            (count_field, "integer"),
+        ],
+        ["Calculation_SelectedTemporalKpiScope"],
+        [
+            (value_field, "Min", f"min:{value_field}:nk", "nominal"),
+            (count_field, "Min", f"min:{count_field}:qk", "quantitative"),
+        ],
+    )
+    add_parameter_dependencies(view)
+    add_true_filter(view, "TemporalKpiDS", "Calculation_SelectedTemporalKpiScope")
+    slices = ET.SubElement(view, "slices")
+    ET.SubElement(slices, "column").text = "[TemporalKpiDS].[Calculation_SelectedTemporalKpiScope]"
+    ET.SubElement(view, "aggregation", {"value": "true"})
+    add_sheet_style(table, hide_headers=True, kpi=True)
+    add_mark(
+        table,
+        "Text",
+        [("text", f"[TemporalKpiDS].[min:{value_field}:nk]")],
+        [
+            (f"{title}: ", {"fontcolor": "#666666"}),
+            (f"<[TemporalKpiDS].[min:{value_field}:nk]>", {"bold": "true"}),
+            ("\nReported incidents: ", {"fontcolor": "#666666"}),
+            (f"<[TemporalKpiDS].[min:{count_field}:qk]>", {"bold": "true"}),
+        ],
+        labels=True,
+        label_font_size=22,
+    )
+    ET.SubElement(table, "rows")
+    ET.SubElement(table, "cols")
+
+
+def add_temporal_heatmap(worksheets: ET.Element) -> None:
+    ws = ET.SubElement(worksheets, "worksheet", {"name": "P3 Day-Hour Heatmap"})
+    add_title(ws, "Reported Incidents by Day and Hour")
+    table = ET.SubElement(ws, "table")
+    view = ET.SubElement(table, "view")
+    sources = ET.SubElement(view, "datasources")
+    ET.SubElement(sources, "datasource", {"caption": "Temporal Detail", "name": "TemporalDS"})
+    ET.SubElement(sources, "datasource", {"name": "Parameters"})
+    add_dependencies(
+        view,
+        "TemporalDS",
+        [
+            ("crime_year", "integer"), ("primary_type", "string"),
+            ("day_of_week", "string"), ("day_of_week_num", "integer"),
+            ("hour_of_day", "integer"), ("reported_incident_count", "integer"),
+            ("arrest_count", "integer"), ("arrest_indicator_denominator", "integer"),
+            ("domestic_count", "integer"), ("domestic_indicator_denominator", "integer"),
+        ],
+        [*TEMPORAL_FILTER_CALCULATIONS, "Calculation_HourLabel", "Calculation_TemporalArrestPercentage", "Calculation_TemporalDomesticPercentage"],
+        [
+            ("day_of_week", "None", "none:day_of_week:nk", "nominal"),
+            ("day_of_week_num", "Min", "min:day_of_week_num:qk", "quantitative"),
+            ("hour_of_day", "None", "none:hour_of_day:ok", "ordinal"),
+            ("reported_incident_count", "Sum", "sum:reported_incident_count:qk", "quantitative"),
+            ("Calculation_TemporalArrestPercentage", "User", "usr:Calculation_TemporalArrestPercentage:qk", "quantitative"),
+            ("Calculation_TemporalDomesticPercentage", "User", "usr:Calculation_TemporalDomesticPercentage:qk", "quantitative"),
+        ],
+    )
+    add_parameter_dependencies(view)
+    filter_names = add_temporal_filter_state(view, include_slices=False)
+    ET.SubElement(view, "sort", {"class": "computed", "column": "[TemporalDS].[none:day_of_week:nk]", "direction": "ASC", "using": "[TemporalDS].[min:day_of_week_num:qk]"})
+    add_temporal_slices(view, filter_names)
+    ET.SubElement(view, "aggregation", {"value": "true"})
+    add_sheet_style(table)
+    add_mark(
+        table,
+        "Square",
+        [("color", "[TemporalDS].[sum:reported_incident_count:qk]")],
+        [
+            ("Day: ", {"fontcolor": "#666666"}), ("<[TemporalDS].[none:day_of_week:nk]>", {"bold": "true"}),
+            ("\nHour: ", {"fontcolor": "#666666"}), ("<[TemporalDS].[none:hour_of_day:ok]>:00", {"bold": "true"}),
+            ("\nReported incidents: ", {"fontcolor": "#666666"}), ("<[TemporalDS].[sum:reported_incident_count:qk]>", {"bold": "true"}),
+            ("\nRecorded times may be estimated.", {"fontcolor": "#666666"}),
+        ],
+    )
+    ET.SubElement(table, "rows").text = "[TemporalDS].[none:day_of_week:nk]"
+    ET.SubElement(table, "cols").text = "[TemporalDS].[none:hour_of_day:ok]"
+
+
+def add_temporal_monthly_trend(worksheets: ET.Element) -> None:
+    ws = ET.SubElement(worksheets, "worksheet", {"name": "P3 Monthly Crime Trend"})
+    add_title(ws, "Monthly Reported-Incident Trend")
+    table = ET.SubElement(ws, "table")
+    view = ET.SubElement(table, "view")
+    sources = ET.SubElement(view, "datasources")
+    ET.SubElement(sources, "datasource", {"caption": "Temporal Detail", "name": "TemporalDS"})
+    ET.SubElement(sources, "datasource", {"name": "Parameters"})
+    add_dependencies(
+        view,
+        "TemporalDS",
+        [("month_start", "date"), ("crime_year", "integer"), ("primary_type", "string"), ("reported_incident_count", "integer")],
+        TEMPORAL_FILTER_CALCULATIONS,
+        [("month_start", "Month-Trunc", "tmn:month_start:ok", "ordinal"), ("reported_incident_count", "Sum", "sum:reported_incident_count:qk", "quantitative")],
+    )
+    add_parameter_dependencies(view)
+    add_temporal_filter_state(view)
+    ET.SubElement(view, "aggregation", {"value": "true"})
+    add_sheet_style(table)
+    add_mark(table, "Line", [], [("Month: ", {"fontcolor": "#666666"}), ("<[TemporalDS].[tmn:month_start:ok]>", {"bold": "true"}), ("\nReported incidents: ", {"fontcolor": "#666666"}), ("<[TemporalDS].[sum:reported_incident_count:qk]>", {"bold": "true"})])
+    ET.SubElement(table, "rows").text = "[TemporalDS].[sum:reported_incident_count:qk]"
+    ET.SubElement(table, "cols").text = "[TemporalDS].[tmn:month_start:ok]"
+
+
+def add_temporal_bar(
+    worksheets: ET.Element,
+    *,
+    name: str,
+    title: str,
+    dimension_name: str,
+    order_name: str,
+    horizontal: bool,
+) -> None:
+    ws = ET.SubElement(worksheets, "worksheet", {"name": name})
+    add_title(ws, title)
+    table = ET.SubElement(ws, "table")
+    view = ET.SubElement(table, "view")
+    sources = ET.SubElement(view, "datasources")
+    ET.SubElement(sources, "datasource", {"caption": "Temporal Detail", "name": "TemporalDS"})
+    ET.SubElement(sources, "datasource", {"name": "Parameters"})
+    calculations = [*TEMPORAL_FILTER_CALCULATIONS]
+    fields = [("crime_year", "integer"), ("primary_type", "string"), (order_name, "integer"), ("reported_incident_count", "integer")]
+    if dimension_name == "Calculation_TimeOfDayDisplay":
+        calculations.append(dimension_name)
+        fields.append(("time_of_day", "string"))
+    else:
+        fields.append((dimension_name, "string"))
+    add_dependencies(
+        view,
+        "TemporalDS",
+        fields,
+        calculations,
+        [
+            (dimension_name, "User" if dimension_name.startswith("Calculation_") else "None", f"{'usr' if dimension_name.startswith('Calculation_') else 'none'}:{dimension_name}:nk", "nominal"),
+            (order_name, "Min", f"min:{order_name}:qk", "quantitative"),
+            ("reported_incident_count", "Sum", "sum:reported_incident_count:qk", "quantitative"),
+        ],
+    )
+    add_parameter_dependencies(view)
+    filter_names = add_temporal_filter_state(view, include_slices=False)
+    dimension_ref = f"[TemporalDS].[{'usr' if dimension_name.startswith('Calculation_') else 'none'}:{dimension_name}:nk]"
+    ET.SubElement(view, "sort", {"class": "computed", "column": dimension_ref, "direction": "ASC", "using": f"[TemporalDS].[min:{order_name}:qk]"})
+    add_temporal_slices(view, filter_names)
+    ET.SubElement(view, "aggregation", {"value": "true"})
+    add_sheet_style(table)
+    add_mark(table, "Bar", [("text", "[TemporalDS].[sum:reported_incident_count:qk]")], labels=True)
+    ET.SubElement(table, "rows").text = dimension_ref if horizontal else "[TemporalDS].[sum:reported_incident_count:qk]"
+    ET.SubElement(table, "cols").text = "[TemporalDS].[sum:reported_incident_count:qk]" if horizontal else dimension_ref
+
+
+def add_temporal_category_comparison(worksheets: ET.Element) -> None:
+    ws = ET.SubElement(worksheets, "worksheet", {"name": "P3 Category Monthly Comparison"})
+    add_title(ws, "Monthly Patterns for Leading Crime Types")
+    table = ET.SubElement(ws, "table")
+    view = ET.SubElement(table, "view")
+    sources = ET.SubElement(view, "datasources")
+    ET.SubElement(sources, "datasource", {"caption": "Temporal Detail", "name": "TemporalDS"})
+    ET.SubElement(sources, "datasource", {"name": "Parameters"})
+    add_dependencies(
+        view,
+        "TemporalDS",
+        [("month_start", "date"), ("crime_year", "integer"), ("primary_type", "string"), ("annual_category_rank", "integer"), ("reported_incident_count", "integer")],
+        [*TEMPORAL_FILTER_CALCULATIONS, "Calculation_TemporalCategoryDisplay"],
+        [
+            ("month_start", "Month-Trunc", "tmn:month_start:ok", "ordinal"),
+            ("primary_type", "None", "none:primary_type:nk", "nominal"),
+            ("reported_incident_count", "Sum", "sum:reported_incident_count:qk", "quantitative"),
+        ],
+    )
+    add_parameter_dependencies(view)
+    add_temporal_filter_state(view, ["Calculation_TemporalCategoryDisplay"])
+    ET.SubElement(view, "aggregation", {"value": "true"})
+    add_sheet_style(table)
+    add_mark(
+        table,
+        "Line",
+        [("color", "[TemporalDS].[none:primary_type:nk]"), ("lod", "[TemporalDS].[none:primary_type:nk]")],
+        [("Crime type: ", {"fontcolor": "#666666"}), ("<[TemporalDS].[none:primary_type:nk]>", {"bold": "true"}), ("\nMonth: ", {"fontcolor": "#666666"}), ("<[TemporalDS].[tmn:month_start:ok]>", {"bold": "true"}), ("\nReported incidents: ", {"fontcolor": "#666666"}), ("<[TemporalDS].[sum:reported_incident_count:qk]>", {"bold": "true"})],
+    )
+    ET.SubElement(table, "rows").text = "[TemporalDS].[sum:reported_incident_count:qk]"
+    ET.SubElement(table, "cols").text = "[TemporalDS].[tmn:month_start:ok]"
+
+
 def add_dashboard(root: ET.Element) -> None:
     dashboards = ET.SubElement(root, "dashboards")
     dashboard = ET.SubElement(dashboards, "dashboard", {"name": "Executive Overview"})
@@ -1076,10 +1473,101 @@ def add_dashboard(root: ET.Element) -> None:
         "Map cells summarize observed coordinates descriptively and do not establish statistical significance or causation."
     )
 
+    temporal_dashboard = ET.SubElement(dashboards, "dashboard", {"name": "Temporal and Seasonal Patterns"})
+    temporal_layout = ET.SubElement(temporal_dashboard, "layout-options")
+    temporal_formatted = ET.SubElement(ET.SubElement(temporal_layout, "title"), "formatted-text")
+    temporal_title_run = ET.SubElement(
+        temporal_formatted,
+        "run",
+        {"bold": "true", "fontcolor": "#17324D", "fontname": "Tableau Semibold", "fontsize": "22"},
+    )
+    temporal_title_run.text = "Chicago Crime Analytics — Temporal and Seasonal Patterns"
+    temporal_style = ET.SubElement(temporal_dashboard, "style")
+    temporal_rule = ET.SubElement(temporal_style, "style-rule", {"element": "dashboard"})
+    add_format(temporal_rule, attr="background-color", value="#F5F7FA")
+    ET.SubElement(
+        temporal_dashboard,
+        "size",
+        {"maxheight": "850", "maxwidth": "1360", "minheight": "850", "minwidth": "1360", "sizing-mode": "fixed"},
+    )
+    temporal_sources = ET.SubElement(temporal_dashboard, "datasources")
+    ET.SubElement(temporal_sources, "datasource", {"name": "Parameters"})
+    add_parameter_dependencies(temporal_dashboard)
+    temporal_zones = ET.SubElement(temporal_dashboard, "zones")
+    temporal_root = ET.SubElement(
+        temporal_zones,
+        "zone",
+        {"h": "100000", "id": "201", "type-v2": "layout-basic", "w": "100000", "x": "0", "y": "0"},
+    )
+    ET.SubElement(temporal_root, "zone", {"h": "7200", "id": "202", "type-v2": "title", "w": "72000", "x": "1800", "y": "1200"})
+    temporal_subtitle = ET.SubElement(
+        temporal_root,
+        "zone",
+        {"h": "3600", "id": "203", "type-v2": "text", "w": "72000", "x": "1800", "y": "7800"},
+    )
+    temporal_sub_text = ET.SubElement(temporal_subtitle, "formatted-text")
+    ET.SubElement(
+        temporal_sub_text,
+        "run",
+        {"fontcolor": "#5B6B7C", "fontname": "Tableau Book", "fontsize": "10"},
+    ).text = "Complete calendar years 2023–2025 | Recorded incident times may be estimated"
+
+    temporal_controls = [
+        (204, "[Parameters].[pSelectedYear]", "Year", 76000, 2200, 9000),
+        (205, "[Parameters].[pCrimeType]", "Crime Type", 86000, 2200, 12500),
+    ]
+    for zone_id, parameter, label, x, y, width in temporal_controls:
+        control = ET.SubElement(
+            temporal_root,
+            "zone",
+            {
+                "custom-title": "true", "h": "5200", "id": str(zone_id), "mode": "compact",
+                "param": parameter, "type-v2": "paramctrl", "w": str(width), "x": str(x), "y": str(y),
+            },
+        )
+        control_text = ET.SubElement(control, "formatted-text")
+        ET.SubElement(control_text, "run", {"bold": "true", "fontcolor": "#243447", "fontsize": "10"}).text = label
+
+    temporal_sheet_zones = [
+        ("P3 KPI Total Incidents", 206, 1800, 13000, 23300, 11000),
+        ("P3 KPI Peak Hour", 207, 25800, 13000, 23300, 11000),
+        ("P3 KPI Peak Day", 208, 49800, 13000, 23300, 11000),
+        ("P3 KPI Peak Month", 209, 73800, 13000, 24800, 11000),
+        ("P3 Day-Hour Heatmap", 210, 1800, 26000, 59000, 31000),
+        ("P3 Monthly Crime Trend", 211, 62500, 26000, 36100, 31000),
+        ("P3 Seasonal Comparison", 212, 1800, 59000, 28500, 29000),
+        ("P3 Time-of-Day Distribution", 213, 31500, 59000, 28500, 29000),
+        ("P3 Category Monthly Comparison", 214, 62500, 59000, 36100, 29000),
+    ]
+    for sheet_name, zone_id, x, y, width, height in temporal_sheet_zones:
+        zone = ET.SubElement(
+            temporal_root,
+            "zone",
+            {"h": str(height), "id": str(zone_id), "name": sheet_name, "show-title": "true", "w": str(width), "x": str(x), "y": str(y)},
+        )
+        zone_style = ET.SubElement(zone, "zone-style")
+        add_format(zone_style, attr="background-color", value="#FFFFFF")
+        add_format(zone_style, attr="border-color", value="#D9E1E8")
+        add_format(zone_style, attr="border-style", value="solid")
+        add_format(zone_style, attr="border-width", value="1")
+        add_format(zone_style, attr="margin", value="6")
+
+    temporal_footer = ET.SubElement(
+        temporal_root,
+        "zone",
+        {"h": "8500", "id": "215", "type-v2": "text", "w": "96800", "x": "1800", "y": "90000"},
+    )
+    temporal_footer_text = ET.SubElement(temporal_footer, "formatted-text")
+    ET.SubElement(temporal_footer_text, "run", {"fontcolor": "#4D5F70", "fontsize": "9"}).text = (
+        "Source extract: Sep 25, 2026 | Incident dates: Jan 1, 2023–Dec 31, 2025 | Complete years\n"
+        "Counts are reported incidents, not population-normalized crime rates. Recorded incident times may be estimated. "
+        "Seasonal and hourly patterns are descriptive and do not establish causation."
+    )
+
 
 def add_windows(root: ET.Element) -> None:
     windows = ET.SubElement(root, "windows", {"source-height": "32"})
-    window = ET.SubElement(windows, "window", {"class": "dashboard", "maximized": "true", "name": "Executive Overview"})
+    window = ET.SubElement(windows, "window", {"class": "dashboard", "maximized": "true", "name": "Temporal and Seasonal Patterns"})
     viewpoints = ET.SubElement(window, "viewpoints")
     for sheet in SHEETS:
         point = ET.SubElement(viewpoints, "viewpoint", {"name": sheet})
@@ -1245,6 +1733,113 @@ def validate_page2_source_data(csv_dir: Path) -> tuple[list[str], list[str], dic
     return community_areas, districts, evidence
 
 
+def validate_page3_source_data(csv_dir: Path) -> dict[str, object]:
+    temporal_path = csv_dir / TEMPORAL_FILE
+    kpi_path = csv_dir / TEMPORAL_KPI_FILE
+    manifest_path = csv_dir / "manifest.json"
+    for path in (temporal_path, kpi_path, manifest_path):
+        if not path.is_file():
+            raise FileNotFoundError(f"Required Tableau source is missing: {path}")
+
+    rows = read_rows(temporal_path)
+    expected_columns = [name for name, _ in TEMPORAL_FIELDS]
+    if len(rows) != 87809 or not rows or list(rows[0]) != expected_columns:
+        raise ValueError(f"Unexpected Page 3 source shape: rows={len(rows)}, columns={list(rows[0]) if rows else []}")
+
+    grain: set[tuple[str, ...]] = set()
+    totals: dict[tuple[int, str | None], int] = defaultdict(int)
+    hour_counts: dict[tuple[int, str | None, int], int] = defaultdict(int)
+    day_counts: dict[tuple[int, str | None, int, str], int] = defaultdict(int)
+    month_counts: dict[tuple[int, str | None, int, str], int] = defaultdict(int)
+    for row in rows:
+        key = (row["month_start"], row["primary_type"], row["day_of_week_num"], row["hour_of_day"], row["weekend_flag"])
+        if key in grain:
+            raise ValueError(f"Duplicate Page 3 grain detected: {key}")
+        grain.add(key)
+        year = int(row["crime_year"])
+        crime_type = row["primary_type"]
+        count = int(row["reported_incident_count"])
+        if not (2023 <= year <= 2025 and 1 <= int(row["crime_month"]) <= 12 and 1 <= int(row["day_of_week_num"]) <= 7 and 0 <= int(row["hour_of_day"]) <= 23 and count > 0):
+            raise ValueError(f"Invalid Page 3 temporal row: {row}")
+        for scope in ((year, None), (year, crime_type)):
+            totals[scope] += count
+            hour_counts[(*scope, int(row["hour_of_day"]))] += count
+            day_counts[(*scope, int(row["day_of_week_num"]), row["day_of_week"])] += count
+            month_counts[(*scope, int(row["crime_month"]), row["month_name"])] += count
+
+    expected_totals = {(2023, None): 263844, (2024, None): 259633, (2025, None): 238086, (2025, "THEFT"): 55198}
+    for scope, expected in expected_totals.items():
+        if totals[scope] != expected:
+            raise ValueError(f"Page 3 total mismatch for {scope}: expected {expected}, got {totals[scope]}")
+
+    def peak(mapping: dict[tuple, int], scope: tuple[int, str | None], dimension_offset: int) -> tuple[tuple, int]:
+        candidates = [(key[dimension_offset:], count) for key, count in mapping.items() if key[:2] == scope]
+        return min(candidates, key=lambda item: (-item[1], item[0]))
+
+    benchmarks = {
+        "all_2025": {
+            "incidents": totals[(2025, None)],
+            "peak_hour": peak(hour_counts, (2025, None), 2),
+            "peak_day": peak(day_counts, (2025, None), 2),
+            "peak_month": peak(month_counts, (2025, None), 2),
+        },
+        "theft_2025": {
+            "incidents": totals[(2025, "THEFT")],
+            "peak_hour": peak(hour_counts, (2025, "THEFT"), 2),
+            "peak_day": peak(day_counts, (2025, "THEFT"), 2),
+            "peak_month": peak(month_counts, (2025, "THEFT"), 2),
+        },
+    }
+    expected_benchmarks = {
+        "all_2025": {"incidents": 238086, "peak_hour": ((0,), 16749), "peak_day": ((5, "Friday"), 35445), "peak_month": ((7, "July"), 22710)},
+        "theft_2025": {"incidents": 55198, "peak_hour": ((12,), 3748), "peak_day": ((5, "Friday"), 8421), "peak_month": ((7, "July"), 5404)},
+    }
+    if benchmarks != expected_benchmarks:
+        raise ValueError(f"Page 3 KPI benchmark mismatch: {benchmarks}")
+
+    kpi_rows = read_rows(kpi_path)
+    expected_kpi_columns = [name for name, _ in TEMPORAL_KPI_FIELDS]
+    if len(kpi_rows) != 96 or not kpi_rows or list(kpi_rows[0]) != expected_kpi_columns:
+        raise ValueError(
+            f"Unexpected Page 3 KPI source shape: rows={len(kpi_rows)}, "
+            f"columns={list(kpi_rows[0]) if kpi_rows else []}"
+        )
+    kpi_lookup = {
+        (int(row["crime_year"]), row["primary_type_scope"]): row
+        for row in kpi_rows
+    }
+    expected_kpis = {
+        (2025, "All Crime Types"): (238086, "00:00", 16749, "Friday", 35445, "July", 22710),
+        (2025, "THEFT"): (55198, "12:00", 3748, "Friday", 8421, "July", 5404),
+    }
+    for scope, expected in expected_kpis.items():
+        row = kpi_lookup.get(scope)
+        actual = None if row is None else (
+            int(row["reported_incident_count"]),
+            row["peak_hour_label"],
+            int(row["peak_hour_incident_count"]),
+            row["peak_day"],
+            int(row["peak_day_incident_count"]),
+            row["peak_month"],
+            int(row["peak_month_incident_count"]),
+        )
+        if actual != expected:
+            raise ValueError(f"Page 3 materialized KPI mismatch for {scope}: expected {expected}, got {actual}")
+
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    for source_path, source_rows in ((temporal_path, rows), (kpi_path, kpi_rows)):
+        item = next((item for item in manifest["exports"] if Path(item["file"]).name == source_path.name), None)
+        digest = hashlib.sha256(source_path.read_bytes()).hexdigest()
+        if not item or item["sha256"] != digest or int(item["rows"]) != len(source_rows):
+            raise ValueError(f"Manifest validation failed for {source_path.name}")
+    return {
+        "rows": len(rows),
+        "kpi_rows": len(kpi_rows),
+        "benchmarks": benchmarks,
+        "manifest_generated_at_utc": manifest["generated_at_utc"],
+    }
+
+
 def build_workbook(crime_types: list[str], community_areas: list[str], districts: list[str]) -> ET.ElementTree:
     ET.register_namespace("user", "http://www.tableausoftware.com/xml/user")
     root = ET.Element(
@@ -1287,6 +1882,22 @@ def build_workbook(crime_types: list[str], community_areas: list[str], districts
         directory="../data/processed/tableau/page2",
         fields=GEOGRAPHIC_FIELDS,
     )
+    add_textscan_datasource(
+        datasources,
+        name="TemporalDS",
+        caption="Temporal Detail",
+        filename=TEMPORAL_FILE,
+        directory="../data/processed/tableau/page3",
+        fields=TEMPORAL_FIELDS,
+    )
+    add_textscan_datasource(
+        datasources,
+        name="TemporalKpiDS",
+        caption="Temporal KPI Scope",
+        filename=TEMPORAL_KPI_FILE,
+        directory="../data/processed/tableau/page3",
+        fields=TEMPORAL_KPI_FIELDS,
+    )
 
     worksheets = ET.SubElement(root, "worksheets")
     add_kpi(worksheets, "Total Reported Crimes", "[AnnualDS].[sum:reported_incident_count:qk]", None, "Reported incident count for the selected complete calendar year and crime-type scope.")
@@ -1316,6 +1927,50 @@ def build_workbook(crime_types: list[str], community_areas: list[str], districts
     add_community_area_ranking(worksheets)
     add_district_comparison(worksheets)
     add_geographic_category_analysis(worksheets)
+    add_temporal_total_kpi(worksheets)
+    add_temporal_peak_kpi(
+        worksheets,
+        name="P3 KPI Peak Hour",
+        title="Peak Recorded Hour",
+        value_field="peak_hour_label",
+        value_type="string",
+        count_field="peak_hour_incident_count",
+    )
+    add_temporal_peak_kpi(
+        worksheets,
+        name="P3 KPI Peak Day",
+        title="Peak Day",
+        value_field="peak_day",
+        value_type="string",
+        count_field="peak_day_incident_count",
+    )
+    add_temporal_peak_kpi(
+        worksheets,
+        name="P3 KPI Peak Month",
+        title="Peak Month",
+        value_field="peak_month",
+        value_type="string",
+        count_field="peak_month_incident_count",
+    )
+    add_temporal_heatmap(worksheets)
+    add_temporal_monthly_trend(worksheets)
+    add_temporal_bar(
+        worksheets,
+        name="P3 Seasonal Comparison",
+        title="Reported Incidents by Season",
+        dimension_name="season",
+        order_name="season_order",
+        horizontal=False,
+    )
+    add_temporal_bar(
+        worksheets,
+        name="P3 Time-of-Day Distribution",
+        title="Reported Incidents by Time of Day",
+        dimension_name="time_of_day_display",
+        order_name="time_of_day_order",
+        horizontal=True,
+    )
+    add_temporal_category_comparison(worksheets)
     add_dashboard(root)
     add_windows(root)
     return ET.ElementTree(root)
@@ -1325,25 +1980,28 @@ def validate_workbook(
     output: Path,
     page1_csv_dir: Path,
     page2_csv_dir: Path,
+    page3_csv_dir: Path,
     page1_evidence: dict[str, object],
     page2_evidence: dict[str, object],
+    page3_evidence: dict[str, object],
 ) -> None:
     tree = ET.parse(output)
     root = tree.getroot()
     if root.tag != "workbook" or root.attrib.get("version") != TABLEAU_VERSION:
         raise ValueError("Unexpected workbook root or Tableau workbook version.")
     sources = {item.attrib.get("name"): item for item in root.findall("./datasources/datasource")}
-    if set(sources) != {"Parameters", "AnnualDS", "MonthlyDS", "GeographicDS"}:
+    if set(sources) != {"Parameters", "AnnualDS", "MonthlyDS", "GeographicDS", "TemporalDS", "TemporalKpiDS"}:
         raise ValueError(f"Unexpected workbook data sources: {sorted(sources)}")
     worksheet_names = [item.attrib["name"] for item in root.findall("./worksheets/worksheet")]
     if worksheet_names != SHEETS:
         raise ValueError(f"Worksheet definitions differ from specification: {worksheet_names}")
     dashboards = root.findall("./dashboards/dashboard")
-    if [item.attrib.get("name") for item in dashboards] != ["Executive Overview", "Geographic Crime Patterns"]:
+    if [item.attrib.get("name") for item in dashboards] != ["Executive Overview", "Geographic Crime Patterns", "Temporal and Seasonal Patterns"]:
         raise ValueError("Expected dashboard definitions are missing or out of order.")
     page1_zones = {zone.attrib.get("name") for zone in dashboards[0].findall(".//zone") if zone.attrib.get("name")}
     page2_zones = {zone.attrib.get("name") for zone in dashboards[1].findall(".//zone") if zone.attrib.get("name")}
-    if not set(PAGE1_SHEETS).issubset(page1_zones) or not set(PAGE2_SHEETS).issubset(page2_zones):
+    page3_zones = {zone.attrib.get("name") for zone in dashboards[2].findall(".//zone") if zone.attrib.get("name")}
+    if not set(PAGE1_SHEETS).issubset(page1_zones) or not set(PAGE2_SHEETS).issubset(page2_zones) or not set(PAGE3_SHEETS).issubset(page3_zones):
         raise ValueError("One or more worksheets are not placed on the correct dashboard.")
     params = {column.attrib.get("name"): column for column in sources["Parameters"].findall("column")}
     expected_defaults = {
@@ -1355,12 +2013,17 @@ def validate_workbook(
     if any(params[name].attrib.get("value") != value for name, value in expected_defaults.items()):
         raise ValueError("Default Tableau parameter values are incorrect.")
     connections = root.findall(".//connection[@class='textscan']")
-    expected_files = {ANNUAL_FILE, MONTHLY_FILE, GEOGRAPHIC_FILE}
+    expected_files = {ANNUAL_FILE, MONTHLY_FILE, GEOGRAPHIC_FILE, TEMPORAL_FILE, TEMPORAL_KPI_FILE}
     if {connection.attrib.get("filename") for connection in connections} != expected_files:
         raise ValueError("Text-file connection references are incomplete.")
     for connection in connections:
         referenced = (output.parent / connection.attrib["directory"] / connection.attrib["filename"]).resolve()
-        expected_dir = page2_csv_dir if connection.attrib["filename"] == GEOGRAPHIC_FILE else page1_csv_dir
+        if connection.attrib["filename"] == GEOGRAPHIC_FILE:
+            expected_dir = page2_csv_dir
+        elif connection.attrib["filename"] in {TEMPORAL_FILE, TEMPORAL_KPI_FILE}:
+            expected_dir = page3_csv_dir
+        else:
+            expected_dir = page1_csv_dir
         expected = (expected_dir / connection.attrib["filename"]).resolve()
         if referenced != expected or not referenced.is_file():
             raise ValueError(f"Workbook reference does not resolve to the validated CSV: {referenced}")
@@ -1374,6 +2037,10 @@ def validate_workbook(
         '[Parameters].[pCommunityArea] = "All Community Areas" OR [community_area_name] = [Parameters].[pCommunityArea]',
         '[Parameters].[pDistrict] = "All Police Districts" OR [district_label] = [Parameters].[pDistrict]',
         "IF SUM([reported_incident_count]) = 0 THEN NULL ELSE 100.0 * SUM(IF [coordinate_mappable_flag] = 1 THEN [reported_incident_count] ELSE 0 END) / SUM([reported_incident_count]) END",
+        '[Parameters].[pCrimeType] <> "All Crime Types" OR [annual_category_rank] <= 5',
+        'IF [time_of_day] = "Overnight" THEN "Night" ELSE [time_of_day] END',
+        'RIGHT("0" + STR([hour_of_day]), 2) + ":00"',
+        "STR([crime_year]) = [Parameters].[pSelectedYear] AND [primary_type_scope] = [Parameters].[pCrimeType]",
     }
     if not required_formulas.issubset(formulas):
         raise ValueError("One or more canonical Tableau calculations are missing.")
@@ -1396,15 +2063,37 @@ def validate_workbook(
         raise ValueError("Source KPI evidence changed during workbook validation.")
     if page2_evidence["all_2025"]["incidents"] != page1_evidence["all_2025"]["incidents"]:
         raise ValueError("Page 2 and Page 1 2025 incident totals do not reconcile.")
+    if page3_evidence["benchmarks"]["all_2025"]["incidents"] != page1_evidence["all_2025"]["incidents"]:
+        raise ValueError("Page 3 and Page 1 2025 incident totals do not reconcile.")
+
+    heatmap = root.find("./worksheets/worksheet[@name='P3 Day-Hour Heatmap']/table")
+    if heatmap is None or heatmap.findtext("rows") != "[TemporalDS].[none:day_of_week:nk]" or heatmap.findtext("cols") != "[TemporalDS].[none:hour_of_day:ok]":
+        raise ValueError("Page 3 heatmap shelves are missing.")
+    category_temporal = root.find("./worksheets/worksheet[@name='P3 Category Monthly Comparison']/table/view")
+    temporal_filters = {item.attrib.get("column") for item in category_temporal.findall("filter")}
+    if "[TemporalDS].[Calculation_TemporalCategoryDisplay]" not in temporal_filters:
+        raise ValueError("Page 3 category comparison is missing its parameter-aware leading-category filter.")
+    time_of_day = root.find("./worksheets/worksheet[@name='P3 Time-of-Day Distribution']/table")
+    if time_of_day is None or time_of_day.findtext("rows") != "[TemporalDS].[none:time_of_day_display:nk]":
+        raise ValueError("Page 3 time-of-day chart is not using the physical display field.")
+    for sheet_name in ("P3 KPI Peak Hour", "P3 KPI Peak Day", "P3 KPI Peak Month"):
+        sheet_view = root.find(f"./worksheets/worksheet[@name='{sheet_name}']/table/view")
+        if sheet_view is None or not any(
+            item.attrib.get("name") == "TemporalKpiDS"
+            for item in sheet_view.findall("./datasources/datasource")
+        ):
+            raise ValueError(f"{sheet_name} is not backed by the materialized temporal KPI source.")
 
 
 def main() -> None:
     args = parse_args()
     page1_csv_dir = args.page1_csv_dir.resolve()
     page2_csv_dir = args.page2_csv_dir.resolve()
+    page3_csv_dir = args.page3_csv_dir.resolve()
     output = args.output.resolve()
     crime_types, page1_evidence = validate_page1_source_data(page1_csv_dir)
     community_areas, districts, page2_evidence = validate_page2_source_data(page2_csv_dir)
+    page3_evidence = validate_page3_source_data(page3_csv_dir)
     if not args.validate_only:
         if output.parent != (PROJECT_ROOT / "tableau").resolve():
             raise ValueError("Default generation is restricted to the repository tableau directory.")
@@ -1416,9 +2105,9 @@ def main() -> None:
         temporary.replace(output)
     if not output.is_file():
         raise FileNotFoundError(f"Workbook does not exist: {output}")
-    validate_workbook(output, page1_csv_dir, page2_csv_dir, page1_evidence, page2_evidence)
+    validate_workbook(output, page1_csv_dir, page2_csv_dir, page3_csv_dir, page1_evidence, page2_evidence, page3_evidence)
     print(f"Validated workbook XML: {output.relative_to(PROJECT_ROOT)}")
-    print(f"Worksheets: {len(SHEETS)}; dashboards: 2; data sources: 3 plus Parameters")
+    print(f"Worksheets: {len(SHEETS)}; dashboards: 3; data sources: 5 plus Parameters")
     print(f"Page 1 CSV rows: annual/category={page1_evidence['annual_rows']:,}; month/category={page1_evidence['monthly_rows']:,}")
     print(
         f"Page 2 CSV rows: {page2_evidence['rows']:,}; community areas={page2_evidence['community_areas']}; "
@@ -1448,7 +2137,15 @@ def main() -> None:
         f"2025 THEFT geographic source: {geo_theft['incidents']:,} incidents; {geo_theft['mapped']:,} mapped "
         f"({100 * geo_theft['mapped'] / geo_theft['incidents']:.4f}% coverage)"
     )
-    print("Structural validation passed; Tableau Desktop rendering still requires manual confirmation.")
+    temporal_all = page3_evidence["benchmarks"]["all_2025"]
+    temporal_theft = page3_evidence["benchmarks"]["theft_2025"]
+    print(
+        "2025 temporal source: "
+        f"All={temporal_all['incidents']:,}, peak hour={temporal_all['peak_hour']}; "
+        f"THEFT={temporal_theft['incidents']:,}, peak hour={temporal_theft['peak_hour']}"
+    )
+    print(f"Page 3 KPI CSV rows: {page3_evidence['kpi_rows']:,}")
+    print("Structural validation passed; Tableau Desktop rendering evidence is documented separately.")
 
 
 if __name__ == "__main__":

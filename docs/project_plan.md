@@ -241,11 +241,11 @@ Build and document the four-page Tableau workbook from the Milestone 9A specific
 
 ### Executive Overview implementation checkpoint — Tableau validation complete
 
-Executive Overview Page 1 is generated and validated in Tableau Desktop. Milestone 9B remains **In Progress** because Pages 3–4 are not implemented; Page 2 is tracked under completed Milestone 9C below. [`sql/07_tableau_page1_validation.sql`](../sql/07_tableau_page1_validation.sql) provides read-only KPI, category, monthly/category, and filter-test benchmarks. `python scripts/export_tableau_data.py --profile page1` reproducibly creates exactly two Git-ignored CSV sources: 93 year/category rows and 1,116 month/category rows. Both sources contain `crime_year` and `primary_type`, reconcile to PostgreSQL, and remain independent to prevent double counting.
+Executive Overview Page 1 is generated and validated in Tableau Desktop. Milestone 9B remains **In Progress** because Page 4 is not implemented; Pages 2 and 3 are tracked under completed Milestones 9C and 9D below. [`sql/07_tableau_page1_validation.sql`](../sql/07_tableau_page1_validation.sql) provides read-only KPI, category, monthly/category, and filter-test benchmarks. `python scripts/export_tableau_data.py --profile page1` reproducibly creates exactly two Git-ignored CSV sources: 93 year/category rows and 1,116 month/category rows. Both sources contain `crime_year` and `primary_type`, reconcile to PostgreSQL, and remain independent to prevent double counting.
 
 [`scripts/generate_tableau_workbook.py`](../scripts/generate_tableau_workbook.py) writes [`tableau/chicago_crime_analytics.twb`](../tableau/chicago_crime_analytics.twb). The workbook defines the two independent text-file sources, workbook-wide Year and Crime Type parameters, six Executive Overview worksheets, and one fixed-size 1,360 × 850 dashboard. Generation validates XML well-formedness, relative file references, source row counts and checksums, parameter defaults, canonical filter and indicator calculations, sheet/dashboard membership, annual-versus-monthly reconciliation, and the documented 2025 citywide and Theft benchmarks.
 
-Tableau Desktop Free Edition 2026.2.3 on Apple silicon initially rejected unsupported workbook markup during development; each reported element was removed before acceptance. The final file completed Tableau's `workspace.open-workbook` path, dashboard layout, and worksheet model computation without workbook-scoped error or fatal log entries. Visual validation confirmed the enlarged KPI typography, ungrouped `2025` display, human-readable axes, labeled annual trend, parameter-aware top-10 category view, and readable limitation footer. At Year = 2025, All Crime Types rendered 238,086 incidents, 16.1% arrest, and 19.0% domestic; THEFT rendered 55,198, 9.0%, and 5.1%. The yearly trend retained 2023–2025, both independent sources were visible in Tableau's Data menu, and Tableau-exported PNG evidence is stored under `images/tableau/`. Pages 3–4 remain planned, so full Milestone 9B completion is not claimed.
+Tableau Desktop Free Edition 2026.2.3 on Apple silicon initially rejected unsupported workbook markup during development; each reported element was removed before acceptance. The final file completed Tableau's `workspace.open-workbook` path, dashboard layout, and worksheet model computation without workbook-scoped error or fatal log entries. Visual validation confirmed the enlarged KPI typography, ungrouped `2025` display, human-readable axes, labeled annual trend, parameter-aware top-10 category view, and readable limitation footer. At Year = 2025, All Crime Types rendered 238,086 incidents, 16.1% arrest, and 19.0% domestic; THEFT rendered 55,198, 9.0%, and 5.1%. The yearly trend retained 2023–2025, both independent sources were visible in Tableau's Data menu, and Tableau-exported PNG evidence is stored under `images/tableau/`. Page 4 remains planned, so full Milestone 9B completion is not claimed.
 
 ## Milestone 9C — Geographic Crime Patterns dashboard
 
@@ -270,7 +270,36 @@ Extend the existing workbook with a separate geographic dashboard while preservi
 
 `python scripts/export_tableau_data.py --profile page2` creates `data/processed/tableau/page2/vw_tableau_geographic_detail.csv` plus a checksum manifest. The exporter reloaded and validated 50,037 rows, 77 community areas, and 24 district labels. The generated workbook contains six Page 2 worksheets and the fixed-size `Geographic Crime Patterns` dashboard while retaining all six Page 1 worksheets and the `Executive Overview` dashboard.
 
-Tableau Desktop 2026.2.3 rendered and filtered the generated workbook. Verified states were 2025 All Crime Types at 238,086 incidents and 236,099 mapped incidents (99.1654%, displayed 99.2%); 2025 THEFT at 55,198 and 54,849 (99.3677%, displayed 99.4%); Austin/THEFT at 1,967; and District 008/THEFT at 3,112. The map, area ranking, district comparison, category analysis, KPIs, and four controls updated without Tableau errors. Tableau-exported screenshots are stored under `images/tableau/`. Full Page 2 methods and evidence are in [the build guide](tableau_page2_build_guide.md). Pages 3–4 remain planned, so the overall four-page workbook milestone remains **In Progress**.
+Tableau Desktop 2026.2.3 rendered and filtered the generated workbook. Verified states were 2025 All Crime Types at 238,086 incidents and 236,099 mapped incidents (99.1654%, displayed 99.2%); 2025 THEFT at 55,198 and 54,849 (99.3677%, displayed 99.4%); Austin/THEFT at 1,967; and District 008/THEFT at 3,112. The map, area ranking, district comparison, category analysis, KPIs, and four controls updated without Tableau errors. Tableau-exported screenshots are stored under `images/tableau/`. Full Page 2 methods and evidence are in [the build guide](tableau_page2_build_guide.md). Page 3 is complete; Page 4 remains planned, so the overall four-page workbook milestone remains **In Progress**.
+
+## Milestone 9D — Temporal and Seasonal Crime dashboard
+
+### Status: Complete
+
+### Scope
+
+Create the minimum validated temporal data source, extend the existing workbook generator, build the Page 3 worksheets and dashboard, preserve Pages 1–2, and validate the generated result in Tableau Desktop.
+
+### Acceptance criteria
+
+- One or more deterministic CSV sources support Year, Month, Month Name, weekday, recorded hour, time band, season, and source crime type without double counting.
+- Reported-incident, arrest, and domestic components retain the established SQL definitions and complete-year scope.
+- Page 3 source totals reconcile to `clean_chicago_crimes` and PostgreSQL benchmarks for 2025 All Crime Types and THEFT.
+- Nine generated worksheets implement the required heatmap, monthly, seasonal, time-band, category-comparison, and KPI views.
+- The 1,360 × 850 dashboard layout and Year/Crime Type control behavior match the established workbook design.
+- The workbook passes XML/source-reference checks and loads, renders, and filters in Tableau Desktop 2026.2.3.
+
+### Implementation and validation evidence
+
+[`sql/10_tableau_temporal_page.sql`](../sql/10_tableau_temporal_page.sql) creates `vw_tableau_temporal_detail` at complete calendar month × source primary type × ISO weekday × recorded hour grain and `vw_tableau_temporal_kpis` at year × filter-scope grain. Every clean incident contributes once to the detail source. The small KPI source materializes deterministic peak-hour, weekday, and month results for `All Crime Types` and each source crime type, avoiding fragile Tableau table-calculation addressing.
+
+[`sql/11_tableau_page3_validation.sql`](../sql/11_tableau_page3_validation.sql) passes all fail-fast blocks and produces the documented manual benchmarks. The detail view contains 87,809 rows, 21 columns, 31 crime types, no duplicate declared-grain rows, and 761,563 represented incidents from January 2023 through December 2025. The KPI view contains 96 rows and 12 columns. Annual counts, indicator components, time bands, and both 2025 KPI scopes reconcile exactly. Both CSVs reload at the PostgreSQL row count and match the manifest SHA-256 checksums.
+
+`./.venv/bin/python scripts/export_tableau_data.py --profile page3` writes `data/processed/tableau/page3/vw_tableau_temporal_detail.csv`, `vw_tableau_temporal_kpis.csv`, and `manifest.json`. The data is Git-ignored. The implementation definitions and benchmark checklist are in [the Page 3 build guide](tableau_page3_build_guide.md).
+
+[`scripts/generate_tableau_workbook.py`](../scripts/generate_tableau_workbook.py) produces 21 worksheets, three fixed-size dashboards, five CSV-backed data sources, and shared parameters while preserving the Page 1–2 XML definitions. The corrected workbook passes XML, file-reference, checksum, worksheet/dashboard membership, formula, and benchmark validation.
+
+An initial 2025 / THEFT screenshot exposed incorrect peak-card values and a blank time-of-day chart. Those defects were corrected: peak cards now read from `vw_tableau_temporal_kpis`, and the time-band chart uses the physical `time_of_day_display` field. Tableau Desktop 2026.2.3 then rendered the corrected 2025 / All Crime Types and 2025 / THEFT states. The retained screenshots verify totals of 238,086 and 55,198; peak hours of 00:00 and 12:00; Friday and July as both scopes' peak day and month; all monthly, seasonal, heatmap, and category views; and the four time-band counts. Evidence is stored in [`temporal_seasonal_patterns_2025_all.png`](../images/tableau/temporal_seasonal_patterns_2025_all.png) and [`temporal_seasonal_patterns_2025_theft.png`](../images/tableau/temporal_seasonal_patterns_2025_theft.png).
 
 ## Milestone 10 — Findings and resource-planning recommendations
 

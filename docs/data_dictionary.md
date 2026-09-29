@@ -186,6 +186,17 @@ The optional exporter writes one CSV per view plus a checksum manifest under Git
 
 The view exports to Git-ignored `data/processed/tableau/page2/vw_tableau_geographic_detail.csv`. Boolean eligibility flags are exported as integer `0`/`1` so Tableau's text-file reader preserves them reliably; the canonical clean-table booleans are unchanged. `UNKNOWN / UNASSIGNED` labels retain analytically usable incidents with missing or invalid administrative geography. Cell coordinates are null for nonmappable records. Valid cell centers are deterministically derived from source coordinates and are not invented locations or official polygons.
 
+## Milestone 9D temporal Tableau view
+
+`sql/10_tableau_temporal_page.sql` creates one non-materialized view for the manual Page 3 build.
+
+| View | Grain / validated rows | Purpose and key fields |
+|---|---|---|
+| `vw_tableau_temporal_detail` | Complete calendar month × source `primary_type` × ISO weekday × recorded hour / 87,809 | Additive Page 3 source. It includes `month_start`, year/month/name/quarter, season/order, crime type/yearly rank, weekday number/name, hour, canonical `time_of_day`, physical `time_of_day_display`, order, weekend flag, reported incidents, and arrest/domestic numerators and denominators. Every clean incident contributes once. |
+| `vw_tableau_temporal_kpis` | Complete calendar year × crime-type filter scope / 96 | Non-additive Page 3 peak-card source. `primary_type_scope` contains `All Crime Types` plus each observed source crime type. It supplies total incidents and deterministic peak hour, weekday, and month labels with supporting counts. Keep it independent from the detail source. |
+
+The views export to Git-ignored `data/processed/tableau/page3/vw_tableau_temporal_detail.csv` and `vw_tableau_temporal_kpis.csv`. `weekend_flag` is exported as integer `0`/`1` for reliable text-file import; the clean-table Boolean remains unchanged. `season_order` is Winter=1, Spring=2, Summer=3, Fall=4. `time_of_day_order` is Overnight=1, Morning=2, Afternoon=3, Evening=4. Physical `time_of_day_display` changes only the display label Overnight to **Night**; the canonical hour boundary remains 00:00–05:59. Detail counts are additive; arrest and domestic percentages must be calculated from summed numerators and denominators. KPI values and their supporting counts are non-additive within the KPI source.
+
 ## Database-load validation completed
 
 - Every source timestamp and boolean value cast successfully.

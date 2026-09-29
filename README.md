@@ -1,6 +1,6 @@
 # Chicago Crime Analytics
 
-An end-to-end data analytics and business intelligence portfolio project built from official City of Chicago reported-crime data. The project uses reproducible PostgreSQL, SQL, and Python workflows to examine temporal, geographic, seasonal, crime-category, domestic-incident, and arrest patterns. The acquired source extract contains 761,563 records across the three complete calendar years 2023–2025. The validated Tableau presentation layer and four-page dashboard specification are complete. Executive Overview Page 1 and Geographic Crime Patterns Page 2 are generated and validated in Tableau Desktop; Pages 3–4 and evidence-backed resource-planning recommendations remain planned deliverables.
+An end-to-end data analytics and business intelligence portfolio project built from official City of Chicago reported-crime data. The project uses reproducible PostgreSQL, SQL, and Python workflows to examine temporal, geographic, seasonal, crime-category, domestic-incident, and arrest patterns. The acquired source extract contains 761,563 records across the three complete calendar years 2023–2025. Executive Overview Page 1, Geographic Crime Patterns Page 2, and Temporal and Seasonal Patterns Page 3 are validated in Tableau Desktop. Page 4 and evidence-backed resource-planning recommendations remain planned.
 
 ## Project objective
 
@@ -52,7 +52,7 @@ Python QA and EDA                         Tableau extracts/dashboard
               documented findings and metrics
 ```
 
-The repository foundation, data pipeline, SQL/Python analysis, descriptive geographic analysis, and Tableau data preparation are complete. Executive Overview Page 1 and Geographic Crime Patterns Page 2 have been generated in one Tableau workbook and passed XML, source-reference, PostgreSQL benchmark, Tableau load, visual-rendering, and filter-interaction checks. Pages 3–4 and resource-planning recommendations remain planned.
+The repository foundation, data pipeline, SQL/Python analysis, descriptive geographic analysis, and Tableau data preparation are complete. Executive Overview Page 1, Geographic Crime Patterns Page 2, and Temporal and Seasonal Patterns Page 3 have passed PostgreSQL benchmark, CSV, XML, source-reference, Tableau rendering, and filter-state validation. Page 4 and resource-planning recommendations remain planned.
 
 ## Repository structure
 
@@ -91,10 +91,11 @@ Empty working directories are retained with `.gitkeep` placeholders. Raw and lar
 | 9A | Tableau data preparation and dashboard specification | Complete |
 | 9B | Four-page interactive Tableau workbook | In Progress |
 | 9C | Geographic Crime Patterns dashboard | Complete |
+| 9D | Temporal and Seasonal Patterns dashboard | Complete |
 | 10 | Findings and resource-planning recommendations | Planned |
 | 11 | Final QA, portfolio packaging, and resume metrics | Planned |
 
-Detailed gates and acceptance criteria are in the [project plan](docs/project_plan.md). The executed extraction evidence is in [dataset acquisition](docs/dataset_acquisition.md), the PostgreSQL workflow and import validation are in [database setup](docs/database_setup.md), observed quality issues are in the [data-quality report](docs/data_quality_report.md), implemented record-level transformations are in the [cleaning report](docs/cleaning_report.md), and verified descriptive SQL findings are in the [core SQL analysis report](docs/sql_analysis_report.md). Independent Pandas validation, exploratory findings, and the visualization inventory are in the [Python EDA report](docs/python_eda_report.md); geographic methods and density limitations are in the [geographic analysis report](docs/geographic_analysis_report.md). Exact data sources, fields, calculations, filters, tooltips, sorting, interactions, and validation criteria are in the [Tableau dashboard plan](docs/tableau_dashboard_plan.md); implemented Page 2 behavior and evidence are in the [Geographic Crime Patterns build guide](docs/tableau_page2_build_guide.md). Claim-level calculations and candidate resume evidence are in [quantified findings](docs/quantified_findings.md). Metric formulas and comparison rules are in [metric definitions](docs/metric_definitions.md), and raw, clean, and analytical-view fields are described in the [data dictionary](docs/data_dictionary.md).
+Detailed gates and acceptance criteria are in the [project plan](docs/project_plan.md). The executed extraction evidence is in [dataset acquisition](docs/dataset_acquisition.md), the PostgreSQL workflow and import validation are in [database setup](docs/database_setup.md), observed quality issues are in the [data-quality report](docs/data_quality_report.md), implemented record-level transformations are in the [cleaning report](docs/cleaning_report.md), and verified descriptive SQL findings are in the [core SQL analysis report](docs/sql_analysis_report.md). Independent Pandas validation, exploratory findings, and the visualization inventory are in the [Python EDA report](docs/python_eda_report.md); geographic methods and density limitations are in the [geographic analysis report](docs/geographic_analysis_report.md). Exact data sources, fields, calculations, filters, tooltips, sorting, interactions, and validation criteria are in the [Tableau dashboard plan](docs/tableau_dashboard_plan.md). Implemented Page 2 behavior is in the [Geographic Crime Patterns build guide](docs/tableau_page2_build_guide.md); Page 3 definitions and validation benchmarks are in the [Temporal and Seasonal Patterns build guide](docs/tableau_page3_build_guide.md). Claim-level calculations and candidate resume evidence are in [quantified findings](docs/quantified_findings.md). Metric formulas and comparison rules are in [metric definitions](docs/metric_definitions.md), and raw, clean, and analytical-view fields are described in the [data dictionary](docs/data_dictionary.md).
 
 ## Reproducibility overview
 
@@ -201,17 +202,29 @@ psql -d chicago_crime -X -v ON_ERROR_STOP=1 -P pager=off \
 python scripts/export_tableau_data.py --profile page2
 ```
 
-Generate and structurally validate the implemented Page 1–2 workbook with:
+Prepare the two independent import-ready Page 3 temporal sources with:
+
+```bash
+psql --no-psqlrc --dbname "${PGDATABASE:-chicago_crime}" \
+  -v ON_ERROR_STOP=1 -P pager=off \
+  --file sql/10_tableau_temporal_page.sql
+psql --no-psqlrc --dbname "${PGDATABASE:-chicago_crime}" \
+  -v ON_ERROR_STOP=1 -P pager=off \
+  --file sql/11_tableau_page3_validation.sql
+./.venv/bin/python scripts/export_tableau_data.py --profile page3
+```
+
+Generate and structurally validate the implemented Pages 1–3 workbook with:
 
 ```bash
 python scripts/generate_tableau_workbook.py
 ```
 
-The exporter uses a read-only environment-configured connection, deterministic ordering, CSV row-count reconciliation, and local checksum manifests under Git-ignored `data/processed/tableau/`. Page 1 uses independent year/category and month/category sources; Page 2 uses one 50,037-row source at year × crime type × community area × district × coordinate-eligibility × coordinate-cell grain. Sources are not joined, preventing cross-grain multiplication. The generator writes `tableau/chicago_crime_analytics.twb`, verifies XML and relative file references, checks 12 worksheet and two-dashboard definitions, and independently rechecks documented 2025 citywide, Theft, and geographic benchmarks. See the [Tableau dashboard plan](docs/tableau_dashboard_plan.md), [Executive Overview build guide](docs/tableau_page1_build_guide.md), and [Geographic Crime Patterns build guide](docs/tableau_page2_build_guide.md).
+The exporter uses a read-only environment-configured connection, deterministic ordering, CSV row-count reconciliation, and local checksum manifests under Git-ignored `data/processed/tableau/`. Page 1 uses independent year/category and month/category sources; Page 2 uses one 50,037-row geographic source; and Page 3 uses an 87,809-row additive detail source plus a 96-row year/crime-type KPI source. The KPI source prevents peak-card results from depending on Tableau table-calculation addressing; it is not joined to the detail source. The generator writes 21 worksheets, three fixed-size dashboards, five CSV-backed data sources, and shared workbook parameters. See the [Tableau dashboard plan](docs/tableau_dashboard_plan.md), [Executive Overview build guide](docs/tableau_page1_build_guide.md), [Geographic Crime Patterns build guide](docs/tableau_page2_build_guide.md), and [Temporal and Seasonal Patterns build guide](docs/tableau_page3_build_guide.md).
 
 ## Current status
 
-**Status: Milestone 9A complete; Milestone 9B in progress; Milestone 9C complete.** The workbook contains three independent CSV data sources, four shared parameters, 12 worksheets, and two 1,360 × 850 dashboards. Page 2's source contains 50,037 rows and reconciles to 761,563 reported incidents, 760,496 community-area-eligible incidents, and 754,866 coordinate-mappable incidents. Tableau Desktop 2026.2.3 rendered and validated 2025 All Crime Types (238,086 incidents; 99.2% displayed coordinate coverage) and THEFT (55,198; 99.4%), plus Austin/THEFT (1,967) and District 008/THEFT (3,112) filter states. Pages 1–2 are validated; Pages 3–4, causal conclusions, and resource-planning recommendations remain unclaimed.
+**Status: Milestones 9A, 9C, and 9D complete; Milestone 9B remains in progress.** The workbook contains 21 worksheets and three validated dashboards. Page 3's detail and KPI CSVs reconcile to PostgreSQL, and the workbook passes XML, source-reference, Tableau rendering, and filter-state validation. The retained [2025 All Crime Types](images/tableau/temporal_seasonal_patterns_2025_all.png) and [2025 THEFT](images/tableau/temporal_seasonal_patterns_2025_theft.png) screenshots verify the corrected KPI cards and four time-of-day bars. Page 4 remains planned.
 
 ### Executive Overview preview
 
