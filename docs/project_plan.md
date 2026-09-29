@@ -355,7 +355,7 @@ The recommendations are framed as testable operational hypotheses and explicitly
 
 ## Milestone 11 — Final QA, portfolio packaging, and resume metrics
 
-### Status: Planned
+### Status: Complete
 
 ### Scope
 
@@ -370,3 +370,13 @@ Audit the full repository, finalize reproducibility instructions, package portfo
 - Dashboard evidence and final reports correspond to the tested workbook and data cutoff.
 - Each resume metric has a documented calculation, source artifact, date coverage, and validation evidence.
 - Final file/link checks pass and no unexecuted validation is represented as successful.
+
+### Completion evidence
+
+The final audit re-executed all three version-controlled notebooks against PostgreSQL in temporary output copies: 38 of 38 code cells completed with zero execution errors, so the committed notebooks and images were not altered during validation. Eight read-only SQL suites completed with stop-on-error behavior: raw import validation, data-quality profiling, core business analysis, Tableau Pages 1–4 validation, and final-findings reconciliation. Mutating schema, cleaning, view-build, and export scripts were inspected but were not rerun because the existing database and generated extracts had already passed their milestone-specific rebuild evidence.
+
+`python scripts/generate_tableau_workbook.py --validate-only` confirmed well-formed workbook XML, 27 worksheets, four dashboards, five relative CSV data sources, source row counts, parameter/calculation references, and the documented 2025 All Crime Types and THEFT benchmarks. All eight Tableau-rendered PNGs exist, are nonempty, and correspond to the two tested filter states for each dashboard.
+
+The declared Python environment passed `pip check`; all six Python scripts parsed successfully; and the dependency/import audit covered every package in `requirements.txt`. A repository-wide audit found zero broken local Markdown links, no tracked credentials or machine-specific paths, no tracked raw CSVs, processed exports, database dumps, Tableau packages/extracts, or oversized files. Git-ignore checks confirmed that the local raw snapshot, extraction manifest, processed validation output, Tableau CSVs, virtual environment, temporary workbook recovery file, and operating-system metadata remain excluded.
+
+Interview-facing metrics were checked against their source artifacts, date coverage, caveats, and validation evidence. The exact September 25, 2026 source snapshot remains locally reproducible from its retained ignored CSV and metadata manifest; because the official City dataset can be revised, a later fresh API download may differ. Subject to that source-revision limitation and the documented need for PostgreSQL/Tableau to execute their respective layers, the end-to-end workflow is reproducible and the portfolio is complete.

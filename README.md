@@ -17,7 +17,7 @@ The eventual analysis must acknowledge that reported-crime data does not measure
 - PostgreSQL and SQL for storage, validation, transformation, and analytical queries
 - Python, Pandas, and NumPy for reproducible analysis
 - Matplotlib for static exploratory visualizations
-- Tableau for the four-page interactive dashboard under staged implementation
+- Tableau for the validated four-page interactive dashboard
 - Git and GitHub for version control and portfolio delivery
 
 ## Analytical questions
@@ -52,7 +52,7 @@ Python QA and EDA                         Tableau extracts/dashboard
               documented findings and metrics
 ```
 
-The repository foundation, data pipeline, SQL/Python analysis, descriptive geographic analysis, Tableau data preparation, and four-page Tableau workbook are complete. All four pages have passed the applicable PostgreSQL benchmark, CSV, XML, source-reference, Tableau rendering, and filter-state checks. Resource-planning recommendations remain planned.
+The repository foundation, data pipeline, SQL/Python analysis, descriptive geographic analysis, four-page Tableau workbook, final findings, and portfolio audit are complete. All four dashboard pages passed the applicable PostgreSQL benchmark, CSV, XML, source-reference, Tableau rendering, and filter-state checks. Recommendations are documented as evidence-based planning hypotheses rather than promised outcomes.
 
 ## Repository structure
 
@@ -94,21 +94,21 @@ Empty working directories are retained with `.gitkeep` placeholders. Raw and lar
 | 9D | Temporal and Seasonal Patterns dashboard | Complete |
 | 9E | Crime and Arrest Analysis dashboard | Complete |
 | 10 | Findings and resource-planning recommendations | Complete |
-| 11 | Final QA, portfolio packaging, and resume metrics | Planned |
+| 11 | Final QA, portfolio packaging, and resume metrics | Complete |
 
-Detailed gates and acceptance criteria are in the [project plan](docs/project_plan.md). The executed extraction evidence is in [dataset acquisition](docs/dataset_acquisition.md), the PostgreSQL workflow and import validation are in [database setup](docs/database_setup.md), observed quality issues are in the [data-quality report](docs/data_quality_report.md), implemented record-level transformations are in the [cleaning report](docs/cleaning_report.md), and verified descriptive SQL findings are in the [core SQL analysis report](docs/sql_analysis_report.md). Independent Pandas validation, exploratory findings, and the visualization inventory are in the [Python EDA report](docs/python_eda_report.md); geographic methods and density limitations are in the [geographic analysis report](docs/geographic_analysis_report.md). Exact data sources, fields, calculations, filters, tooltips, sorting, interactions, and validation criteria are in the [Tableau dashboard plan](docs/tableau_dashboard_plan.md). Implemented Page 2 behavior is in the [Geographic Crime Patterns build guide](docs/tableau_page2_build_guide.md); Page 3 definitions and validation benchmarks are in the [Temporal and Seasonal Patterns build guide](docs/tableau_page3_build_guide.md). Claim-level calculations and candidate resume evidence are in [quantified findings](docs/quantified_findings.md). Metric formulas and comparison rules are in [metric definitions](docs/metric_definitions.md), and raw, clean, and analytical-view fields are described in the [data dictionary](docs/data_dictionary.md).
+Detailed gates and acceptance criteria are in the [project plan](docs/project_plan.md). The executed extraction evidence is in [dataset acquisition](docs/dataset_acquisition.md), the PostgreSQL workflow and import validation are in [database setup](docs/database_setup.md), observed quality issues are in the [data-quality report](docs/data_quality_report.md), implemented record-level transformations are in the [cleaning report](docs/cleaning_report.md), and verified descriptive SQL findings are in the [core SQL analysis report](docs/sql_analysis_report.md). Independent Pandas validation, exploratory findings, and the visualization inventory are in the [Python EDA report](docs/python_eda_report.md); geographic methods and density limitations are in the [geographic analysis report](docs/geographic_analysis_report.md). Exact data sources, fields, calculations, filters, tooltips, sorting, interactions, and validation criteria are in the [Tableau dashboard plan](docs/tableau_dashboard_plan.md). Implemented Page 2 behavior is in the [Geographic Crime Patterns build guide](docs/tableau_page2_build_guide.md); Page 3 definitions and validation benchmarks are in the [Temporal and Seasonal Patterns build guide](docs/tableau_page3_build_guide.md). Claim-level calculations are in [quantified findings](docs/quantified_findings.md), and the evidence-backed synthesis is in the [final analysis report](docs/final_analysis_report.md). Metric formulas and comparison rules are in [metric definitions](docs/metric_definitions.md), and raw, clean, and analytical-view fields are described in the [data dictionary](docs/data_dictionary.md).
 
 ## Reproducibility overview
 
 The workflow uses environment variables copied from `.env.example`, scripts and version-controlled SQL instead of manual transformations, immutable raw inputs, documented extraction metadata, and validation checks at each milestone. Paths in project code and documentation are repository-relative. Credentials, raw CSV files, database dumps, Tableau extracts, and other large generated exports are excluded from Git.
 
-The acquisition is reproducible from a clean checkout after installing `requirements.txt`:
+The acquisition workflow is reproducible from a clean checkout after installing `requirements.txt`:
 
 ```bash
 python3 scripts/download_crimes.py
 ```
 
-The script applies the documented date filter, downloads 50,000-row pages using source-ID keyset pagination, orders records by `id ASC`, retries transient API failures, refuses to overwrite existing raw artifacts, and validates source counts before and after download. It writes an immutable Git-ignored CSV and JSON evidence manifest under `data/raw/`. See [dataset acquisition](docs/dataset_acquisition.md) for exact commands, filters, outputs, and limitations. The declared Python dependency set was installed successfully in a fresh repository-local virtual environment for Milestone 7 execution.
+The script applies the documented date filter, downloads 50,000-row pages using source-ID keyset pagination, orders records by `id ASC`, retries transient API failures, refuses to overwrite existing raw artifacts, and validates source counts before and after download. It writes an immutable Git-ignored CSV and JSON evidence manifest under `data/raw/`. See [dataset acquisition](docs/dataset_acquisition.md) for exact commands, filters, outputs, and limitations. Because the City dataset can be revised, reproducing the exact September 25, 2026 snapshot requires the retained local raw file and metadata manifest; a later fresh download may legitimately differ. The declared dependency set passes `pip check` in the repository-local virtual environment.
 
 After creating a PostgreSQL database and configuring connection variables, the raw import is reproducible with:
 
@@ -244,7 +244,7 @@ The complete evidence register, analytical interpretations, recommendations, lim
 
 ## Current status
 
-**Status: Milestones 0–10 are complete; final portfolio QA remains planned.** The generated workbook contains 27 worksheets, four fixed-size dashboards, five CSV-backed data sources, and shared filter parameters. Tableau Desktop 2026.2.3 rendered Page 4 at the required 2025 All Crime Types and 2025 THEFT states, and the displayed KPIs reconciled to PostgreSQL. The final analysis report documents seven verified findings, evidence-based planning hypotheses, limitations, and future work without presenting observational patterns as causal results.
+**Status: Project complete; Milestones 0–11 are validated.** The final audit re-executed all three notebooks from start to finish, ran eight read-only SQL validation/analysis scripts successfully, validated the Tableau workbook's XML and five relative data references, confirmed all eight Tableau screenshots, checked the declared Python environment, and found no broken Markdown links or tracked credentials, raw data, processed exports, database dumps, or machine-specific paths. The workbook contains 27 worksheets, four fixed-size dashboards, five CSV-backed data sources, and shared filter parameters.
 
 ### Executive Overview preview
 
